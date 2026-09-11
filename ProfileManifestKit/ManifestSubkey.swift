@@ -9,7 +9,7 @@ import Foundation
 
 /// A single key within a manifest. Represents one `pfm_subkeys` entry — a field the
 /// user configures. Subkeys nest: dictionaries and arrays carry their own `subkeys`.
-struct ManifestSubkey: Sendable, Decodable {
+struct ManifestSubkey: Sendable, Decodable, Equatable {
     // MARK: - Identity & docs
 
     /// `pfm_name` — the key's name. **Optional**: keys that are immediate subkeys of an

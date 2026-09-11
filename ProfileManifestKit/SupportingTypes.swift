@@ -19,7 +19,7 @@ enum HiddenMode: String, Sendable, Decodable {
 }
 
 // `pfm_conditionals` entry — makes a key conditionally required.
-struct Conditional: Sendable, Decodable {
+struct Conditional: Sendable, Decodable, Equatable {
     var require: RequireMode?  // if nil, the conditional has no effect
     var targetConditions: [TargetCondition]
     enum CodingKeys: String, CodingKey {
@@ -29,7 +29,7 @@ struct Conditional: Sendable, Decodable {
 }
 
 /// `pfm_exclude` entry — conditionally drops a key from the payload.
-struct Exclusion: Sendable, Decodable {
+struct Exclusion: Sendable, Decodable, Equatable {
     var targetConditions: [TargetCondition]
 
     enum CodingKeys: String, CodingKey {
@@ -38,7 +38,7 @@ struct Exclusion: Sendable, Decodable {
 }
 
 /// One condition inside a `pfm_target_conditions` array.
-struct TargetCondition: Sendable, Decodable {
+struct TargetCondition: Sendable, Decodable, Equatable {
     /// dotted keypath to the key being evaluated
     var target: String?
 
