@@ -55,14 +55,22 @@ extension PFMValue: Encodable {
         var c = encoder.singleValueContainer()
 
         switch self {
-            case .string(let v): try c.encode(v)
-            case .integer(let v): try c.encode(v)
-            case .real(let v): try c.encode(v)
-            case .boolean(let v): try c.encode(v)
-            case .date(let v): try c.encode(v)
-            case .data(let v): try c.encode(v)
-            case .array(let v): try c.encode(v)
-            case .dictionary(let v): try c.encode(v)
+            case .string(let v):
+                try c.encode(v)
+            case .integer(let v):
+                try c.encode(v)
+            case .real(let v):
+                try c.encode(v)
+            case .boolean(let v):
+                try c.encode(v)
+            case .date(let v):
+                try c.encode(v)
+            case .data(let v):
+                try c.encode(v)
+            case .array(let v):
+                try c.encode(v)
+            case .dictionary(let v):
+                try c.encode(v)
         }
     }
 }
@@ -71,22 +79,45 @@ extension PFMValue: Encodable {
 extension PFMValue {
     var asDouble: Double? {
         switch self {
-            case .integer(let i): return Double(i)
-            case .real(let r): return r
-            default: return nil
+            case .integer(let i):
+                return Double(i)
+            case .real(let r):
+                return r
+            default:
+                return nil
         }
     }
 
     var displayString: String {
         switch self {
-            case .string(let s): return s
-            case .integer(let i): return String(i)
-            case .real(let r): return String(r)
-            case .boolean(let b): return b ? "true" : "false"
-            case .date(let date): return date.formatted()
-            case .data: return "<data>"
-            case .array: return ""
-            case .dictionary: return ""
+            case .string(let s):
+                return s
+            case .integer(let i):
+                return String(i)
+            case .real(let r):
+                return String(r)
+            case .boolean(let b):
+                return b ? "true" : "false"
+            case .date(let date):
+                return date.formatted()
+            case .data:
+                return "<data>"
+            case .array:
+                return ""
+            case .dictionary:
+                return ""
+        }
+    }
+
+    /// Coerce a decoded value to match the subkey's declared pfm_type.
+    func normalized(to type: PFMType) -> PFMValue {
+        switch (type, self) {
+            case (.real, .integer(let i)):
+                return .real(Double(i))
+            case (.integer, .real(let r)):
+                return .integer(Int(r))  // manifest says int; trust it
+            default:
+                return self
         }
     }
 }
