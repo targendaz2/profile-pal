@@ -141,6 +141,10 @@ extension FormModel {
     }
 
     /// Double-typed binding for sliders, bridging integer and real.
+    // TODO: set always writes .real, even when the subkey's pfm_type is .integer
+    // (unlike stringBinding/boolBinding, there's no coercion to the declared type here).
+    // Fine while only `real` subkeys use this binding; if an integer-typed slider
+    // shows up, coerce via PFMValue.normalized(to:) like PFMValue.seed(for:) does.
     func doubleBinding(at path: FormPath) -> Binding<Double> {
         Binding(
             get: { self.value(at: path)?.asDouble ?? 0 },
