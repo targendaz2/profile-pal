@@ -123,4 +123,12 @@ extension PFMValue {
                 return self
         }
     }
+
+    /// Build the initial value for a subkey from its pfm_default, coerced to
+    /// the declared pfm_type. Returns nil when the subkey has no default —
+    /// an unset field is absent from the tree, not present-but-empty.
+    static func seed(for key: ManifestSubkey) -> PFMValue? {
+        guard let def = key.defaultValue else { return nil }
+        return def.normalized(to: key.type)
+    }
 }
