@@ -1,4 +1,7 @@
 {
+  "enabledMcpjsonServers": [
+    "xcode"
+  ],
   "enabledPlugins": {
     "swiftui-pro@swiftui-agent-skill": true,
     "swift-concurrency-pro@swift-concurrency-agent-skill": true,
