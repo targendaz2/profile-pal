@@ -115,7 +115,10 @@ extension PFMValue {
             case (.real, .integer(let i)):
                 return .real(Double(i))
             case (.integer, .real(let r)):
-                return .integer(Int(r))  // manifest says int; trust it
+                // Int(r) traps on NaN/infinite/out-of-range input from an untrusted manifest;
+                // fall back to leaving it as .real rather than crashing.
+                guard let i = Int(exactly: r.rounded(.towardZero)) else { return self }
+                return .integer(i)
             default:
                 return self
         }
