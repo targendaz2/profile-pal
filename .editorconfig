@@ -8,5 +8,8 @@ charset = utf-8
 trim_trailing_whitespace = false
 insert_final_newline = true
 
-[*.{json,swift-format}]
+[*.{json}]
+indent_size = 2
+    
+[.swift-format]
 indent_size = 2
