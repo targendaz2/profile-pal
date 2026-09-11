@@ -405,3 +405,310 @@ struct InvertedBoolTests {
         #expect(model.boolBinding(at: path, inverted: true).wrappedValue == true)
     }
 }
+
+@Suite("Condition evaluator") @MainActor
+struct EvaluatorTests {
+
+    /// Build a model with a controlling key and a dependent key that's excluded
+    /// when the controller equals a given value.
+    private func modelExcludingWhen(
+        controller: String,
+        equals trigger: PFMValue,
+    ) throws -> (FormModel, ManifestSubkey) {
+        let manifest = try decodeManifest(
+            PlistFixture.manifest(
+                domain: "com.example.cond", title: "Cond",
+                subkeys: [
+                    PlistFixture.key(name: controller, type: "string"),
+                    PlistFixture.key(
+                        name: "Dependent", type: "string",
+                        extra: [
+                            "pfm_exclude": [
+                                PlistFixture.exclusion(targets: [
+                                    PlistFixture.condition(
+                                        target: controller,
+                                        ["pfm_range_list": [trigger.plistValue]],
+                                    )
+                                ])
+                            ]
+                        ],
+                    ),
+                ],
+            )
+        )
+        let model = FormModel(manifest: manifest)
+        let dependent = manifest.subkeys.first { $0.name == "Dependent" }!
+        return (model, dependent)
+    }
+
+    /// Model with two controllers and a dependent excluded by a SINGLE entry
+    /// containing TWO conditions (tests AND-within-entry).
+    fileprivate func modelExcludedWhenBoth(
+        _ ctrlA: String, equals a: PFMValue,
+        _ ctrlB: String, equals b: PFMValue,
+    ) throws -> (FormModel, ManifestSubkey) {
+        let manifest = try decodeManifest(
+            PlistFixture.manifest(
+                domain: "com.example.cond", title: "Cond",
+                subkeys: [
+                    PlistFixture.key(name: ctrlA, type: "string"),
+                    PlistFixture.key(name: ctrlB, type: "string"),
+                    PlistFixture.key(
+                        name: "Dependent", type: "string",
+                        extra: [
+                            "pfm_exclude": [
+                                PlistFixture.exclusion(targets: [
+                                    PlistFixture.condition(
+                                        target: ctrlA, ["pfm_range_list": [a.plistValue]], ),
+                                    PlistFixture.condition(
+                                        target: ctrlB, ["pfm_range_list": [b.plistValue]], ),
+                                ])
+                            ]
+                        ],
+                    ),
+                ],
+            )
+        )
+        let model = FormModel(manifest: manifest)
+        let dep = manifest.subkeys.first { $0.name == "Dependent" }!
+        return (model, dep)
+    }
+
+    /// Model with two controllers and a dependent excluded by TWO separate
+    /// entries, one condition each (tests OR-across-entries).
+    fileprivate func modelExcludedWhenEither(
+        _ ctrlA: String, equals a: PFMValue,
+        _ ctrlB: String, equals b: PFMValue,
+    ) throws -> (FormModel, ManifestSubkey) {
+        let manifest = try decodeManifest(
+            PlistFixture.manifest(
+                domain: "com.example.cond", title: "Cond",
+                subkeys: [
+                    PlistFixture.key(name: ctrlA, type: "string"),
+                    PlistFixture.key(name: ctrlB, type: "string"),
+                    PlistFixture.key(
+                        name: "Dependent", type: "string",
+                        extra: [
+                            "pfm_exclude": [
+                                PlistFixture.exclusion(targets: [
+                                    PlistFixture.condition(
+                                        target: ctrlA, ["pfm_range_list": [a.plistValue]], )
+                                ]),
+                                PlistFixture.exclusion(targets: [
+                                    PlistFixture.condition(
+                                        target: ctrlB, ["pfm_range_list": [b.plistValue]], )
+                                ]),
+                            ]
+                        ],
+                    ),
+                ],
+            )
+        )
+        let model = FormModel(manifest: manifest)
+        let dep = manifest.subkeys.first { $0.name == "Dependent" }!
+        return (model, dep)
+
+    }
+
+    @Test("rangeList: excluded when controller equals trigger")
+    func range_list_match() throws {
+        let (model, dep) = try modelExcludingWhen(controller: "Mode", equals: .string("off"))
+        let ctrl = FormPath.root.appending(key: "Mode")
+
+        model.setValue(.string("off"), at: ctrl)
+        #expect(model.isExcluded(dep) == true)
+
+        model.setValue(.string("on"), at: ctrl)
+        #expect(model.isExcluded(dep) == false)
+
+        model.setValue(nil, at: ctrl)  // absent → equals-any is false
+        #expect(model.isExcluded(dep) == false)
+    }
+
+    @Test("present: true holds only when the key exists")
+    func present_true() throws {
+        let manifest = try decodeManifest(
+            PlistFixture.manifest(
+                domain: "com.example.cond", title: "Cond",
+                subkeys: [
+                    PlistFixture.key(name: "Ctrl", type: "string"),
+                    PlistFixture.key(
+                        name: "Dependent", type: "string",
+                        extra: [
+                            "pfm_exclude": [
+                                PlistFixture.exclusion(targets: [
+                                    PlistFixture.condition(target: "Ctrl", ["pfm_present": true])
+                                ])
+                            ]
+                        ],
+                    ),
+                ],
+            )
+        )
+        let model = FormModel(manifest: manifest)
+        let dep = manifest.subkeys.first { $0.name == "Dependent" }!
+        let ctrl = FormPath.root.appending(key: "Ctrl")
+
+        // Absent → present:true is false → not excluded.
+        #expect(model.isExcluded(dep) == false)
+
+        // Set → key exists → present:true holds → excluded.
+        model.setValue(.string("anything"), at: ctrl)
+        #expect(model.isExcluded(dep) == true)
+
+        // Cleared back to absent → not excluded again.
+        model.setValue(nil, at: ctrl)
+        #expect(model.isExcluded(dep) == false)
+    }
+
+    @Test("nRangeList: absent value counts as 'not any'")
+    func not_range_list_absence() throws {
+        let manifest = try decodeManifest(
+            PlistFixture.manifest(
+                domain: "com.example.cond", title: "Cond",
+                subkeys: [
+                    PlistFixture.key(name: "Ctrl", type: "string"),
+                    PlistFixture.key(
+                        name: "Dependent", type: "string",
+                        extra: [
+                            "pfm_exclude": [
+                                PlistFixture.exclusion(targets: [
+                                    PlistFixture.condition(
+                                        target: "Ctrl", ["pfm_n_range_list": ["x"]], )
+                                ])
+                            ]
+                        ],
+                    ),
+                ],
+            )
+        )
+        let model = FormModel(manifest: manifest)
+        let dep = manifest.subkeys.first { $0.name == "Dependent" }!
+        let ctrl = FormPath.root.appending(key: "Ctrl")
+
+        // Absent → "not any of [x]" is TRUE → excluded. This is the polarity that
+        // a manual click-through never hits, because you always end up setting the field.
+        #expect(model.isExcluded(dep) == true)
+
+        // Set to "x" → it IS in the list → n_range_list is false → not excluded.
+        model.setValue(.string("x"), at: ctrl)
+        #expect(model.isExcluded(dep) == false)
+
+        // Set to "y" → not in the list → n_range_list is true → excluded.
+        model.setValue(.string("y"), at: ctrl)
+        #expect(model.isExcluded(dep) == true)
+    }
+
+    @Test("AND within an entry: both conditions must hold")
+    func and_within_entry() throws {
+        let (model, dep) = try modelExcludedWhenBoth(
+            "ModeA", equals: .string("off"),
+            "ModeB", equals: .string("off"),
+        )
+        let a = FormPath.root.appending(key: "ModeA")
+        let b = FormPath.root.appending(key: "ModeB")
+
+        // Neither set → neither condition holds → not excluded.
+        #expect(model.isExcluded(dep) == false)
+
+        // Only A matches → AND fails → not excluded.
+        model.setValue(.string("off"), at: a)
+        #expect(model.isExcluded(dep) == false)
+
+        // Only B matches → AND fails → not excluded.
+        model.setValue(.string("on"), at: a)
+        model.setValue(.string("off"), at: b)
+        #expect(model.isExcluded(dep) == false)
+
+        // Both match → AND holds → excluded.
+        model.setValue(.string("off"), at: a)
+        #expect(model.isExcluded(dep) == true)
+    }
+
+    @Test("OR across entries: any entry triggers exclusion")
+    func or_across_entries() throws {
+        let (model, dep) = try modelExcludedWhenEither(
+            "ModeA", equals: .string("off"),
+            "ModeB", equals: .string("off"),
+        )
+        let a = FormPath.root.appending(key: "ModeA")
+        let b = FormPath.root.appending(key: "ModeB")
+
+        // Neither → not excluded.
+        #expect(model.isExcluded(dep) == false)
+
+        // A alone matches → its entry holds → excluded.
+        model.setValue(.string("off"), at: a)
+        #expect(model.isExcluded(dep) == true)
+
+        // B alone matches → the other entry holds → still excluded.
+        model.setValue(.string("on"), at: a)
+        model.setValue(.string("off"), at: b)
+        #expect(model.isExcluded(dep) == true)
+
+        // Both match → excluded (OR, so no double-count concern).
+        model.setValue(.string("off"), at: a)
+        #expect(model.isExcluded(dep) == true)
+    }
+
+    @Test("conditional with no pfm_require never makes a key required")
+    func conditional_no_require_is_no_op() throws {
+        let manifest = try decodeManifest(
+            PlistFixture.manifest(
+                domain: "com.example.cond", title: "Cond",
+                subkeys: [
+                    PlistFixture.key(name: "Ctrl", type: "string"),
+                    PlistFixture.key(
+                        name: "Dep", type: "string",
+                        extra: [
+                            "pfm_conditionals": [
+                                // note: no pfm_require key
+                                PlistFixture.conditional(targets: [
+                                    PlistFixture.condition(
+                                        target: "Ctrl", ["pfm_range_list": ["go"]], )
+                                ])
+                            ]
+                        ],
+                    ),
+                ],
+            )
+        )
+        let model = FormModel(manifest: manifest)
+        let dep = manifest.subkeys.first { $0.name == "Dep" }!
+
+        model.setValue(.string("go"), at: FormPath.root.appending(key: "Ctrl"))
+        #expect(model.isRequired(dep) == false)  // no pfm_require → no effect, even when condition holds
+    }
+
+    @Test("conditional with pfm_require: push never makes a key required in the UI")
+    func conditional_push_require_is_no_op() throws {
+        let manifest = try decodeManifest(
+            PlistFixture.manifest(
+                domain: "com.example.cond", title: "Cond",
+                subkeys: [
+                    PlistFixture.key(name: "Ctrl", type: "string"),
+                    PlistFixture.key(
+                        name: "Dep", type: "string",
+                        extra: [
+                            "pfm_conditionals": [
+                                PlistFixture.conditional(
+                                    require: "push",
+                                    targets: [
+                                        PlistFixture.condition(
+                                            target: "Ctrl", ["pfm_range_list": ["go"]], )
+                                    ],
+                                )
+                            ]
+                        ],
+                    ),
+                ],
+            )
+        )
+        let model = FormModel(manifest: manifest)
+        let dep = manifest.subkeys.first { $0.name == "Dep" }!
+
+        model.setValue(.string("go"), at: FormPath.root.appending(key: "Ctrl"))
+        // push only matters for MDM delivery, same exclusion as the static require check.
+        #expect(model.isRequired(dep) == false)
+    }
+}

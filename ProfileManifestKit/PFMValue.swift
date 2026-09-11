@@ -132,3 +132,28 @@ extension PFMValue {
         return def.normalized(to: key.type)
     }
 }
+
+extension PFMValue {
+    /// Convert back to a plist-serializable `Any`, for use with PlistFixture
+    /// (which builds value trees from raw Foundation types).
+    var plistValue: Any {
+        switch self {
+            case .string(let s):
+                return s
+            case .integer(let i):
+                return i
+            case .real(let r):
+                return r
+            case .boolean(let b):
+                return b
+            case .date(let date):
+                return date
+            case .data(let data):
+                return data
+            case .array(let arr):
+                return arr.map(\.plistValue)
+            case .dictionary(let dict):
+                return dict.mapValues(\.plistValue)
+        }
+    }
+}

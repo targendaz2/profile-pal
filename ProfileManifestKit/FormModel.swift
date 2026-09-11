@@ -152,3 +152,127 @@ extension FormModel {
         )
     }
 }
+
+extension FormModel {
+    /// Resolve a pfm_target dotted keypath against the value tree.
+    /// Cross-payload targeting (a non-nil domain) is not yet supported — treated
+    /// as unresolvable, so conditions referencing another payload read as "absent".
+    func targetValue(_ target: String, domain: String?) -> PFMValue? {
+        guard domain == nil else { return nil }  // step-5 limitation, documented
+        let path = FormPath(
+            components:
+                target
+                .split(separator: ".")
+                .map { .key(String($0)) })
+        return value(at: path)
+    }
+}
+
+extension FormModel {
+    /// Evaluate one target condition against current form state.
+    func evaluate(_ condition: TargetCondition) -> Bool {
+        let value = condition.target.flatMap {
+            targetValue($0, domain: condition.domain)
+        }
+
+        // pfm_present: true → key must exist; false → key must be absent.
+        if let present = condition.present {
+            return (value != nil) == present
+        }
+
+        // pfm_value_empty: true → value is absent or an empty string/array.
+        if let empty = condition.valueEmpty {
+            return isEmpty(value) == empty
+        }
+
+        // pfm_range_list: value equals any listed value.
+        if let list = condition.rangeList {
+            guard let value else { return false }
+            return list.contains(value)
+        }
+
+        // pfm_n_range_list: value equals none of the listed values.
+        if let list = condition.nRangeList {
+            guard let value else { return true }  // absent ≠ any listed value
+            return !list.contains(value)
+        }
+
+        // pfm_contains_any: array value shares at least one element with the list.
+        if let any = condition.containsAny {
+            return containsAny(value, any)
+        }
+
+        // pfm_n_contains_any: array value shares no element with the list.
+        if let nAny = condition.nContainsAny {
+            return !containsAny(value, nAny)
+        }
+
+        // pfm_platforms (extended condition): current platform is in the list.
+        if let platforms = condition.platforms {
+            return platforms.contains(currentPlatform)
+        }
+
+        // A condition with no recognized operator is vacuously true.
+        return true
+    }
+
+    private func isEmpty(_ value: PFMValue?) -> Bool {
+        switch value {
+            case nil: return true
+            case .string(let s): return s.isEmpty
+            case .array(let a): return a.isEmpty
+            case .dictionary(let d): return d.isEmpty
+            default: return false
+        }
+    }
+
+    private func containsAny(_ value: PFMValue?, _ candidates: [PFMValue]) -> Bool {
+        guard case .array(let elements)? = value else { return false }
+        return elements.contains { candidates.contains($0) }
+    }
+
+    var currentPlatform: String { "macOS" }  // hard-coded for a macOS-only v1
+}
+
+extension FormModel {
+    /// All conditions in one entry must hold (AND).
+    func evaluateAll(_ conditions: [TargetCondition]) -> Bool {
+        conditions.allSatisfy { evaluate($0) }
+    }
+
+    // MARK: Visibility
+
+    /// A key is excluded if ANY pfm_exclude entry's conditions all hold (OR of ANDs).
+    func isExcluded(_ key: ManifestSubkey) -> Bool {
+        guard let exclusions = key.exclude else { return false }
+        return exclusions.contains { evaluateAll($0.targetConditions) }
+    }
+
+    /// Whether a key should render at all: not excluded, not statically hidden,
+    /// and applicable to the current platform.
+    func isVisible(_ key: ManifestSubkey) -> Bool {
+        if key.hidden == .all { return false }
+        if isExcluded(key) { return false }
+        if let platforms = key.platforms, !platforms.contains(currentPlatform) {
+            return false
+        }
+        return true
+    }
+
+    // MARK: Requirement
+
+    /// A key is required if a static flag says so, OR any pfm_conditionals entry
+    /// with a non-nil pfm_require has all its conditions holding.
+    func isRequired(_ key: ManifestSubkey) -> Bool {
+        if key.required == true { return true }
+        if key.require == .always || key.require == .alwaysNested { return true }
+
+        guard let conditionals = key.conditionals else { return false }
+        return conditionals.contains { conditional in
+            // .push only matters for MDM delivery, not the local editing UI —
+            // same exclusion as the static require check above.
+            (conditional.require == .always || conditional.require == .alwaysNested)
+                && evaluateAll(conditional.targetConditions)
+        }
+    }
+}
