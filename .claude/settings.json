@@ -1,0 +1,41 @@
+{
+  "enabledPlugins": {
+    "swiftui-pro@swiftui-agent-skill": true,
+    "swift-concurrency-pro@swift-concurrency-agent-skill": true,
+    "swift-testing-pro@swift-testing-agent-skill": true,
+    "swift-architecture-skill@swift-architecture-skill": true,
+    "swift-security-expert@swift-security-skill": true
+  },
+  "extraKnownMarketplaces": {
+    "swiftui-agent-skill": {
+      "source": {
+        "source": "github",
+        "repo": "twostraws/SwiftUI-Agent-Skill"
+      }
+    },
+    "swift-concurrency-agent-skill": {
+      "source": {
+        "source": "github",
+        "repo": "twostraws/Swift-Concurrency-Agent-Skill"
+      }
+    },
+    "swift-testing-agent-skill": {
+      "source": {
+        "source": "github",
+        "repo": "twostraws/Swift-Testing-Agent-Skill"
+      }
+    },
+    "swift-architecture-skill": {
+      "source": {
+        "source": "github",
+        "repo": "efremidze/swift-architecture-skill"
+      }
+    },
+    "swift-security-skill": {
+      "source": {
+        "source": "github",
+        "repo": "ivan-magda/swift-security-skill"
+      }
+    }
+  }
+}
