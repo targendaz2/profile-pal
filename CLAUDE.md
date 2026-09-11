@@ -73,6 +73,20 @@ is added.
 reusable named fixtures (e.g. `.dock`, `.trap`). Tests then round-trip through
 `PropertyListDecoder().decode(PayloadManifest.self, from:)`.
 
+## Correctness invariants (don't regress these)
+
+- **Plist decode probes `Bool` before `Int`** — a `<true/>` also decodes as `Int 1`;
+  reversing this silently turns every boolean into an integer.
+- **`pfm_required` (Bool) and `pfm_require` (String enum: `always`/`always-nested`/`push`)
+  are separate keys** — both decoded, never merged at decode time; resolved only in the
+  condition evaluator.
+- **Condition absence polarity:** an absent target is `false` for `pfm_range_list`
+  (equals-any) and `true` for `pfm_n_range_list` (not-equals-any). `isVisible`/`isRequired`
+  on `FormModel` depend on getting this right.
+- **`pfm_conditionals` with no `pfm_require` is a no-op.**
+- **Control resolution order is load-bearing:** `pfm_segments` then `pfm_range_list` win
+  before any type-based default; never trap on an unknown combination — return `.unsupported`.
+
 ## Style
 
 Formatting is enforced by `.swift-format` (4-space indent, 100-col lines, one case per line,
