@@ -50,7 +50,7 @@ is the source of truth, not the live diagnostics list.
 **Decoding pipeline**: `PayloadManifest` (top-level plist) → `[ManifestSubkey]` (`pfm_subkeys`,
 recursively nested for `dictionary`/`array` types) → `PFMValue` (the actual decoded/edited value,
 an indirect enum covering every plist type: string/integer/real/boolean/date/data/array/dictionary).
-`PFMType` is the `pfm_type` enum subkeys declare; `SupportingTypes.swift` holds the rest of the
+`PFMType` is the `pfm_type` enum subkeys declare; `Manifest/Conditions.swift` holds the rest of the
 manifest vocabulary (`RequireMode`, `HiddenMode`, `Conditional`, `Exclusion`, `TargetCondition` for
 `pfm_target_conditions`).
 
