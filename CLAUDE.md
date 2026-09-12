@@ -9,6 +9,13 @@ profiles from Apple's [ProfileManifests](https://github.com/ProfileManifests/Pro
 format. `ProfileManifestKit` decodes `pfm_*` payload manifest plists into typed Swift models and
 drives a dynamic form (`FormModel`) for editing the resulting profile payload as a `PFMValue` tree.
 
+**The framework is headless.** It owns all manifest *logic* — decode, value tree, conditions
+(visibility/requirement), control resolution, and export — and exposes it as a queryable, public
+API (`FormModel`, `control(for:)`, and the `FormNode` render tree). The **app** owns 100% of the
+SwiftUI: it walks `FormNode`, switches on each field's `Control`, and applies its own styling. No
+SwiftUI ships from `ProfileManifestKit`. Keep that boundary: rendering/presentation decisions
+belong in the app, manifest semantics belong in the framework.
+
 ## Build & test
 
 This is an Xcode project (`ProfilePal.xcodeproj`), not SwiftPM. Use `xcodebuild` or the `xcode` MCP

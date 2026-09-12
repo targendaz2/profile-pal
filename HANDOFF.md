@@ -11,11 +11,16 @@ config profile). They're the format powering ProfileCreator and iMazing Profile
 Editor. This framework parses them, renders an editing form, and serializes the
 user's input back out as a profile.
 
-**Design line:** the framework owns *everything about manifests* — decode,
-value model, conditions, control resolution, rendering, export. A thin host app
-(manifest picker, window chrome, file I/O) comes last and is out of scope until
-step 10. If you find yourself writing app-policy code (where files live, window
-management), it belongs in the app, not here.
+**Design line (UPDATED — headless):** the framework owns everything about manifest
+*logic* — decode, value model, conditions, control resolution, and a render *tree*
+(`FormNode`), plus export. It ships **no SwiftUI**. The **app** owns all rendering,
+presentation, and styling: it walks `FormNode` and switches on each field's `Control`.
+If you find yourself writing SwiftUI/presentation code (views, styling) or app-policy
+code (where files live, window management), it belongs in the app, not here.
+
+> Supersedes the original plan where the framework rendered the form (a `ManifestForm`
+> view). Steps 7–8 and the public-surface convention below reflect the headless pivot;
+> CLAUDE.md's "What this is" is authoritative on the boundary.
 
 **Authoritative spec:** the ProfileManifests wiki "Manifest Format" page. Fetch
 it directly when you need a `pfm_*` key's exact semantics — prefer it over any
@@ -25,13 +30,15 @@ paraphrase in this doc.
 
 - Swift 6 language mode, strict concurrency **on** (`swiftLanguageModes: [.v6]`).
 - `FormModel` is `@MainActor`; every other type is `Sendable`.
-- Public surface stays **minimal**: `ManifestForm` view, a manifest-loader
-  protocol, an exported-profile accessor, and the handful of model types a
-  consumer inspects. Everything else is `internal`. Keeping this narrow is
-  deliberate — it preserves freedom to refactor internals and to later split a
-  headless `ManifestCore` target out.
+- Public surface (headless): the app renders, so the model + logic are public —
+  `FormModel` (`@Observable`), its bindings, `Control` + `control(for:)`,
+  `isVisible`/`isRequired`, `validate()`/`errors`, the `FormNode` tree + `Field`
+  descriptor, and the model types a consumer reads (`PayloadManifest`,
+  `ManifestSubkey`, `PFMValue`, `PFMType`, and the supporting condition types).
+  There is **no** public view. Keep genuinely-internal helpers `internal`.
 - Tests use **Swift Testing** (`@Test` / `#expect`), not XCTest.
-- UI restraint: native macOS controls, System-Settings look, no decoration.
+- UI restraint lives in the **app**: native macOS controls, System-Settings look,
+  no decoration. The framework has no UI.
 - No fetching at test time — tests run offline. Build plist fixtures in code
   with `PlistFixture` (see below).
 
@@ -42,11 +49,11 @@ paraphrase in this doc.
 3. Manifest model (`PayloadManifest`, `ManifestSubkey`) ✅
 4. Form model (`FormModel`, `FormPath`, bindings) ✅
 5. Condition evaluator (visibility + requirement) ✅
-6. **Control resolution — NEXT (after the detour below)**
-7. SwiftUI renderer
-8. Public API (`ManifestForm`)
+6. Control resolution ✅
+7. **Headless render tree (`FormNode` + `Field`, `FormModel.formTree()`) — NEXT**
+8. Public headless API (make the model/logic/tree `public`; app writes the render loop)
 9. Export to `.mobileconfig`
-10. Packaging + sample app
+10. Packaging + sample app (the render loop lives in ProfilePal)
 
 ## Done and tested (headless), steps 1–5
 
