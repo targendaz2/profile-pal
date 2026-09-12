@@ -13,18 +13,12 @@ import Testing
 struct PFMValueTests {
 
     @Test func decodes_each_scalar_type() throws {
-        let plist = """
-            <?xml version="1.0" encoding="UTF-8"?>
-            <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-            <plist version="1.0">
-            <dict>
-                <key>s</key><string>hello</string>
-                <key>i</key><integer>42</integer>
-                <key>r</key><real>3.14</real>
-                <key>b</key><true/>
-            </dict>
-            </plist>
-            """.data(using: .utf8)!
+        let plist = try PlistFixture.xmlData([
+            "s": "hello",
+            "i": 42,
+            "r": 3.14,
+            "b": true,
+        ])
 
         let decoded = try PropertyListDecoder().decode([String: PFMValue].self, from: plist)
         #expect(decoded["s"] == .string("hello"))
@@ -34,17 +28,11 @@ struct PFMValueTests {
     }
 
     @Test func raw_decoding_coerces_integral_reals_to_integer() throws {
-        let plist = """
-            <?xml version="1.0" encoding="UTF-8"?>
-            <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-            <plist version="1.0">
-            <dict>
-                <key>whole</key><integer>42</integer>
-                <key>fractional</key><real>3.14</real>
-                <key>wholeLookingReal</key><real>5.0</real>
-            </dict>
-            </plist>
-            """.data(using: .utf8)!
+        let plist = try PlistFixture.xmlData([
+            "whole": 42,
+            "fractional": 3.14,
+            "wholeLookingReal": 5.0,
+        ])
 
         let decoded = try PropertyListDecoder().decode([String: PFMValue].self, from: plist)
 
