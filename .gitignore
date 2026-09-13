@@ -1,6 +1,3 @@
-# Created by https://www.toptal.com/developers/gitignore/api/swift,swiftpm,swiftpackagemanager,xcode,macos,git
-# Edit at https://www.toptal.com/developers/gitignore?templates=swift,swiftpm,swiftpackagemanager,xcode,macos,git
-
 ### ProfilePal (project) ###
 # Local design/exploration scratch — kept out of the repo. Durable design lives in docs/.
 api-proposals/
@@ -54,7 +51,6 @@ Temporary Items
 *.icloud
 
 ### Swift ###
-# Xcode
 
 ## User settings
 xcuserdata/
@@ -76,8 +72,6 @@ DerivedData/
 !*.xcodeproj/project.xcworkspace/
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
-
-# End of https://www.toptal.com/developers/gitignore/api/swift,swiftpm,swiftpackagemanager,xcode,macos,git
 
 # Claude Code worktrees
 .claude/worktrees/
