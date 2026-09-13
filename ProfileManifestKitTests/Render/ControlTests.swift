@@ -152,7 +152,7 @@ struct ControlTests {
 
     @Test func date_style_surfaces() throws {
         let key = try subkey(type: "date", extra: ["pfm_date_style": "time"])
-        #expect(control(for: key) == .datePicker(style: "time"))
+        #expect(control(for: key) == .datePicker(style: .time))
     }
 
     @Test func data_allowed_types_surface() throws {

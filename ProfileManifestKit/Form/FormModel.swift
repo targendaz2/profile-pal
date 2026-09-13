@@ -111,8 +111,12 @@ public final class FormModel {
 }
 
 extension FormModel {
+    // These typed binding builders are internal: the app binds through the prepared
+    // `Field` the form tree hands it, not by reaching for a binding at a raw path.
+    // `value(at:)` / `setValue(_:at:)` remain the public escape hatch.
+
     /// Generic binding to the raw PFMValue at a path.
-    public func binding(at path: FormPath) -> Binding<PFMValue?> {
+    func valueBinding(at path: FormPath) -> Binding<PFMValue?> {
         Binding(
             get: { self.value(at: path) },
             set: { self.setValue($0, at: path) },
@@ -120,7 +124,7 @@ extension FormModel {
     }
 
     /// String-typed binding for text fields. Empty string clears the key.
-    public func stringBinding(at path: FormPath) -> Binding<String> {
+    func stringBinding(at path: FormPath) -> Binding<String> {
         Binding(
             get: {
                 if case .string(let s) = self.value(at: path) { return s }
@@ -131,7 +135,7 @@ extension FormModel {
     }
 
     /// Bool-typed binding, honoring pfm_value_inverted.
-    public func boolBinding(at path: FormPath, inverted: Bool = false) -> Binding<Bool> {
+    func boolBinding(at path: FormPath, inverted: Bool = false) -> Binding<Bool> {
         Binding(
             get: {
                 if case .boolean(let b) = self.value(at: path) { return inverted ? !b : b }
@@ -146,15 +150,15 @@ extension FormModel {
     // (unlike stringBinding/boolBinding, there's no coercion to the declared type here).
     // Fine while only `real` subkeys use this binding; if an integer-typed slider
     // shows up, coerce via PFMValue.normalized(to:) like PFMValue.seed(for:) does.
-    public func doubleBinding(at path: FormPath) -> Binding<Double> {
+    func doubleBinding(at path: FormPath) -> Binding<Double> {
         Binding(
-            get: { self.value(at: path)?.asDouble ?? 0 },
+            get: { self.value(at: path)?.doubleValue ?? 0 },
             set: { self.setValue(.real($0), at: path) },
         )
     }
 
     /// Date-typed binding for date pickers.
-    public func dateBinding(at path: FormPath) -> Binding<Date> {
+    func dateBinding(at path: FormPath) -> Binding<Date> {
         Binding(
             get: {
                 if case .date(let d) = self.value(at: path) { return d }

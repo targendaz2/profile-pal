@@ -17,7 +17,7 @@ public enum Control: Equatable {
     case popUp(options: [Option], allowsCustom: Bool)
     case slider(min: Double, max: Double)
     case stepper(min: Double?, max: Double?)
-    case datePicker(style: String?)
+    case datePicker(style: DatePickerStyle?)
     case fileDrop(types: [String])
     case unsupported
 
@@ -26,6 +26,13 @@ public enum Control: Equatable {
         public let value: PFMValue
         public let title: String
         public var id: PFMValue { value }
+    }
+
+    /// How a `datePicker` presents its components. `nil` in the enclosing case means
+    /// the manifest specified no style, so the app picks its default.
+    public enum DatePickerStyle: Equatable {
+        case dateAndTime
+        case time
     }
 }
 
@@ -51,8 +58,8 @@ func control(for key: ManifestSubkey) -> Control {
             return .textField(secure: key.sensitive ?? false)
 
         case .integer, .real:
-            let lo = key.rangeMin?.asDouble
-            let hi = key.rangeMax?.asDouble
+            let lo = key.rangeMin?.doubleValue
+            let hi = key.rangeMax?.doubleValue
             if key.view == "slider", let lo, let hi {
                 return .slider(min: lo, max: hi)
             }
@@ -62,12 +69,22 @@ func control(for key: ManifestSubkey) -> Control {
             return .textField(secure: false)
 
         case .date:
-            return .datePicker(style: key.dateStyle)
+            return .datePicker(style: datePickerStyle(key.dateStyle))
 
         case .data:
             return .fileDrop(types: key.allowedFileTypes ?? [])
 
         case .array, .dictionary:
             return .unsupported  // structural — the form tree handles these
+    }
+}
+
+/// Map the manifest's `pfm_date_style` string onto a typed style. Unknown or absent
+/// values resolve to `nil` — "no style specified".
+private func datePickerStyle(_ raw: String?) -> Control.DatePickerStyle? {
+    switch raw {
+        case "dateAndTime": return .dateAndTime
+        case "time": return .time
+        default: return nil
     }
 }
