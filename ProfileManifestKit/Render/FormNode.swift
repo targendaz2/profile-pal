@@ -6,59 +6,59 @@
 //
 
 import Foundation
+import SwiftUI
 
-/// One editable leaf the app renders. Carries everything the app needs to draw
-/// and bind the control; the app reads `subkey` for labels/help text.
-public struct Field: Identifiable, Equatable {
-    public var path: FormPath
-    public var subkey: ManifestSubkey
-    public var control: Control
-    public var isRequired: Bool
-    public var errors: [String]
+/// One editable leaf, fully prepared: labels, metadata, and ready-to-bind values.
+/// The app never touches the manifest model — it reads this and picks a widget by
+/// `control`. Not `Equatable` (it carries `Binding`s); identify it by `id`.
+public struct Field: Identifiable {
+    public let id: FormPath
+    public let control: Control
+    public let title: String
+    public let help: String?
+    public let note: String?
+    public let isRequired: Bool
 
-    public var id: FormPath { path }
-    public var title: String { subkey.title ?? subkey.name ?? "" }
+    public var isSet: Binding<Bool>  // present-in-payload vs absent
+    public var text: Binding<String>
+    public var bool: Binding<Bool>
+    public var number: Binding<Double>
+    public var date: Binding<Date>
+    public var selection: Binding<PFMValue?>
 }
 
 /// The render tree the app walks. Structure mirrors the manifest: scalars are
-/// `field`s, dictionaries are `group`s, arrays are repeatable `array` rows. The
-/// framework decides structure and control; the app decides how each node looks.
-public enum FormNode: Identifiable, Equatable {
+/// `field`s, dictionaries `group`s, arrays repeatable `array` rows, and a
+/// `segmented` control groups sibling members under tabs.
+public enum FormNode: Identifiable {
     case field(Field)
-    case group(id: FormPath, title: String?, children: [FormNode])
-    case array(id: FormPath, title: String?, template: ManifestSubkey, rows: [FormNode])
-    /// A tab selector: `tabs` in display order, `groups` maps each tab to the
-    /// member nodes shown while it's selected. The selection is a string stored at
-    /// `id` (bind it there); the members are pulled out of the flat sibling list.
+    case group(id: FormPath, title: String?, isSet: Binding<Bool>, children: [FormNode])
+    case array(id: FormPath, title: String?, rows: [FormNode])
     case segmented(id: FormPath, tabs: [String], groups: [String: [FormNode]])
 
     public var id: FormPath {
         switch self {
-            case .field(let field):
-                return field.path
-            case .group(let id, _, _):
-                return id
-            case .array(let id, _, _, _):
-                return id
-            case .segmented(let id, _, _):
-                return id
+            case .field(let field): return field.id
+            case .group(let id, _, _, _): return id
+            case .array(let id, _, _): return id
+            case .segmented(let id, _, _): return id
         }
     }
 }
 
 extension FormModel {
     /// The visible render tree for the whole manifest, rebuilt from current state.
-    /// Reading this inside a SwiftUI view establishes observation, so edits that
-    /// change visibility re-render automatically.
+    /// Reading it in a SwiftUI view establishes observation, so edits that change
+    /// visibility re-render automatically.
     public var formTree: [FormNode] {
         nodes(for: manifest.subkeys, at: .root)
     }
 
     private func nodes(for subkeys: [ManifestSubkey], at base: FormPath) -> [FormNode] {
-        // Names claimed by a segmented control render inside it, not in the flat list.
         let consumed = segmentMembers(of: subkeys)
         return subkeys.compactMap { subkey -> FormNode? in
-            if let name = subkey.name, consumed.contains(name) { return nil }
+            guard let name = subkey.name else { return nil }
+            if consumed.contains(name) { return nil }  // rendered under a segmented control
             if subkey.segments != nil {
                 return segmentedNode(for: subkey, siblings: subkeys, at: base)
             }
@@ -66,7 +66,65 @@ extension FormModel {
         }
     }
 
-    /// Every sibling name referenced by any segmented control at this level.
+    /// Build one non-segmented node (field / group / array).
+    private func node(for subkey: ManifestSubkey, at base: FormPath) -> FormNode? {
+        guard isVisible(subkey), let name = subkey.name else { return nil }
+        let path = base.appending(key: name)
+        switch subkey.type {
+            case .dictionary:
+                return .group(
+                    id: path,
+                    title: subkey.title,
+                    isSet: isSetBinding(for: subkey, at: path),
+                    children: nodes(for: subkey.subkeys ?? [], at: path),
+                )
+            case .array:
+                return .array(
+                    id: path,
+                    title: subkey.title,
+                    rows: rows(of: subkey.subkeys?.first, at: path),
+                )
+            default:
+                return .field(field(for: subkey, at: path))
+        }
+    }
+
+    private func field(for subkey: ManifestSubkey, at path: FormPath) -> Field {
+        Field(
+            id: path,
+            control: control(for: subkey),
+            title: subkey.title ?? subkey.name ?? "",
+            help: subkey.description,
+            note: subkey.note,
+            isRequired: isRequired(subkey),
+            isSet: isSetBinding(for: subkey, at: path),
+            text: stringBinding(at: path),
+            bool: boolBinding(at: path, inverted: subkey.valueInverted ?? false),
+            number: doubleBinding(at: path),
+            date: dateBinding(at: path),
+            selection: binding(at: path),
+        )
+    }
+
+    /// One node per existing array element (positional → addressed by index).
+    private func rows(of template: ManifestSubkey?, at base: FormPath) -> [FormNode] {
+        guard case .array(let elements)? = value(at: base), let template else { return [] }
+        return elements.indices.map { index in
+            let path = base.appending(index: index)
+            switch template.type {
+                case .dictionary:
+                    return .group(
+                        id: path,
+                        title: nil,
+                        isSet: .constant(true),
+                        children: nodes(for: template.subkeys ?? [], at: path),
+                    )
+                default:
+                    return .field(field(for: template, at: path))
+            }
+        }
+    }
+
     private func segmentMembers(of subkeys: [ManifestSubkey]) -> Set<String> {
         var names: Set<String> = []
         for subkey in subkeys {
@@ -76,9 +134,6 @@ extension FormModel {
         return names
     }
 
-    /// Build a segmented node: tabs from `pfm_range_list_titles` (order matters),
-    /// each tab's members resolved against the sibling list into child nodes. A
-    /// referenced member that's missing or hidden is simply dropped.
     private func segmentedNode(
         for key: ManifestSubkey,
         siblings: [ManifestSubkey],
@@ -98,58 +153,5 @@ extension FormModel {
             }
         }
         return .segmented(id: path, tabs: tabs, groups: groups)
-    }
-
-    private func node(for subkey: ManifestSubkey, at base: FormPath) -> FormNode? {
-        guard isVisible(subkey) else { return nil }
-        guard let name = subkey.name else { return nil }  // named children only; array rows below
-        let path = base.appending(key: name)
-
-        switch control(for: subkey) {
-            case .dictionary(let children):
-                return .group(
-                    id: path,
-                    title: subkey.title,
-                    children: nodes(for: children, at: path),
-                )
-            case .arrayTable(let template):
-                return .array(
-                    id: path,
-                    title: subkey.title,
-                    template: template,
-                    rows: rows(of: template, at: path),
-                )
-            case let control:
-                return .field(
-                    Field(
-                        path: path,
-                        subkey: subkey,
-                        control: control,
-                        isRequired: isRequired(subkey),
-                        errors: errors[path] ?? [],
-                    ))
-        }
-    }
-
-    /// Build one node per existing element of an array value. Elements are
-    /// positional (the template subkey has no name), so they're addressed by index.
-    private func rows(of template: ManifestSubkey, at base: FormPath) -> [FormNode] {
-        guard case .array(let elements)? = value(at: base) else { return [] }
-        return elements.indices.map { index in
-            let path = base.appending(index: index)
-            switch control(for: template) {
-                case .dictionary(let children):
-                    return .group(id: path, title: nil, children: nodes(for: children, at: path))
-                case let control:
-                    return .field(
-                        Field(
-                            path: path,
-                            subkey: template,
-                            control: control,
-                            isRequired: false,
-                            errors: errors[path] ?? [],
-                        ))
-            }
-        }
     }
 }

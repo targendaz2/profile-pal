@@ -9,29 +9,29 @@ import Foundation
 
 /// A single key within a manifest. Represents one `pfm_subkeys` entry — a field the
 /// user configures. Subkeys nest: dictionaries and arrays carry their own `subkeys`.
-public struct ManifestSubkey: Sendable, Decodable, Equatable {
+struct ManifestSubkey: Sendable, Decodable, Equatable {
     // MARK: - Identity & docs
 
     /// `pfm_name` — the key's name. **Optional**: keys that are immediate subkeys of an
     /// array have no name (they're positional), so this is nil for array-element subkeys.
-    public var name: String?
+    var name: String?
 
     /// `pfm_title` — human-readable title shown as the field label.
-    public var title: String?
+    var title: String?
 
     /// `pfm_description` — description of the key.
-    public var description: String?
+    var description: String?
 
     /// `pfm_description_extended` — longer clarifying text.
-    public var descriptionExtended: String?
+    var descriptionExtended: String?
 
     /// `pfm_note` — a note to bring something to the user's attention.
-    public var note: String?
+    var note: String?
 
     // MARK: - Type & value
 
     /// `pfm_type` — the stored plist type of this key's value.
-    public var type: PFMType
+    var type: PFMType
 
     /// `pfm_type_input` — overrides the type the *user* edits, when it differs from `type`.
     var typeInput: PFMType?

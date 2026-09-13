@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 import Testing
 
 @testable import ProfileManifestKit
@@ -32,7 +33,7 @@ struct FormTreeTests {
             Issue.record("expected two fields")
             return
         }
-        #expect(a.path == FormPath.root.appending(key: "A"))
+        #expect(a.id == FormPath.root.appending(key: "A"))
         #expect(a.control == .textField(secure: false))
         #expect(b.control == .toggle(inverted: false))
     }
@@ -48,7 +49,7 @@ struct FormTreeTests {
             Issue.record("expected field")
             return
         }
-        #expect(a.path == FormPath.root.appending(key: "A"))
+        #expect(a.id == FormPath.root.appending(key: "A"))
     }
 
     @Test func dictionary_becomes_group_with_children() throws {
@@ -64,7 +65,7 @@ struct FormTreeTests {
         ])
         let tree = m.formTree
         #expect(tree.count == 1)
-        guard case .group(let id, _, let children) = tree[0] else {
+        guard case .group(let id, _, _, let children) = tree[0] else {
             Issue.record("expected group")
             return
         }
@@ -74,13 +75,13 @@ struct FormTreeTests {
             Issue.record("expected nested field")
             return
         }
-        #expect(x.path == FormPath.root.appending(key: "Group").appending(key: "X"))
+        #expect(x.id == FormPath.root.appending(key: "Group").appending(key: "X"))
     }
 
     @Test func empty_array_is_array_node_with_no_rows() throws {
         let element = PlistFixture.key(type: "string")
         let m = try model([PlistFixture.key(name: "Tags", type: "array", subkeys: [element])])
-        guard case .array(let id, _, _, let rows) = m.formTree[0] else {
+        guard case .array(let id, _, let rows) = m.formTree[0] else {
             Issue.record("expected array")
             return
         }
@@ -92,7 +93,7 @@ struct FormTreeTests {
         let element = PlistFixture.key(type: "string")
         let m = try model([PlistFixture.key(name: "Tags", type: "array", subkeys: [element])])
         m.setValue(.array([.string("a"), .string("b")]), at: FormPath.root.appending(key: "Tags"))
-        guard case .array(_, _, _, let rows) = m.formTree[0] else {
+        guard case .array(_, _, let rows) = m.formTree[0] else {
             Issue.record("expected array")
             return
         }
@@ -101,7 +102,7 @@ struct FormTreeTests {
             Issue.record("expected field row")
             return
         }
-        #expect(r0.path == FormPath.root.appending(key: "Tags").appending(index: 0))
+        #expect(r0.id == FormPath.root.appending(key: "Tags").appending(index: 0))
     }
 
     @Test func required_and_control_surface_on_field() throws {
@@ -142,7 +143,7 @@ struct FormTreeTests {
             Issue.record("expected field A under Basic")
             return
         }
-        #expect(a.path == FormPath.root.appending(key: "A"))
+        #expect(a.id == FormPath.root.appending(key: "A"))
 
         guard case .field(let b)? = groups["Advanced"]?.first else {
             Issue.record("expected field B under Advanced")
@@ -154,7 +155,7 @@ struct FormTreeTests {
             Issue.record("expected C to remain flat")
             return
         }
-        #expect(c.path == FormPath.root.appending(key: "C"))
+        #expect(c.id == FormPath.root.appending(key: "C"))
     }
 
     @Test func segmented_tab_order_follows_range_list_titles() throws {
@@ -173,5 +174,41 @@ struct FormTreeTests {
         }
         // Order comes from pfm_range_list_titles, not the (unordered) segments dict.
         #expect(tabs == ["Second", "First"])
+    }
+
+    // MARK: Array mutation & presence
+
+    @Test func add_and_remove_array_elements() throws {
+        let element = PlistFixture.key(type: "string")
+        let m = try model([PlistFixture.key(name: "Tags", type: "array", subkeys: [element])])
+        let tags = FormPath.root.appending(key: "Tags")
+
+        m.addArrayElement(at: tags)
+        m.addArrayElement(at: tags)
+        guard case .array(_, _, let rows) = m.formTree[0] else {
+            Issue.record("expected array")
+            return
+        }
+        #expect(rows.count == 2)
+
+        m.removeArrayElement(at: tags, index: 0)
+        guard case .array(_, _, let rows2) = m.formTree[0] else {
+            Issue.record("expected array")
+            return
+        }
+        #expect(rows2.count == 1)
+    }
+
+    @Test func isSet_toggles_presence() throws {
+        let m = try model([PlistFixture.key(name: "A", type: "string")])  // no default → absent
+        guard case .field(let a) = m.formTree[0] else {
+            Issue.record("expected field")
+            return
+        }
+        #expect(a.isSet.wrappedValue == false)
+        a.isSet.wrappedValue = true
+        #expect(m.value(at: a.id) != nil)
+        a.isSet.wrappedValue = false
+        #expect(m.value(at: a.id) == nil)
     }
 }

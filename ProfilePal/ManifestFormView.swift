@@ -2,29 +2,23 @@
 //  ManifestFormView.swift
 //  ProfilePal
 //
-//  Sample render loop over ProfileManifestKit's headless API. The framework
-//  decides structure (FormNode) and control type (Control); the app owns every
-//  view and all styling below.
+//  The whole render layer: one recursive view over ProfileManifestKit's headless
+//  form tree. The framework prepares each Field (control + labels + bindings); the
+//  app owns all layout and styling here.
 //
 
 import ProfileManifestKit
 import SwiftUI
 
-/// Renders a whole manifest by walking the framework's `formTree`.
 struct ManifestFormView: View {
     @State var model: FormModel
 
     var body: some View {
-        Form {
-            ForEach(model.formTree) { node in
-                NodeView(node: node, model: model)
-            }
-        }
-        .formStyle(.grouped)
+        Form { ForEach(model.formTree) { NodeView(node: $0, model: model) } }
+            .formStyle(.grouped)
     }
 }
 
-/// One node of the tree. Groups and arrays recurse by rendering child `NodeView`s.
 private struct NodeView: View {
     let node: FormNode
     let model: FormModel
@@ -32,124 +26,106 @@ private struct NodeView: View {
     var body: some View {
         switch node {
             case .field(let field):
-                FieldView(field: field, model: model)
-            case .group(_, let title, let children):
-                Section(title ?? "") {
+                LabeledContent {
+                    control(field)
+                } label: {
+                    HStack(spacing: 8) {
+                        Toggle("", isOn: field.isSet).labelsHidden()
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(field.title)
+                            if let help = field.help {
+                                Text(help).font(.caption).foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                }
+
+            case .group(_, let title, let isSet, let children):
+                Section {
                     ForEach(children) { NodeView(node: $0, model: model) }
+                } header: {
+                    HStack {
+                        Toggle("", isOn: isSet).labelsHidden()
+                        Text(title ?? "")
+                    }
                 }
-            case .array(_, let title, _, let rows):
+
+            case .array(let id, let title, let rows):
                 Section(title ?? "") {
-                    ForEach(rows) { NodeView(node: $0, model: model) }
+                    ForEach(Array(rows.enumerated()), id: \.element.id) { index, row in
+                        NodeView(node: row, model: model)
+                            .swipeActions {
+                                Button("Delete", role: .destructive) {
+                                    model.removeArrayElement(at: id, index: index)
+                                }
+                            }
+                    }
+                    Button("Add") { model.addArrayElement(at: id) }
                 }
+
             case .segmented(let id, let tabs, let groups):
-                SegmentedNodeView(id: id, tabs: tabs, groups: groups, model: model)
+                let selection = model.stringBinding(at: id)
+                Picker("", selection: selection) {
+                    ForEach(tabs, id: \.self) { Text($0).tag($0) }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                let current =
+                    selection.wrappedValue.isEmpty ? (tabs.first ?? "") : selection.wrappedValue
+                ForEach(groups[current] ?? []) { NodeView(node: $0, model: model) }
+
             @unknown default:
                 EmptyView()
         }
     }
-}
 
-/// A tab selector whose selection (a string stored at `id`) chooses which member
-/// nodes to show. Selection binding and layout are entirely the app's concern.
-private struct SegmentedNodeView: View {
-    let id: FormPath
-    let tabs: [String]
-    let groups: [String: [FormNode]]
-    let model: FormModel
-
-    var body: some View {
-        let selection = model.stringBinding(at: id)
-        let current = selection.wrappedValue.isEmpty ? (tabs.first ?? "") : selection.wrappedValue
-        Picker("", selection: selection) {
-            ForEach(tabs, id: \.self) { Text($0).tag($0) }
-        }
-        .pickerStyle(.segmented)
-        .labelsHidden()
-        ForEach(groups[current] ?? []) { NodeView(node: $0, model: model) }
-    }
-}
-
-/// One editable leaf. A plain switch over the framework's `Control` — this is the
-/// entire "how it looks" layer, and it lives in the app.
-private struct FieldView: View {
-    let field: Field
-    let model: FormModel
-
-    var body: some View {
+    @ViewBuilder func control(_ field: Field) -> some View {
         switch field.control {
             case .textField(let secure):
-                LabeledContent(field.title) {
-                    if secure {
-                        SecureField("", text: model.stringBinding(at: field.path))
-                    } else {
-                        TextField("", text: model.stringBinding(at: field.path))
-                    }
+                if secure {
+                    SecureField("", text: field.text)
+                } else {
+                    TextField("", text: field.text)
                 }
-
-            case .toggle(let inverted):
-                Toggle(field.title, isOn: model.boolBinding(at: field.path, inverted: inverted))
-
+            case .toggle:
+                Toggle("", isOn: field.bool).labelsHidden()
             case .radioTwoState(let titles):
-                Picker(field.title, selection: model.boolBinding(at: field.path)) {
-                    Text(titles.first ?? "On").tag(true)
-                    Text(titles.last ?? "Off").tag(false)
+                Picker("", selection: field.bool) {
+                    Text(titles.first ?? "").tag(true)
+                    Text(titles.last ?? "").tag(false)
                 }
                 .pickerStyle(.radioGroup)
-
-            case .popUp(let values, let titles, _):
-                Picker(field.title, selection: model.binding(at: field.path)) {
-                    ForEach(Array(values.enumerated()), id: \.element) { index, value in
-                        Text(index < titles.count ? titles[index] : value.displayString)
-                            .tag(Optional(value))
-                    }
+                .labelsHidden()
+            case .popUp(let options, _):
+                Picker("", selection: field.selection) {
+                    ForEach(options) { Text($0.title).tag(Optional($0.value)) }
                 }
-
-            case .slider(let min, let max):
-                LabeledContent(field.title) {
-                    Slider(value: model.doubleBinding(at: field.path), in: min...max)
-                }
-
-            case .stepper(_, _):
-                Stepper(field.title, value: model.doubleBinding(at: field.path))
-
+                .labelsHidden()
+            case .slider(let lo, let hi):
+                Slider(value: field.number, in: lo...hi)
+            case .stepper:
+                Stepper("", value: field.number).labelsHidden()
             case .datePicker:
-                DatePicker(field.title, selection: dateBinding(field.path))
-
+                DatePicker("", selection: field.date).labelsHidden()
             case .fileDrop:
-                LabeledContent(field.title) { Text("(unsupported in sample)") }
-
-            // Containers/segmented become nodes, not leaves, so they never reach a
-            // FieldView; the switch stays exhaustive so an unexpected manifest can't crash.
-            case .arrayTable, .dictionary, .segmented, .unsupported:
+                Text("Drop a file…").foregroundStyle(.secondary)
+            case .unsupported:
                 EmptyView()
-
             @unknown default:
                 EmptyView()
         }
-    }
-
-    /// A typed Date binding derived from the framework's generic value binding —
-    /// exactly the kind of adaptation the app owns.
-    private func dateBinding(_ path: FormPath) -> Binding<Date> {
-        Binding(
-            get: {
-                if case .date(let date)? = model.value(at: path) { return date }
-                return .now
-            },
-            set: { model.setValue(.date($0), at: path) },
-        )
     }
 }
 
 #Preview {
     ManifestFormView(model: FormModel(manifest: sampleManifest()))
-        .frame(width: 420, height: 420)
+        .frame(width: 420, height: 460)
 }
 
 /// A small hand-built manifest covering several control types, for the preview.
 private func sampleManifest() -> PayloadManifest {
-    // Split into per-subkey typed locals: one giant [String: Any] literal trips the
-    // preview type-checker ("unable to type-check this expression in reasonable time").
+    // Per-subkey typed locals: one giant [String: Any] literal trips the preview
+    // type-checker ("unable to type-check this expression in reasonable time").
     let serverURL: [String: Any] = [
         "pfm_name": "ServerURL", "pfm_type": "string", "pfm_title": "Server URL",
     ]
@@ -173,7 +149,6 @@ private func sampleManifest() -> PayloadManifest {
         "pfm_name": "Tags", "pfm_type": "array", "pfm_title": "Tags",
         "pfm_subkeys": [["pfm_type": "string"]],
     ]
-    // A segmented control groups four of the fields above under two tabs.
     let section: [String: Any] = [
         "pfm_name": "Section", "pfm_type": "string", "pfm_title": "Section",
         "pfm_default": "Connection",

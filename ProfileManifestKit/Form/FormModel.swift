@@ -152,6 +152,95 @@ extension FormModel {
             set: { self.setValue(.real($0), at: path) },
         )
     }
+
+    /// Date-typed binding for date pickers.
+    public func dateBinding(at path: FormPath) -> Binding<Date> {
+        Binding(
+            get: {
+                if case .date(let d) = self.value(at: path) { return d }
+                return Date()
+            },
+            set: { self.setValue(.date($0), at: path) },
+        )
+    }
+}
+
+extension FormModel {
+    // MARK: Presence (the "set / absent" affordance)
+
+    /// Binding for whether a key is present in the payload. Turning it on seeds the
+    /// subkey's default (or a typed empty); turning it off removes the key.
+    func isSetBinding(for subkey: ManifestSubkey, at path: FormPath) -> Binding<Bool> {
+        Binding(
+            get: { self.value(at: path) != nil },
+            set: { on in
+                if on {
+                    guard self.value(at: path) == nil else { return }
+                    self.setValue(
+                        PFMValue.seed(for: subkey) ?? Self.emptyValue(for: subkey.type),
+                        at: path,
+                    )
+                } else {
+                    self.setValue(nil, at: path)
+                }
+            },
+        )
+    }
+
+    static func emptyValue(for type: PFMType) -> PFMValue {
+        switch type {
+            case .string, .url: return .string("")
+            case .integer: return .integer(0)
+            case .real: return .real(0)
+            case .boolean: return .boolean(false)
+            case .date: return .date(Date())
+            case .data: return .data(Data())
+            case .array: return .array([])
+            case .dictionary: return .dictionary([:])
+        }
+    }
+
+    // MARK: Array mutation
+
+    /// Append a new element to the array at `path`, seeded from its element template.
+    public func addArrayElement(at path: FormPath) {
+        var elements: [PFMValue] = []
+        if case .array(let existing)? = value(at: path) { elements = existing }
+        let template = manifestSubkey(at: path)?.subkeys?.first
+        elements.append(template.map { Self.emptyValue(for: $0.type) } ?? .string(""))
+        setValue(.array(elements), at: path)
+    }
+
+    /// Remove the element at `index` from the array at `path`.
+    public func removeArrayElement(at path: FormPath, index: Int) {
+        guard case .array(var elements)? = value(at: path), elements.indices.contains(index) else {
+            return
+        }
+        elements.remove(at: index)
+        setValue(.array(elements), at: path)
+    }
+
+    /// Resolve the manifest subkey addressed by a value path (array indices step
+    /// into the element template).
+    func manifestSubkey(at path: FormPath) -> ManifestSubkey? {
+        var candidates: [ManifestSubkey]? = manifest.subkeys
+        var result: ManifestSubkey?
+        for component in path.components {
+            switch component {
+                case .key(let name):
+                    guard let match = candidates?.first(where: { $0.name == name }) else {
+                        return nil
+                    }
+                    result = match
+                    candidates = match.subkeys
+                case .index:
+                    guard let template = candidates?.first else { return nil }
+                    result = template
+                    candidates = template.subkeys
+            }
+        }
+        return result
+    }
 }
 
 extension FormModel {
@@ -251,7 +340,7 @@ extension FormModel {
 
     /// Whether a key should render at all: not excluded, not statically hidden,
     /// and applicable to the current platform.
-    public func isVisible(_ key: ManifestSubkey) -> Bool {
+    func isVisible(_ key: ManifestSubkey) -> Bool {
         if key.hidden == .all { return false }
         if isExcluded(key) { return false }
         if let platforms = key.platforms, !platforms.contains(currentPlatform) {
@@ -264,7 +353,7 @@ extension FormModel {
 
     /// A key is required if a static flag says so, OR any pfm_conditionals entry
     /// with a non-nil pfm_require has all its conditions holding.
-    public func isRequired(_ key: ManifestSubkey) -> Bool {
+    func isRequired(_ key: ManifestSubkey) -> Bool {
         if key.required == true { return true }
         if key.require == .always || key.require == .alwaysNested { return true }
 

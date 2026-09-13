@@ -7,10 +7,10 @@
 
 import Foundation
 
-public enum PFMType: String, Sendable, Decodable {
+enum PFMType: String, Sendable, Decodable {
     case string, integer, real, boolean, date, data, array, dictionary, url
 
-    public init(from decoder: any Decoder) throws {
+    init(from decoder: any Decoder) throws {
         let raw = try decoder.singleValueContainer().decode(String.self).lowercased()
         guard let value = PFMType(rawValue: raw) else {
             throw DecodingError.dataCorruptedError(

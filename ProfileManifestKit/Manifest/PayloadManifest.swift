@@ -26,7 +26,7 @@ public struct PayloadManifest: Sendable, Decodable {
     var version: Int?
 
     /// `pfm_subkeys` — the payload's keys, in display order.
-    public var subkeys: [ManifestSubkey]
+    var subkeys: [ManifestSubkey]
 
     /// `pfm_unique` — whether only one payload of this type may be installed.
     var unique: Bool?

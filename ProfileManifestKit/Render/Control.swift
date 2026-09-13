@@ -7,40 +7,37 @@
 
 import Foundation
 
-/// How a visible subkey renders. `control(for:)` decides the case; the step-7
-/// renderer is a plain switch over it.
+/// The leaf widget a field renders as. Structural kinds (dictionary, array,
+/// segmented) are *not* here — the form tree expresses those as node kinds. So a
+/// `Field.control` is always a real, renderable leaf control.
 public enum Control: Equatable {
     case textField(secure: Bool)
     case toggle(inverted: Bool)
     case radioTwoState(titles: [String])
-    case popUp(values: [PFMValue], titles: [String], allowsCustom: Bool)
+    case popUp(options: [Option], allowsCustom: Bool)
     case slider(min: Double, max: Double)
     case stepper(min: Double?, max: Double?)
     case datePicker(style: String?)
     case fileDrop(types: [String])
-    case arrayTable(element: ManifestSubkey)
-    case dictionary(subkeys: [ManifestSubkey])
-    case segmented(tabs: [String], segments: [String: [String]])
     case unsupported
+
+    /// One choice in a pop-up: the stored value plus its display title.
+    public struct Option: Identifiable, Equatable {
+        public let value: PFMValue
+        public let title: String
+        public var id: PFMValue { value }
+    }
 }
 
-/// Resolve how a subkey should render. Pure function: subkey in, `Control` out.
-///
-/// Order is load-bearing: enumerated/explicit-hint controls must win before
-/// type-based defaults, or an enumerated string would render as a plain text box.
-/// Never traps — an unrecognized shape degrades to `.unsupported`.
-public func control(for key: ManifestSubkey) -> Control {
-    if let segments = key.segments {
-        return .segmented(tabs: key.rangeListTitles ?? Array(segments.keys), segments: segments)
-    }
-
+/// Resolve the leaf control for a subkey. Enumerated (`range_list`) wins before the
+/// type default. Container types return `.unsupported` — they're structural and the
+/// form tree turns them into group/array nodes, so this is never asked of them in
+/// practice. Never traps.
+func control(for key: ManifestSubkey) -> Control {
     if let values = key.rangeList {
         let titles = key.rangeListTitles ?? values.map(\.displayString)
-        return .popUp(
-            values: values,
-            titles: titles,
-            allowsCustom: key.rangeListAllowsCustom ?? false,
-        )
+        let options = zip(values, titles).map { Control.Option(value: $0.0, title: $0.1) }
+        return .popUp(options: options, allowsCustom: key.rangeListAllowsCustom ?? false)
     }
 
     switch key.typeInput ?? key.type {
@@ -70,10 +67,7 @@ public func control(for key: ManifestSubkey) -> Control {
         case .data:
             return .fileDrop(types: key.allowedFileTypes ?? [])
 
-        case .array:
-            return .arrayTable(element: key.subkeys?.first ?? key)
-
-        case .dictionary:
-            return .dictionary(subkeys: key.subkeys ?? [])
+        case .array, .dictionary:
+            return .unsupported  // structural — the form tree handles these
     }
 }

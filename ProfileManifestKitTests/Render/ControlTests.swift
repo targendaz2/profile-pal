@@ -67,42 +67,24 @@ struct ControlTests {
         #expect(control(for: try subkey(type: "data")) == .fileDrop(types: []))
     }
 
-    @Test func array_defaults_to_array_table_with_element() throws {
-        let key = try subkey(type: "array", subkeys: [PlistFixture.key(type: "string")])
-        guard case .arrayTable(let element) = control(for: key) else {
-            Issue.record("expected .arrayTable")
-            return
-        }
-        #expect(element.type == .string)
-    }
-
-    @Test func dictionary_defaults_to_dictionary_with_subkeys() throws {
-        let key = try subkey(type: "dictionary", subkeys: [PlistFixture.key(type: "string")])
-        guard case .dictionary(let subkeys) = control(for: key) else {
-            Issue.record("expected .dictionary")
-            return
-        }
-        #expect(subkeys.count == 1)
-        #expect(subkeys.first?.type == .string)
+    @Test func container_types_are_unsupported_leaves() throws {
+        // Dictionaries and arrays are structural (the form tree turns them into
+        // group/array nodes), so they are not leaf controls.
+        #expect(control(for: try subkey(type: "array")) == .unsupported)
+        #expect(control(for: try subkey(type: "dictionary")) == .unsupported)
     }
 
     // MARK: Enumerated / hint controls win before type defaults
-
-    @Test func segments_win_over_type_default() throws {
-        // pfm_segments is the first decision-order check: a dictionary with
-        // segments renders segmented, not as a nested dictionary.
-        let key = try subkey(type: "dictionary", extra: ["pfm_segments": ["Basic": ["ServerURL"]]])
-        #expect(
-            control(for: key) == .segmented(tabs: ["Basic"], segments: ["Basic": ["ServerURL"]]))
-    }
 
     @Test func range_list_on_string_is_pop_up_not_text_field() throws {
         let key = try subkey(type: "string", rangeList: ["a", "b"])
         #expect(
             control(for: key)
                 == .popUp(
-                    values: [.string("a"), .string("b")],
-                    titles: ["a", "b"],
+                    options: [
+                        .init(value: .string("a"), title: "a"),
+                        .init(value: .string("b"), title: "b"),
+                    ],
                     allowsCustom: false,
                 ))
     }
@@ -112,8 +94,10 @@ struct ControlTests {
         #expect(
             control(for: key)
                 == .popUp(
-                    values: [.string("a"), .string("b")],
-                    titles: ["A", "B"],
+                    options: [
+                        .init(value: .string("a"), title: "A"),
+                        .init(value: .string("b"), title: "B"),
+                    ],
                     allowsCustom: false,
                 ))
     }
@@ -123,7 +107,7 @@ struct ControlTests {
         let key = try subkey(type: "string", rangeList: ["a"], extra: extra)
         #expect(
             control(for: key)
-                == .popUp(values: [.string("a")], titles: ["a"], allowsCustom: true))
+                == .popUp(options: [.init(value: .string("a"), title: "a")], allowsCustom: true))
     }
 
     // MARK: Boolean variants
