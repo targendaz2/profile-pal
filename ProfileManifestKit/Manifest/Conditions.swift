@@ -43,15 +43,15 @@ struct PFMExclusion: Sendable, Decodable, Equatable {
 struct PFMTargetCondition: Sendable, Decodable, Equatable {
     /// Evaluates whether the target key value is set to any value from this key.
     /// Important: The array must be the same type as the target key's `pfm_type`.
-    var containsAny: [FormValue]?
+    var containsAny: [PFMValue]?
 
     /// Evaluates whether the target key value is NOT set to any value from this key.
     /// Important: The array must be the same type as the target key's `pfm_type`.
-    var nContainsAny: [FormValue]?
+    var nContainsAny: [PFMValue]?
 
     /// Evaluates whether the target key value does NOT match the value of this key.
     /// Important: The array must be the same type as the target key's `pfm_type`.
-    var nRangeList: [FormValue]?
+    var nRangeList: [PFMValue]?
 
     /// Evaluates the existence of the target key in the exported payload.
     /// If set to `true` the condition satisfies when the target key is present.
@@ -60,7 +60,7 @@ struct PFMTargetCondition: Sendable, Decodable, Equatable {
 
     /// Evaluates whether the target key value matches the value of this key.
     /// Important: The array must be the same type as the target key's `pfm_type`.
-    var rangeList: [FormValue]?
+    var rangeList: [PFMValue]?
 
     /// The target key to evaluate. For nested keys, the key names can be separated by a dot "."
     var target: String?

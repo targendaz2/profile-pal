@@ -20,7 +20,7 @@ private func decodeManifest(_ root: [String: Any]) throws -> PFMPayload {
 }
 
 /// Pull the underlying dictionary out of a PFMValue, or fail.
-private func dict(_ value: FormValue?) throws -> [String: FormValue] {
+private func dict(_ value: PFMValue?) throws -> [String: PFMValue] {
     guard case .dictionary(let d)? = value else {
         Issue.record("expected .dictionary, got \(String(describing: value))")
         throw TestError.shape
@@ -413,7 +413,7 @@ struct EvaluatorTests {
     /// when the controller equals a given value.
     private func modelExcludingWhen(
         controller: String,
-        equals trigger: FormValue,
+        equals trigger: PFMValue,
     ) throws -> (FormModel, PFMSubkey) {
         let manifest = try decodeManifest(
             PlistFixture.manifest(
@@ -444,8 +444,8 @@ struct EvaluatorTests {
     /// Model with two controllers and a dependent excluded by a SINGLE entry
     /// containing TWO conditions (tests AND-within-entry).
     fileprivate func modelExcludedWhenBoth(
-        _ ctrlA: String, equals a: FormValue,
-        _ ctrlB: String, equals b: FormValue,
+        _ ctrlA: String, equals a: PFMValue,
+        _ ctrlB: String, equals b: PFMValue,
     ) throws -> (FormModel, PFMSubkey) {
         let manifest = try decodeManifest(
             PlistFixture.manifest(
@@ -477,8 +477,8 @@ struct EvaluatorTests {
     /// Model with two controllers and a dependent excluded by TWO separate
     /// entries, one condition each (tests OR-across-entries).
     fileprivate func modelExcludedWhenEither(
-        _ ctrlA: String, equals a: FormValue,
-        _ ctrlB: String, equals b: FormValue,
+        _ ctrlA: String, equals a: PFMValue,
+        _ ctrlB: String, equals b: PFMValue,
     ) throws -> (FormModel, PFMSubkey) {
         let manifest = try decodeManifest(
             PlistFixture.manifest(

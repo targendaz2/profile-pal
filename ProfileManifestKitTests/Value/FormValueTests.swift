@@ -20,7 +20,7 @@ struct FormValueTests {
             "b": true,
         ])
 
-        let decoded = try PropertyListDecoder().decode([String: FormValue].self, from: plist)
+        let decoded = try PropertyListDecoder().decode([String: PFMValue].self, from: plist)
         #expect(decoded["s"] == .string("hello"))
         #expect(decoded["i"] == .integer(42))
         #expect(decoded["r"] == .real(3.14))
@@ -34,7 +34,7 @@ struct FormValueTests {
             "wholeLookingReal": 5.0,
         ])
 
-        let decoded = try PropertyListDecoder().decode([String: FormValue].self, from: plist)
+        let decoded = try PropertyListDecoder().decode([String: PFMValue].self, from: plist)
 
         // An <integer> must land in .integer, never .real
         #expect(decoded["whole"] == .integer(42))
@@ -49,13 +49,13 @@ struct FormValueTests {
     }
 
     @Test func normalizes_to_declared_type() throws {
-        #expect(FormValue.integer(5).normalized(to: .real) == .real(5.0))
-        #expect(FormValue.real(5.0).normalized(to: .integer) == .integer(5))
-        #expect(FormValue.real(3.14).normalized(to: .real) == .real(3.14))
+        #expect(PFMValue.integer(5).normalized(to: .real) == .real(5.0))
+        #expect(PFMValue.real(5.0).normalized(to: .integer) == .integer(5))
+        #expect(PFMValue.real(3.14).normalized(to: .real) == .real(3.14))
     }
 
     @Test func round_trips() throws {
-        let original: FormValue = .dictionary([
+        let original: PFMValue = .dictionary([
             "name": .string("Dock"),
             "size": .integer(64),
             "magnify": .boolean(true),
@@ -64,7 +64,7 @@ struct FormValueTests {
 
         let encoder = PropertyListEncoder()
         let data = try encoder.encode(original)
-        let back = try PropertyListDecoder().decode(FormValue.self, from: data)
+        let back = try PropertyListDecoder().decode(PFMValue.self, from: data)
         #expect(back == original)
     }
 }

@@ -23,9 +23,9 @@ public enum Control: Equatable {
 
     /// One choice in a pop-up: the stored value plus its display title.
     public struct Option: Identifiable, Equatable {
-        public let value: FormValue
+        public let value: PFMValue
         public let title: String
-        public var id: FormValue { value }
+        public var id: PFMValue { value }
     }
 
     /// How a `datePicker` presents its components. `nil` in the enclosing case means

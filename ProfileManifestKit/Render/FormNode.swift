@@ -24,7 +24,7 @@ public struct Field: Identifiable {
     public var bool: Binding<Bool>
     public var number: Binding<Double>
     public var date: Binding<Date>
-    public var selection: Binding<FormValue?>
+    public var selection: Binding<PFMValue?>
 }
 
 /// The render tree the app walks. Structure mirrors the manifest: scalars are

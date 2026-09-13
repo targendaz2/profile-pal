@@ -18,7 +18,7 @@ struct PFMSubkey: Sendable, Decodable, Equatable {
     /// The key's default value.
     /// Important: Must be the same type as the key's `pfm_type`.
     /// Only set this when the app's source or documentation confirms an actual default. For example or template values, use `pfm_value_placeholder` instead. Do not combine with `pfm_require` — a required key with a default is contradictory.
-    var defaultValue: FormValue?
+    var defaultValue: PFMValue?
 
     /// Description of the key.
     var description: String?
@@ -47,15 +47,15 @@ struct PFMSubkey: Sendable, Decodable, Equatable {
 
     /// An array of legal values for this key.
     /// Important: The array must be the same type as the key's `pfm_type`.
-    var rangeList: [FormValue]?
+    var rangeList: [PFMValue]?
 
     /// The maximum value for this key.
     /// Important: Must be the same type as the key's `pfm_type`.
-    var rangeMax: FormValue?
+    var rangeMax: PFMValue?
 
     /// The minimum value for this key.
     /// Important: Must be the same type as the key's `pfm_type`.
-    var rangeMin: FormValue?
+    var rangeMin: PFMValue?
 
     /// This key describes keys nested under the current key.
     var subkeys: [PFMSubkey]?
@@ -202,7 +202,7 @@ struct PFMSubkey: Sendable, Decodable, Equatable {
     /// Placeholder value for the key. Placeholder value is never included in the exported payload, it's only used to show an example value.
     /// Use this instead of `pfm_default` for example or template values (e.g., domain.example.com) where the app does not define an actual default.
     /// If `pfm_default` is used for a preference, this will override any value supplied by `pfm_value_placeholder`. As such, this key should only be used when a `pfm_default` value is not defined.
-    var placeholder: FormValue?
+    var placeholder: PFMValue?
 
     /// Name of the value processor to use when converting a user entered value to the exported value.
     var valueProcessor: String?

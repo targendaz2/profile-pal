@@ -12,7 +12,7 @@ import SwiftUI
 @Observable @MainActor
 public final class FormModel {
     public let manifest: PFMPayload
-    private(set) var root: FormValue
+    private(set) var root: PFMValue
     private(set) var errors: [FormPath: [String]] = [:]
 
     public init(manifest: PFMPayload) {
@@ -20,8 +20,8 @@ public final class FormModel {
         self.root = Self.initialTree(for: manifest.subkeys)
     }
 
-    static func initialTree(for subkeys: [PFMSubkey]) -> FormValue {
-        var dict: [String: FormValue] = [:]
+    static func initialTree(for subkeys: [PFMSubkey]) -> PFMValue {
+        var dict: [String: PFMValue] = [:]
         for key in subkeys {
             guard let name = key.name else { continue }  // array-element subkeys have no name
             if let seeded = seededValue(for: key) {
@@ -31,29 +31,29 @@ public final class FormModel {
         return .dictionary(dict)
     }
 
-    private static func seededValue(for key: PFMSubkey) -> FormValue? {
+    private static func seededValue(for key: PFMSubkey) -> PFMValue? {
         switch key.type {
             case .dictionary:
                 // Recurse into nested dict subkeys; include it only if something seeded.
-                guard let subs = key.subkeys else { return FormValue.seed(for: key) }
+                guard let subs = key.subkeys else { return PFMValue.seed(for: key) }
                 let nested = initialTree(for: subs)
                 if case .dictionary(let d) = nested, d.isEmpty {
                     // no nested defaults → fall back to own default (usually nil)
-                    return FormValue.seed(for: key)
+                    return PFMValue.seed(for: key)
                 }
                 return nested
             case .array:
                 // Arrays start empty unless there's an explicit default array.
-                return FormValue.seed(for: key)
+                return PFMValue.seed(for: key)
             default:
-                return FormValue.seed(for: key)
+                return PFMValue.seed(for: key)
         }
     }
 
     // MARK: Read
 
-    public func value(at path: FormPath) -> FormValue? {
-        var current: FormValue? = root
+    public func value(at path: FormPath) -> PFMValue? {
+        var current: PFMValue? = root
         for component in path.components {
             switch (current, component) {
                 case (.dictionary(let d), .key(let k)):
@@ -69,17 +69,17 @@ public final class FormModel {
 
     // MARK: Write
 
-    public func setValue(_ newValue: FormValue?, at path: FormPath) {
+    public func setValue(_ newValue: PFMValue?, at path: FormPath) {
         root = Self.set(newValue, at: path.components, in: root)
         // validation hook lands in step 5; for now, writing is enough
     }
 
     /// Immutable recursive set — rebuilds the spine of the tree along `path`.
     private static func set(
-        _ newValue: FormValue?,
+        _ newValue: PFMValue?,
         at components: [FormPath.Component],
-        in node: FormValue,
-    ) -> FormValue {
+        in node: PFMValue,
+    ) -> PFMValue {
         guard let first = components.first else {
             return newValue ?? .dictionary([:])  // replacing the node itself
         }
@@ -116,7 +116,7 @@ extension FormModel {
     // `value(at:)` / `setValue(_:at:)` remain the public escape hatch.
 
     /// Generic binding to the raw PFMValue at a path.
-    func valueBinding(at path: FormPath) -> Binding<FormValue?> {
+    func valueBinding(at path: FormPath) -> Binding<PFMValue?> {
         Binding(
             get: { self.value(at: path) },
             set: { self.setValue($0, at: path) },
@@ -181,7 +181,7 @@ extension FormModel {
                 if on {
                     guard self.value(at: path) == nil else { return }
                     self.setValue(
-                        FormValue.seed(for: subkey) ?? Self.emptyValue(for: subkey.type),
+                        PFMValue.seed(for: subkey) ?? Self.emptyValue(for: subkey.type),
                         at: path,
                     )
                 } else {
@@ -191,7 +191,7 @@ extension FormModel {
         )
     }
 
-    static func emptyValue(for type: PFMType) -> FormValue {
+    static func emptyValue(for type: PFMType) -> PFMValue {
         switch type {
             case .string, .url: return .string("")
             case .integer: return .integer(0)
@@ -208,7 +208,7 @@ extension FormModel {
 
     /// Append a new element to the array at `path`, seeded from its element template.
     public func addArrayElement(at path: FormPath) {
-        var elements: [FormValue] = []
+        var elements: [PFMValue] = []
         if case .array(let existing)? = value(at: path) { elements = existing }
         let template = manifestSubkey(at: path)?.subkeys?.first
         elements.append(template.map { Self.emptyValue(for: $0.type) } ?? .string(""))
@@ -251,7 +251,7 @@ extension FormModel {
     /// Resolve a pfm_target dotted keypath against the value tree.
     /// Cross-payload targeting (a non-nil domain) is not yet supported — treated
     /// as unresolvable, so conditions referencing another payload read as "absent".
-    func targetValue(_ target: String, domain: String?) -> FormValue? {
+    func targetValue(_ target: String, domain: String?) -> PFMValue? {
         guard domain == nil else { return nil }  // step-5 limitation, documented
         let path = FormPath(
             components:
@@ -310,7 +310,7 @@ extension FormModel {
         return true
     }
 
-    private func isEmpty(_ value: FormValue?) -> Bool {
+    private func isEmpty(_ value: PFMValue?) -> Bool {
         switch value {
             case nil: return true
             case .string(let s): return s.isEmpty
@@ -320,7 +320,7 @@ extension FormModel {
         }
     }
 
-    private func containsAny(_ value: FormValue?, _ candidates: [FormValue]) -> Bool {
+    private func containsAny(_ value: PFMValue?, _ candidates: [PFMValue]) -> Bool {
         guard case .array(let elements)? = value else { return false }
         return elements.contains { candidates.contains($0) }
     }
