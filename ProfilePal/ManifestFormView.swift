@@ -126,32 +126,36 @@ private struct FieldView: View {
 
 /// A small hand-built manifest covering several control types, for the preview.
 private func sampleManifest() -> PayloadManifest {
+    // Split into per-subkey typed locals: one giant [String: Any] literal trips the
+    // preview type-checker ("unable to type-check this expression in reasonable time").
+    let serverURL: [String: Any] = [
+        "pfm_name": "ServerURL", "pfm_type": "string", "pfm_title": "Server URL",
+    ]
+    let enabled: [String: Any] = [
+        "pfm_name": "Enabled", "pfm_type": "boolean", "pfm_title": "Enabled",
+    ]
+    let mode: [String: Any] = [
+        "pfm_name": "Mode", "pfm_type": "string", "pfm_title": "Mode",
+        "pfm_range_list": ["auto", "manual"],
+        "pfm_range_list_titles": ["Automatic", "Manual"],
+    ]
+    let level: [String: Any] = [
+        "pfm_name": "Level", "pfm_type": "integer", "pfm_title": "Level",
+        "pfm_view": "slider", "pfm_range_min": 0, "pfm_range_max": 10,
+    ]
+    let advanced: [String: Any] = [
+        "pfm_name": "Advanced", "pfm_type": "dictionary", "pfm_title": "Advanced",
+        "pfm_subkeys": [["pfm_name": "Timeout", "pfm_type": "integer", "pfm_title": "Timeout"]],
+    ]
+    let tags: [String: Any] = [
+        "pfm_name": "Tags", "pfm_type": "array", "pfm_title": "Tags",
+        "pfm_subkeys": [["pfm_type": "string"]],
+    ]
+    let subkeys: [[String: Any]] = [serverURL, enabled, mode, level, advanced, tags]
     let dict: [String: Any] = [
         "pfm_domain": "com.example.sample",
         "pfm_title": "Sample",
-        "pfm_subkeys": [
-            ["pfm_name": "ServerURL", "pfm_type": "string", "pfm_title": "Server URL"],
-            ["pfm_name": "Enabled", "pfm_type": "boolean", "pfm_title": "Enabled"],
-            [
-                "pfm_name": "Mode", "pfm_type": "string", "pfm_title": "Mode",
-                "pfm_range_list": ["auto", "manual"],
-                "pfm_range_list_titles": ["Automatic", "Manual"],
-            ],
-            [
-                "pfm_name": "Level", "pfm_type": "integer", "pfm_title": "Level",
-                "pfm_view": "slider", "pfm_range_min": 0, "pfm_range_max": 10,
-            ],
-            [
-                "pfm_name": "Advanced", "pfm_type": "dictionary", "pfm_title": "Advanced",
-                "pfm_subkeys": [
-                    ["pfm_name": "Timeout", "pfm_type": "integer", "pfm_title": "Timeout"]
-                ],
-            ],
-            [
-                "pfm_name": "Tags", "pfm_type": "array", "pfm_title": "Tags",
-                "pfm_subkeys": [["pfm_type": "string"]],
-            ],
-        ],
+        "pfm_subkeys": subkeys,
     ]
     let data = try! PropertyListSerialization.data(
         fromPropertyList: dict,
