@@ -25,9 +25,9 @@ paraphrase in this doc.
 - Swift 6 language mode, strict concurrency **on** (`swiftLanguageModes: [.v6]`).
 - `FormModel` is `@MainActor`; every other type is `Sendable`.
 - Public surface is the headless **prepared-field** API (`FormModel`, `formTree`,
-  `FormNode`, `Field`, leaf `Control`, `PayloadManifest` identity, `FormPath`,
+  `FormNode`, `Field`, leaf `Control`, `PFMPayload` identity, `FormPath`,
   `PFMValue`) — see [`docs/architecture.md`](docs/architecture.md). Keep the manifest
-  model (`ManifestSubkey`, `PFMType`, condition types), `control(for:)`, and
+  model (`PFMSubkey`, `PFMType`, condition types), `control(for:)`, and
   `isVisible`/`isRequired` **internal**; the app sees only form concepts. No public view.
 - Tests use **Swift Testing** (`@Test` / `#expect`), not XCTest.
 - UI restraint lives in the **app**: native macOS controls, System-Settings look,
@@ -61,15 +61,20 @@ can't be recovered at decode time, so it's restored later via `normalized(to:)`
 driven by the subkey's declared `pfm_type`. Has `asDouble`, `displayString`,
 `plistValue` (→ Foundation `Any`, for fixtures) accessors.
 
-**`PayloadManifest` / `ManifestSubkey`** — decode the `pfm_*` keys via explicit
-`CodingKeys`. Everything optional **except** `domain`, `title`, `type`,
-`subkeys`. Critical: `pfm_name` is **optional** — array-element subkeys are
-positional and have none. `pfm_required` (Bool) and `pfm_require` (String enum:
+**`PFMPayload` / `PFMSubkey`** — decode the `pfm_*` keys via explicit
+`CodingKeys`. `PFMPayload`'s required keys are `domain`, `title`, `subkeys`,
+`version`; on a subkey, `type` and `subkeys` are required. Critical: `pfm_name`
+is **optional** — array-element subkeys are positional and have none.
+`pfm_required` (Bool) and `pfm_require` (`PFMRequireMode` enum:
 `always`/`always-nested`/`push`) are **two separate keys**, both decoded, not
 merged at decode time. `pfm_default` / `pfm_value_placeholder` are `PFMValue?`.
-Unknown `pfm_*` keys are silently ignored (only ~40 of ~60 keys modeled; add
-more as real manifests demand). `PFMType` has a **case-insensitive** decoder
-(manifests are inconsistent about capitalization).
+The key set has been **trued up against the ProfileManifests docs** — the full
+documented `pfm_*` payload and subkey vocabulary is now modeled (Apple-defined +
+extended keys), including deprecation/platform bounds, substitution variables,
+and value-processor hints; shared vocabulary (`PFMTarget`, `PFMPlatform`,
+`PFMSubstitutionVariable`/`PFMSubstitutionSource`) lives in `Manifest/Common.swift`.
+Unknown `pfm_*` keys are still silently ignored. `PFMType` has a
+**case-insensitive** decoder (manifests are inconsistent about capitalization).
 
 **`FormModel`** — `@Observable @MainActor`. Owns `root: PFMValue` (the value
 tree), `errors: [FormPath: [String]]`, and the manifest. `FormPath` addresses
@@ -123,7 +128,7 @@ the step-7 previews.
 
 ## Step 6 — Control resolution (the target)
 
-A **pure function** `control(for: ManifestSubkey) -> Control` that decides *how*
+A **pure function** `control(for: PFMSubkey) -> Control` that decides *how*
 a visible key renders. No SwiftUI — this returns an enum; step 7's renderer is a
 boring switch over it. Unit-test it directly: subkey in, `Control` case out.
 
@@ -139,8 +144,8 @@ enum Control: Equatable {
     case stepper(min: Double?, max: Double?)
     case datePicker(style: String?)
     case fileDrop(types: [String])              // pfm_type == data
-    case arrayTable(element: ManifestSubkey)
-    case dictionary(subkeys: [ManifestSubkey])
+    case arrayTable(element: PFMSubkey)
+    case dictionary(subkeys: [PFMSubkey])
     case segmented([String: [String]])
     case unsupported                            // explicit fallback; don't crash
 }

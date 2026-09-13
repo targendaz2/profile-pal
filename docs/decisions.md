@@ -3,7 +3,7 @@
 Short records of the load-bearing choices. Newest first.
 
 ## D6 — Cache manifests at startup; edit state per opened payload
-Parse definitions once into `PayloadManifest` (immutable, `Sendable`) via a
+Parse definitions once into `PFMPayload` (immutable, `Sendable`) via a
 `ManifestStore`; build a `FormModel` per opened payload for the session. The
 rendered `formTree` stays live (it depends on edits — conditionals). Don't freeze
 the rendered tree.

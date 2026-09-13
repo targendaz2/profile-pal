@@ -37,7 +37,7 @@ xcodebuild test -project ProfilePal.xcodeproj -scheme ProfileManifestKitTests -d
 
 # Run a single test (XCTest-style identifier works for Swift Testing too)
 xcodebuild test -project ProfilePal.xcodeproj -scheme ProfileManifestKitTests \
-  -destination 'platform=macOS' -only-testing:ProfileManifestKitTests/PayloadManifestTests
+  -destination 'platform=macOS' -only-testing:ProfileManifestKitTests/PFMPayloadTests
 ```
 
 Targets: `ProfilePal` (app), `ProfileManifestKit` (framework — the actual logic), and
@@ -51,12 +51,15 @@ is the source of truth, not the live diagnostics list.
 
 ## Architecture
 
-**Decoding pipeline**: `PayloadManifest` (top-level plist) → `[ManifestSubkey]` (`pfm_subkeys`,
+**Decoding pipeline**: `PFMPayload` (top-level plist) → `[PFMSubkey]` (`pfm_subkeys`,
 recursively nested for `dictionary`/`array` types) → `PFMValue` (the actual decoded/edited value,
 an indirect enum covering every plist type: string/integer/real/boolean/date/data/array/dictionary).
-`PFMType` is the `pfm_type` enum subkeys declare; `Manifest/Conditions.swift` holds the rest of the
-manifest vocabulary (`RequireMode`, `HiddenMode`, `Conditional`, `Exclusion`, `TargetCondition` for
-`pfm_target_conditions`).
+Types are named after the `pfm_*` vocabulary and split by concern under `Manifest/`: `PFMType` is the
+`pfm_type` enum subkeys declare; `Manifest/Conditions.swift` holds `PFMConditional`, `PFMExclusion`,
+and `PFMTargetCondition` (for `pfm_target_conditions`); `PFMSubkey` nests its own enums
+(`PFMRequireMode` for `pfm_require`, plus `PFMHiddenMode`/`PFMDateStyle`/`PFMViewMode`); and
+`Manifest/Common.swift` holds the shared vocabulary (`PFMTarget`, `PFMPlatform`,
+`PFMSubstitutionVariable`/`PFMSubstitutionSource`). `PFMValue` lives at `Manifest/PFMValue.swift`.
 
 Key invariant: a subkey's declared `pfm_type` doesn't necessarily match the literal type
 `Decodable` infers from the plist value (e.g. a `real` field with an integer-looking default).
@@ -65,7 +68,7 @@ whenever a value is seeded or read against its manifest type — see `PFMValue.s
 `Int(exactly:)` rather than `Int(r)` because the source plist is untrusted input; don't reintroduce
 a trapping conversion here.
 
-**Form editing**: `FormModel` is an `@Observable` tree of `PFMValue` rooted at a `PayloadManifest`,
+**Form editing**: `FormModel` is an `@Observable` tree of `PFMValue` rooted at a `PFMPayload`,
 addressed by `FormPath` (a `Hashable` sequence of `.key`/`.index` components — dict keys or array
 indices). It's seeded once from each subkey's `pfm_default` (coerced via `normalized(to:)`);
 subkeys with no default are *absent* from the tree, not present with an empty/zero value — this
@@ -82,7 +85,7 @@ is added.
 `FixtureGen.swift`) builds fixtures as `[String: Any]` trees and serializes them with
 `PropertyListSerialization`, so malformed XML can't be produced by a typo. `PlistFixtures` holds
 reusable named fixtures (e.g. `.dock`, `.trap`). Tests then round-trip through
-`PropertyListDecoder().decode(PayloadManifest.self, from:)`.
+`PropertyListDecoder().decode(PFMPayload.self, from:)`.
 
 ## Correctness invariants (don't regress these)
 

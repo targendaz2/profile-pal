@@ -20,7 +20,7 @@ come free) rather than reproduced 1:1. See [decisions.md](decisions.md).
 
 The split that keeps everything decoupled (and makes caching clean):
 
-1. **Definitions** — `PayloadManifest`, parsed from a `pfm_*` plist. Immutable,
+1. **Definitions** — `PFMPayload`, parsed from a `pfm_*` plist. Immutable,
    `Sendable`, cacheable.
 2. **Edit state** — `FormModel`, one per opened payload, lives for the session.
 3. **Rendered tree** — `formTree`, recomputed live and cheaply (it *must* stay
@@ -47,11 +47,12 @@ Control (leaf-only) = textField(secure:) | toggle(inverted:) | radioTwoState(tit
           | datePicker(style:) | fileDrop(types:) | unsupported
           Control.Option = value · title
 
-PayloadManifest (identity: domain/title/description) · FormPath · PFMValue
+PFMPayload (identity: domain/title/description) · FormPath · PFMValue
 ```
 
-Internal (not public): `ManifestSubkey`, `PFMType`, `control(for:)`,
-`isVisible`/`isRequired`, condition types, `PayloadManifest.subkeys`.
+Internal (not public): `PFMSubkey`, `PFMType`, `control(for:)`,
+`isVisible`/`isRequired`, condition types (`PFMConditional`/`PFMExclusion`/`PFMTargetCondition`),
+`PFMPayload.subkeys`.
 
 `Control` is **leaf-only** — dictionaries/arrays/segmented are expressed as
 `FormNode` kinds, so a `Field.control` is always a real widget (no dead cases in
@@ -70,7 +71,7 @@ and segmented tabs are wired. Styling grows this file; no new types.
 
 - **`ManifestStore`** (planned, step 2): one per app; parses definitions lazily,
   caches, and vends `PayloadPlaceholder`s for the sidebar / add-payload list and
-  full `PayloadManifest`s on open. Source-keyed (multiple manifest sources).
+  full `PFMPayload`s on open. Source-keyed (multiple manifest sources).
 - **`FormModel` per opened payload**: the edit state, held for the session (e.g.
   `[domain: FormModel]` on a future `Profile` aggregate). Switching payloads swaps
   which model renders.
@@ -101,8 +102,8 @@ ProfileCreator = AppKit UI). Concept map:
 
 | Ours | ProfilePayloads |
 |------|-----------------|
-| `PayloadManifest` / `ManifestSubkey` | `PayloadManifest` / `PayloadManifestSubkey` |
-| `Conditional`/`Exclusion`/`TargetCondition` | `PayloadCondition`/`PayloadExclude`/`PayloadTargetCondition` |
+| `PFMPayload` / `PFMSubkey` | `PayloadManifest` / `PayloadManifestSubkey` |
+| `PFMConditional`/`PFMExclusion`/`PFMTargetCondition` | `PayloadCondition`/`PayloadExclude`/`PayloadTargetCondition` |
 | `ManifestStore` / `ManifestSource` (planned) | `ManifestRepositories` / `ManifestRepository` |
 | `PayloadPlaceholder` (planned) | `PayloadPlaceholder` |
 | `ValueProcessor` (planned) | `ValueProcessors` |
