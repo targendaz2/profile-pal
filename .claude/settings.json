@@ -3,6 +3,8 @@
     "xcode"
   ],
   "enabledPlugins": {
+    "claude-md-management@claude-plugins-official": true,
+    "swift-lsp@claude-plugins-official": true,
     "swiftui-pro@swiftui-agent-skill": true,
     "swift-concurrency-pro@swift-concurrency-agent-skill": true,
     "swift-testing-pro@swift-testing-agent-skill": true,
