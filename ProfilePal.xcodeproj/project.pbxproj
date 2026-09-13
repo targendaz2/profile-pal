@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		EC05AFF73056769500D2CAEF /* SemanticVersion in Frameworks */ = {isa = PBXBuildFile; productRef = EC05AFF63056769500D2CAEF /* SemanticVersion */; };
 		EC06B2EB305392B60053B03A /* ProfileManifestKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EC557BB730538AE0006554A9 /* ProfileManifestKit.framework */; };
 		EC557BBD30538AE0006554A9 /* ProfileManifestKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EC557BB730538AE0006554A9 /* ProfileManifestKit.framework */; };
 		EC557BBE30538AE0006554A9 /* ProfileManifestKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = EC557BB730538AE0006554A9 /* ProfileManifestKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -49,10 +50,10 @@
 		EC06B2E130538FD50053B03A /* .editorconfig */ = {isa = PBXFileReference; lastKnownFileType = text; path = .editorconfig; sourceTree = "<group>"; };
 		EC06B2E7305392B60053B03A /* ProfileManifestKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ProfileManifestKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EC06B2F1305394B70053B03A /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
-		EC06B2F2305394D00053B03A /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		EC06B2F2305394D00053B03A /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.markdown; };
 		EC06B2F9305397DB0053B03A /* .mcp.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = .mcp.json; sourceTree = "<group>"; };
 		EC06B31D3053BC090053B03A /* CLAUDE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CLAUDE.md; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.markdown; };
-		EC06B31E30544A950053B03A /* HANDOFF.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = HANDOFF.md; sourceTree = "<group>"; };
+		EC06B31E30544A950053B03A /* HANDOFF.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = HANDOFF.md; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.markdown; };
 		EC557BA430538A94006554A9 /* ProfilePal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ProfilePal.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EC557BB730538AE0006554A9 /* ProfileManifestKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ProfileManifestKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -124,6 +125,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EC05AFF73056769500D2CAEF /* SemanticVersion in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -240,6 +242,7 @@
 			);
 			name = ProfileManifestKit;
 			packageProductDependencies = (
+				EC05AFF63056769500D2CAEF /* SemanticVersion */,
 			);
 			productName = ProfileManifestKit;
 			productReference = EC557BB730538AE0006554A9 /* ProfileManifestKit.framework */;
@@ -275,6 +278,9 @@
 			);
 			mainGroup = EC557B9B30538A94006554A9;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				EC05AFF53056769500D2CAEF /* XCRemoteSwiftPackageReference "SemanticVersion" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = EC557BA530538A94006554A9 /* Products */;
 			projectDirPath = "";
@@ -578,7 +584,7 @@
 		EC557BC030538AE0006554A9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -618,7 +624,7 @@
 		EC557BC130538AE0006554A9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -695,6 +701,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		EC05AFF53056769500D2CAEF /* XCRemoteSwiftPackageReference "SemanticVersion" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SwiftPackageIndex/SemanticVersion";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.5.3;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		EC05AFF63056769500D2CAEF /* SemanticVersion */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EC05AFF53056769500D2CAEF /* XCRemoteSwiftPackageReference "SemanticVersion" */;
+			productName = SemanticVersion;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = EC557B9C30538A94006554A9 /* Project object */;
 }

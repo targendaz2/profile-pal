@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SemanticVersion
 
 /// A decoded payload manifest — the top-level `.plist` describing one payload domain
 /// and its keys. Maps the `pfm_*` payload-level keys from the ProfileManifests format.
@@ -48,25 +49,25 @@ public struct PFMPayload: Sendable, Decodable {
     var interaction: PFMInteraction
 
     /// Version of iOS that started deprecating the payload.
-    var iOSDeprecated: String?
+    var iOSDeprecated: SemanticVersion?
 
     /// Version of iOS that stopped supporting the payload.
-    var iOSMax: String?
+    var iOSMax: SemanticVersion?
 
     /// Version of iOS that started supporting the payload.
-    var iOSMin: String?
+    var iOSMin: SemanticVersion?
 
     /// Date the manifest was last modified.
     var lastModified: String
 
     /// Version of macOS that started deprecating the payload.
-    var macOSDeprecated: String?
+    var macOSDeprecated: SemanticVersion?
 
     /// Version of macOS that stopped supporting the payload.
-    var macOSMax: String?
+    var macOSMax: SemanticVersion?
 
     /// Version of macOS that started supporting the payload.
-    var macOSMin: String?
+    var macOSMin: SemanticVersion?
 
     /// A note to emphasize or bring something specific to the user's attention about the payload.
     var note: String?
@@ -87,13 +88,13 @@ public struct PFMPayload: Sendable, Decodable {
     var supervised: Bool?
 
     /// Version of tvOS that started deprecating the payload.
-    var tvOSDeprecated: String?
+    var tvOSDeprecated: SemanticVersion?
 
     /// Version of tvOS that stopped supporting the payload.
-    var tvOSMax: String?
+    var tvOSMax: SemanticVersion?
 
     /// Version of tvOS that started supporting the payload.
-    var tvOSMin: String?
+    var tvOSMin: SemanticVersion?
 
     /// Indicates if multiple payloads of this type can be installed on a device. `true` = one payload; `false` = multiple payloads
     var unique: Bool
@@ -133,7 +134,7 @@ public struct PFMPayload: Sendable, Decodable {
         case unique = "pfm_unique"
         case userApproved = "pfm_user_approved"
     }
-    
+
     // MARK: Subtypes
     enum PFMInteraction: String, Sendable, Decodable {
         case combined, exclusive, undefined

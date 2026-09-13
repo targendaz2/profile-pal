@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SemanticVersion
 
 /// A single key within a manifest. Represents one `pfm_subkeys` entry — a field the
 /// user configures. Subkeys nest: dictionaries and arrays carry their own `subkeys`.
@@ -112,22 +113,22 @@ struct PFMSubkey: Sendable, Decodable, Equatable {
     var hidden: PFMHiddenMode?
 
     /// Version of iOS that started deprecating the key.
-    var iOSDeprecated: String?
+    var iOSDeprecated: SemanticVersion?
 
     /// Version of iOS that stopped supporting the key.
-    var iOSMax: String?
+    var iOSMax: SemanticVersion?
 
     /// Version of iOS that started supporting the key.
-    var iOSMin: String?
+    var iOSMin: SemanticVersion?
 
     /// Version of macOS that started deprecating the key.
-    var macOSDeprecated: String?
+    var macOSDeprecated: SemanticVersion?
 
     /// Version of macOS that stopped supporting the key.
-    var macOSMax: String?
+    var macOSMax: SemanticVersion?
 
     /// Version of macOS that started supporting the key.
-    var macOSMin: String?
+    var macOSMin: SemanticVersion?
 
     /// A note to emphasize or bring something specific to the user's attention about the key.
     var note: String?
@@ -167,13 +168,13 @@ struct PFMSubkey: Sendable, Decodable, Equatable {
     var typeInput: PFMType?
 
     /// Version of tvOS that started deprecating the key.
-    var tvOSDeprecated: String?
+    var tvOSDeprecated: SemanticVersion?
 
     /// Version of tvOS that stopped supporting the key.
-    var tvOSMax: String?
+    var tvOSMax: SemanticVersion?
 
     /// Version of tvOS that started supporting the key.
-    var tvOSMin: String?
+    var tvOSMin: SemanticVersion?
 
     /// Requires the device to be user approved, or enrolled using DEP for this key to work.
     var userApproved: Bool?
@@ -282,9 +283,9 @@ struct PFMSubkey: Sendable, Decodable, Equatable {
         case valueUnit = "pfm_value_unit"
         case view = "pfm_view"
     }
-    
+
     // MARK: Subtypes
-    
+
     enum PFMRequireMode: String, Sendable, Decodable {
         /// The key is always required.
         case always
