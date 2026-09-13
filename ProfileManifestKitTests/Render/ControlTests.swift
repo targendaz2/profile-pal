@@ -22,7 +22,7 @@ struct ControlTests {
         rangeListTitles: [String]? = nil,
         subkeys: [[String: Any]]? = nil,
         extra: [String: Any] = [:],
-    ) throws -> ManifestSubkey {
+    ) throws -> PFMSubkey {
         let fixture = PlistFixture.key(
             name: name,
             type: type,
@@ -32,7 +32,7 @@ struct ControlTests {
             extra: extra,
         )
         return try PropertyListDecoder().decode(
-            ManifestSubkey.self,
+            PFMSubkey.self,
             from: PlistFixture.xmlData(fixture),
         )
     }

@@ -11,17 +11,17 @@ import SwiftUI
 
 @Observable @MainActor
 public final class FormModel {
-    public let manifest: PayloadManifest
-    private(set) var root: PFMValue
+    public let manifest: PFMPayload
+    private(set) var root: FormValue
     private(set) var errors: [FormPath: [String]] = [:]
 
-    public init(manifest: PayloadManifest) {
+    public init(manifest: PFMPayload) {
         self.manifest = manifest
         self.root = Self.initialTree(for: manifest.subkeys)
     }
 
-    static func initialTree(for subkeys: [ManifestSubkey]) -> PFMValue {
-        var dict: [String: PFMValue] = [:]
+    static func initialTree(for subkeys: [PFMSubkey]) -> FormValue {
+        var dict: [String: FormValue] = [:]
         for key in subkeys {
             guard let name = key.name else { continue }  // array-element subkeys have no name
             if let seeded = seededValue(for: key) {
@@ -31,29 +31,29 @@ public final class FormModel {
         return .dictionary(dict)
     }
 
-    private static func seededValue(for key: ManifestSubkey) -> PFMValue? {
+    private static func seededValue(for key: PFMSubkey) -> FormValue? {
         switch key.type {
             case .dictionary:
                 // Recurse into nested dict subkeys; include it only if something seeded.
-                guard let subs = key.subkeys else { return PFMValue.seed(for: key) }
+                guard let subs = key.subkeys else { return FormValue.seed(for: key) }
                 let nested = initialTree(for: subs)
                 if case .dictionary(let d) = nested, d.isEmpty {
                     // no nested defaults → fall back to own default (usually nil)
-                    return PFMValue.seed(for: key)
+                    return FormValue.seed(for: key)
                 }
                 return nested
             case .array:
                 // Arrays start empty unless there's an explicit default array.
-                return PFMValue.seed(for: key)
+                return FormValue.seed(for: key)
             default:
-                return PFMValue.seed(for: key)
+                return FormValue.seed(for: key)
         }
     }
 
     // MARK: Read
 
-    public func value(at path: FormPath) -> PFMValue? {
-        var current: PFMValue? = root
+    public func value(at path: FormPath) -> FormValue? {
+        var current: FormValue? = root
         for component in path.components {
             switch (current, component) {
                 case (.dictionary(let d), .key(let k)):
@@ -69,17 +69,17 @@ public final class FormModel {
 
     // MARK: Write
 
-    public func setValue(_ newValue: PFMValue?, at path: FormPath) {
+    public func setValue(_ newValue: FormValue?, at path: FormPath) {
         root = Self.set(newValue, at: path.components, in: root)
         // validation hook lands in step 5; for now, writing is enough
     }
 
     /// Immutable recursive set — rebuilds the spine of the tree along `path`.
     private static func set(
-        _ newValue: PFMValue?,
+        _ newValue: FormValue?,
         at components: [FormPath.Component],
-        in node: PFMValue,
-    ) -> PFMValue {
+        in node: FormValue,
+    ) -> FormValue {
         guard let first = components.first else {
             return newValue ?? .dictionary([:])  // replacing the node itself
         }
@@ -116,7 +116,7 @@ extension FormModel {
     // `value(at:)` / `setValue(_:at:)` remain the public escape hatch.
 
     /// Generic binding to the raw PFMValue at a path.
-    func valueBinding(at path: FormPath) -> Binding<PFMValue?> {
+    func valueBinding(at path: FormPath) -> Binding<FormValue?> {
         Binding(
             get: { self.value(at: path) },
             set: { self.setValue($0, at: path) },
@@ -174,14 +174,14 @@ extension FormModel {
 
     /// Binding for whether a key is present in the payload. Turning it on seeds the
     /// subkey's default (or a typed empty); turning it off removes the key.
-    func isSetBinding(for subkey: ManifestSubkey, at path: FormPath) -> Binding<Bool> {
+    func isSetBinding(for subkey: PFMSubkey, at path: FormPath) -> Binding<Bool> {
         Binding(
             get: { self.value(at: path) != nil },
             set: { on in
                 if on {
                     guard self.value(at: path) == nil else { return }
                     self.setValue(
-                        PFMValue.seed(for: subkey) ?? Self.emptyValue(for: subkey.type),
+                        FormValue.seed(for: subkey) ?? Self.emptyValue(for: subkey.type),
                         at: path,
                     )
                 } else {
@@ -191,7 +191,7 @@ extension FormModel {
         )
     }
 
-    static func emptyValue(for type: PFMType) -> PFMValue {
+    static func emptyValue(for type: PFMType) -> FormValue {
         switch type {
             case .string, .url: return .string("")
             case .integer: return .integer(0)
@@ -208,7 +208,7 @@ extension FormModel {
 
     /// Append a new element to the array at `path`, seeded from its element template.
     public func addArrayElement(at path: FormPath) {
-        var elements: [PFMValue] = []
+        var elements: [FormValue] = []
         if case .array(let existing)? = value(at: path) { elements = existing }
         let template = manifestSubkey(at: path)?.subkeys?.first
         elements.append(template.map { Self.emptyValue(for: $0.type) } ?? .string(""))
@@ -226,9 +226,9 @@ extension FormModel {
 
     /// Resolve the manifest subkey addressed by a value path (array indices step
     /// into the element template).
-    func manifestSubkey(at path: FormPath) -> ManifestSubkey? {
-        var candidates: [ManifestSubkey]? = manifest.subkeys
-        var result: ManifestSubkey?
+    func manifestSubkey(at path: FormPath) -> PFMSubkey? {
+        var candidates: [PFMSubkey]? = manifest.subkeys
+        var result: PFMSubkey?
         for component in path.components {
             switch component {
                 case .key(let name):
@@ -251,7 +251,7 @@ extension FormModel {
     /// Resolve a pfm_target dotted keypath against the value tree.
     /// Cross-payload targeting (a non-nil domain) is not yet supported — treated
     /// as unresolvable, so conditions referencing another payload read as "absent".
-    func targetValue(_ target: String, domain: String?) -> PFMValue? {
+    func targetValue(_ target: String, domain: String?) -> FormValue? {
         guard domain == nil else { return nil }  // step-5 limitation, documented
         let path = FormPath(
             components:
@@ -264,7 +264,7 @@ extension FormModel {
 
 extension FormModel {
     /// Evaluate one target condition against current form state.
-    func evaluate(_ condition: TargetCondition) -> Bool {
+    func evaluate(_ condition: PFMTargetCondition) -> Bool {
         let value = condition.target.flatMap {
             targetValue($0, domain: condition.domain)
         }
@@ -310,7 +310,7 @@ extension FormModel {
         return true
     }
 
-    private func isEmpty(_ value: PFMValue?) -> Bool {
+    private func isEmpty(_ value: FormValue?) -> Bool {
         switch value {
             case nil: return true
             case .string(let s): return s.isEmpty
@@ -320,31 +320,31 @@ extension FormModel {
         }
     }
 
-    private func containsAny(_ value: PFMValue?, _ candidates: [PFMValue]) -> Bool {
+    private func containsAny(_ value: FormValue?, _ candidates: [FormValue]) -> Bool {
         guard case .array(let elements)? = value else { return false }
         return elements.contains { candidates.contains($0) }
     }
 
-    var currentPlatform: String { "macOS" }  // hard-coded for a macOS-only v1
+    var currentPlatform: PFMPlatform { .macOS }  // hard-coded for a macOS-only v1
 }
 
 extension FormModel {
     /// All conditions in one entry must hold (AND).
-    func evaluateAll(_ conditions: [TargetCondition]) -> Bool {
+    func evaluateAll(_ conditions: [PFMTargetCondition]) -> Bool {
         conditions.allSatisfy { evaluate($0) }
     }
 
     // MARK: Visibility
 
     /// A key is excluded if ANY pfm_exclude entry's conditions all hold (OR of ANDs).
-    func isExcluded(_ key: ManifestSubkey) -> Bool {
+    func isExcluded(_ key: PFMSubkey) -> Bool {
         guard let exclusions = key.exclude else { return false }
-        return exclusions.contains { evaluateAll($0.targetConditions) }
+        return exclusions.contains { evaluateAll($0.targetConditions ?? []) }
     }
 
     /// Whether a key should render at all: not excluded, not statically hidden,
     /// and applicable to the current platform.
-    func isVisible(_ key: ManifestSubkey) -> Bool {
+    func isVisible(_ key: PFMSubkey) -> Bool {
         if key.hidden == .all { return false }
         if isExcluded(key) { return false }
         if let platforms = key.platforms, !platforms.contains(currentPlatform) {
@@ -357,15 +357,16 @@ extension FormModel {
 
     /// A key is required if a static flag says so, OR any pfm_conditionals entry
     /// with a non-nil pfm_require has all its conditions holding.
-    func isRequired(_ key: ManifestSubkey) -> Bool {
+    func isRequired(_ key: PFMSubkey) -> Bool {
         if key.required == true { return true }
         if key.require == .always || key.require == .alwaysNested { return true }
 
         guard let conditionals = key.conditionals else { return false }
         return conditionals.contains { conditional in
             // .push only matters for MDM delivery, not the local editing UI —
-            // same exclusion as the static require check above.
-            (conditional.require == .always || conditional.require == .alwaysNested)
+            // same exclusion as the static require check above. (pfm_conditionals
+            // only supports `always`/`push`, never `always-nested`.)
+            conditional.require == .always
                 && evaluateAll(conditional.targetConditions)
         }
     }

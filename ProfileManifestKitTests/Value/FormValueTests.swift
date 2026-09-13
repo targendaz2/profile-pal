@@ -1,5 +1,5 @@
 //
-//  ProfileManifestKitTests.swift
+//  FormValueTests.swift
 //  ProfileManifestKitTests
 //
 //  Created by David Rosenberg on 9/10/26.
@@ -10,7 +10,7 @@ import Testing
 
 @testable import ProfileManifestKit
 
-struct PFMValueTests {
+struct FormValueTests {
 
     @Test func decodes_each_scalar_type() throws {
         let plist = try PlistFixture.xmlData([
@@ -20,7 +20,7 @@ struct PFMValueTests {
             "b": true,
         ])
 
-        let decoded = try PropertyListDecoder().decode([String: PFMValue].self, from: plist)
+        let decoded = try PropertyListDecoder().decode([String: FormValue].self, from: plist)
         #expect(decoded["s"] == .string("hello"))
         #expect(decoded["i"] == .integer(42))
         #expect(decoded["r"] == .real(3.14))
@@ -34,7 +34,7 @@ struct PFMValueTests {
             "wholeLookingReal": 5.0,
         ])
 
-        let decoded = try PropertyListDecoder().decode([String: PFMValue].self, from: plist)
+        let decoded = try PropertyListDecoder().decode([String: FormValue].self, from: plist)
 
         // An <integer> must land in .integer, never .real
         #expect(decoded["whole"] == .integer(42))
@@ -49,13 +49,13 @@ struct PFMValueTests {
     }
 
     @Test func normalizes_to_declared_type() throws {
-        #expect(PFMValue.integer(5).normalized(to: .real) == .real(5.0))
-        #expect(PFMValue.real(5.0).normalized(to: .integer) == .integer(5))
-        #expect(PFMValue.real(3.14).normalized(to: .real) == .real(3.14))
+        #expect(FormValue.integer(5).normalized(to: .real) == .real(5.0))
+        #expect(FormValue.real(5.0).normalized(to: .integer) == .integer(5))
+        #expect(FormValue.real(3.14).normalized(to: .real) == .real(3.14))
     }
 
     @Test func round_trips() throws {
-        let original: PFMValue = .dictionary([
+        let original: FormValue = .dictionary([
             "name": .string("Dock"),
             "size": .integer(64),
             "magnify": .boolean(true),
@@ -64,7 +64,7 @@ struct PFMValueTests {
 
         let encoder = PropertyListEncoder()
         let data = try encoder.encode(original)
-        let back = try PropertyListDecoder().decode(PFMValue.self, from: data)
+        let back = try PropertyListDecoder().decode(FormValue.self, from: data)
         #expect(back == original)
     }
 }

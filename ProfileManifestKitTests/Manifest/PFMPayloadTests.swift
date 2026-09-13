@@ -1,5 +1,5 @@
 //
-//  PayloadManifestTests.swift
+//  PFMPayloadTests.swift
 //  ProfileManifestKitTests
 //
 //  Created by David Rosenberg on 9/10/26.
@@ -10,11 +10,11 @@ import Testing
 
 @testable import ProfileManifestKit
 
-struct PayloadManifestTests {
+struct PFMPayloadTests {
 
     @Test func decodes_dock_manifest() throws {
         let data = try PlistFixture.xmlData(PlistFixtures.dock)
-        let manifest = try PropertyListDecoder().decode(PayloadManifest.self, from: data)
+        let manifest = try PropertyListDecoder().decode(PFMPayload.self, from: data)
 
         #expect(manifest.domain == "com.apple.dock")
         #expect(!manifest.subkeys.isEmpty)
@@ -22,7 +22,7 @@ struct PayloadManifestTests {
 
     @Test func decodes_trap_fixture() throws {
         let data = try PlistFixture.xmlData(PlistFixtures.trap)
-        let manifest = try PropertyListDecoder().decode(PayloadManifest.self, from: data)
+        let manifest = try PropertyListDecoder().decode(PFMPayload.self, from: data)
         #expect(manifest.subkeys.count == 3)
 
         let mode = manifest.subkeys[0]

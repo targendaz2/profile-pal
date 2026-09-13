@@ -25,6 +25,10 @@ enum PlistFixture {
             "pfm_title": title,
             "pfm_format_version": formatVersion,
             "pfm_subkeys": subkeys,
+            "pfm_version": 1,
+            "pfm_interaction": "undefined",
+            "pfm_last_modified": Date().ISO8601Format(),
+            "pfm_unique": true,
         ]
     }
 

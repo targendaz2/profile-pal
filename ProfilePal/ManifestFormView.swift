@@ -122,7 +122,7 @@ private struct NodeView: View {
 }
 
 /// A small hand-built manifest covering several control types, for the preview.
-private func sampleManifest() -> PayloadManifest {
+private func sampleManifest() -> PFMPayload {
     // Per-subkey typed locals: one giant [String: Any] literal trips the preview
     // type-checker ("unable to type-check this expression in reasonable time").
     let serverURL: [String: Any] = [
@@ -165,5 +165,5 @@ private func sampleManifest() -> PayloadManifest {
         format: .xml,
         options: 0,
     )
-    return try! PropertyListDecoder().decode(PayloadManifest.self, from: data)
+    return try! PropertyListDecoder().decode(PFMPayload.self, from: data)
 }

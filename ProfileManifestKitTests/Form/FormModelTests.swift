@@ -14,13 +14,13 @@ import Testing
 // MARK: - Helpers
 
 /// Decode a manifest from a PlistFixture value tree.
-private func decodeManifest(_ root: [String: Any]) throws -> PayloadManifest {
+private func decodeManifest(_ root: [String: Any]) throws -> PFMPayload {
     let data = try PlistFixture.xmlData(root)
-    return try PropertyListDecoder().decode(PayloadManifest.self, from: data)
+    return try PropertyListDecoder().decode(PFMPayload.self, from: data)
 }
 
 /// Pull the underlying dictionary out of a PFMValue, or fail.
-private func dict(_ value: PFMValue?) throws -> [String: PFMValue] {
+private func dict(_ value: FormValue?) throws -> [String: FormValue] {
     guard case .dictionary(let d)? = value else {
         Issue.record("expected .dictionary, got \(String(describing: value))")
         throw TestError.shape
@@ -413,8 +413,8 @@ struct EvaluatorTests {
     /// when the controller equals a given value.
     private func modelExcludingWhen(
         controller: String,
-        equals trigger: PFMValue,
-    ) throws -> (FormModel, ManifestSubkey) {
+        equals trigger: FormValue,
+    ) throws -> (FormModel, PFMSubkey) {
         let manifest = try decodeManifest(
             PlistFixture.manifest(
                 domain: "com.example.cond", title: "Cond",
@@ -444,9 +444,9 @@ struct EvaluatorTests {
     /// Model with two controllers and a dependent excluded by a SINGLE entry
     /// containing TWO conditions (tests AND-within-entry).
     fileprivate func modelExcludedWhenBoth(
-        _ ctrlA: String, equals a: PFMValue,
-        _ ctrlB: String, equals b: PFMValue,
-    ) throws -> (FormModel, ManifestSubkey) {
+        _ ctrlA: String, equals a: FormValue,
+        _ ctrlB: String, equals b: FormValue,
+    ) throws -> (FormModel, PFMSubkey) {
         let manifest = try decodeManifest(
             PlistFixture.manifest(
                 domain: "com.example.cond", title: "Cond",
@@ -477,9 +477,9 @@ struct EvaluatorTests {
     /// Model with two controllers and a dependent excluded by TWO separate
     /// entries, one condition each (tests OR-across-entries).
     fileprivate func modelExcludedWhenEither(
-        _ ctrlA: String, equals a: PFMValue,
-        _ ctrlB: String, equals b: PFMValue,
-    ) throws -> (FormModel, ManifestSubkey) {
+        _ ctrlA: String, equals a: FormValue,
+        _ ctrlB: String, equals b: FormValue,
+    ) throws -> (FormModel, PFMSubkey) {
         let manifest = try decodeManifest(
             PlistFixture.manifest(
                 domain: "com.example.cond", title: "Cond",

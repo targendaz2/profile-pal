@@ -1,5 +1,5 @@
 //
-//  PFMValue.swift
+//  FormValue.swift
 //  ProfileManifestKit
 //
 //  Created by David Rosenberg on 9/10/26.
@@ -7,19 +7,19 @@
 
 import Foundation
 
-public enum PFMValue: Sendable, Hashable {
+public enum FormValue: Sendable, Hashable {
     case string(String)
     case integer(Int)
     case real(Double)
     case boolean(Bool)
     case date(Date)
     case data(Data)
-    indirect case array([PFMValue])
-    indirect case dictionary([String: PFMValue])
+    indirect case array([FormValue])
+    indirect case dictionary([String: FormValue])
 }
 
 // MARK: - Decodable
-extension PFMValue: Decodable {
+extension FormValue: Decodable {
     public init(from decoder: any Decoder) throws {
         let container = try decoder.singleValueContainer()
 
@@ -36,9 +36,9 @@ extension PFMValue: Decodable {
             self = .date(date)
         } else if let data = try? container.decode(Data.self) {
             self = .data(data)
-        } else if let arr = try? container.decode([PFMValue].self) {
+        } else if let arr = try? container.decode([FormValue].self) {
             self = .array(arr)
-        } else if let dict = try? container.decode([String: PFMValue].self) {
+        } else if let dict = try? container.decode([String: FormValue].self) {
             self = .dictionary(dict)
         } else {
             throw DecodingError.dataCorruptedError(
@@ -50,7 +50,7 @@ extension PFMValue: Decodable {
 }
 
 // MARK: - Encodable
-extension PFMValue: Encodable {
+extension FormValue: Encodable {
     public func encode(to encoder: any Encoder) throws {
         var c = encoder.singleValueContainer()
 
@@ -76,7 +76,7 @@ extension PFMValue: Encodable {
 }
 
 // MARK: - Convenience Accessors
-extension PFMValue {
+extension FormValue {
     /// This value as a `Double` when it is numeric (`integer` or `real`), otherwise `nil`.
     public var doubleValue: Double? {
         switch self {
@@ -111,7 +111,7 @@ extension PFMValue {
     }
 
     /// Coerce a decoded value to match the subkey's declared pfm_type.
-    func normalized(to type: PFMType) -> PFMValue {
+    func normalized(to type: PFMType) -> FormValue {
         switch (type, self) {
             case (.real, .integer(let i)):
                 return .real(Double(i))
@@ -128,13 +128,13 @@ extension PFMValue {
     /// Build the initial value for a subkey from its pfm_default, coerced to
     /// the declared pfm_type. Returns nil when the subkey has no default —
     /// an unset field is absent from the tree, not present-but-empty.
-    static func seed(for key: ManifestSubkey) -> PFMValue? {
+    static func seed(for key: PFMSubkey) -> FormValue? {
         guard let def = key.defaultValue else { return nil }
         return def.normalized(to: key.type)
     }
 }
 
-extension PFMValue {
+extension FormValue {
     /// Convert back to a plist-serializable `Any`, for use with PlistFixture
     /// (which builds value trees from raw Foundation types).
     var plistValue: Any {

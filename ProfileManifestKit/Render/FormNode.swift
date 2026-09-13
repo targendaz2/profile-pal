@@ -24,7 +24,7 @@ public struct Field: Identifiable {
     public var bool: Binding<Bool>
     public var number: Binding<Double>
     public var date: Binding<Date>
-    public var selection: Binding<PFMValue?>
+    public var selection: Binding<FormValue?>
 }
 
 /// The render tree the app walks. Structure mirrors the manifest: scalars are
@@ -59,7 +59,7 @@ extension FormModel {
         nodes(for: manifest.subkeys, at: .root)
     }
 
-    private func nodes(for subkeys: [ManifestSubkey], at base: FormPath) -> [FormNode] {
+    private func nodes(for subkeys: [PFMSubkey], at base: FormPath) -> [FormNode] {
         let consumed = segmentMembers(of: subkeys)
         return subkeys.compactMap { subkey -> FormNode? in
             guard let name = subkey.name else { return nil }
@@ -72,7 +72,7 @@ extension FormModel {
     }
 
     /// Build one non-segmented node (field / group / array).
-    private func node(for subkey: ManifestSubkey, at base: FormPath) -> FormNode? {
+    private func node(for subkey: PFMSubkey, at base: FormPath) -> FormNode? {
         guard isVisible(subkey), let name = subkey.name else { return nil }
         let path = base.appending(key: name)
         switch subkey.type {
@@ -94,7 +94,7 @@ extension FormModel {
         }
     }
 
-    private func field(for subkey: ManifestSubkey, at path: FormPath) -> Field {
+    private func field(for subkey: PFMSubkey, at path: FormPath) -> Field {
         Field(
             id: path,
             control: control(for: subkey),
@@ -112,7 +112,7 @@ extension FormModel {
     }
 
     /// One node per existing array element (positional → addressed by index).
-    private func rows(of template: ManifestSubkey?, at base: FormPath) -> [FormNode] {
+    private func rows(of template: PFMSubkey?, at base: FormPath) -> [FormNode] {
         guard case .array(let elements)? = value(at: base), let template else { return [] }
         return elements.indices.map { index in
             let path = base.appending(index: index)
@@ -130,7 +130,7 @@ extension FormModel {
         }
     }
 
-    private func segmentMembers(of subkeys: [ManifestSubkey]) -> Set<String> {
+    private func segmentMembers(of subkeys: [PFMSubkey]) -> Set<String> {
         var names: Set<String> = []
         for subkey in subkeys {
             guard let segments = subkey.segments else { continue }
@@ -140,8 +140,8 @@ extension FormModel {
     }
 
     private func segmentedNode(
-        for key: ManifestSubkey,
-        siblings: [ManifestSubkey],
+        for key: PFMSubkey,
+        siblings: [PFMSubkey],
         at base: FormPath,
     ) -> FormNode? {
         guard isVisible(key), let name = key.name, let segments = key.segments else { return nil }

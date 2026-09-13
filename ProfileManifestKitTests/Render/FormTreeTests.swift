@@ -18,7 +18,7 @@ struct FormTreeTests {
     private func model(_ subkeys: [[String: Any]]) throws -> FormModel {
         let data = try PlistFixture.xmlData(
             PlistFixture.manifest(domain: "com.example", title: "T", subkeys: subkeys))
-        let manifest = try PropertyListDecoder().decode(PayloadManifest.self, from: data)
+        let manifest = try PropertyListDecoder().decode(PFMPayload.self, from: data)
         return FormModel(manifest: manifest)
     }
 

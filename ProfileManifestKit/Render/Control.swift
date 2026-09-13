@@ -23,9 +23,9 @@ public enum Control: Equatable {
 
     /// One choice in a pop-up: the stored value plus its display title.
     public struct Option: Identifiable, Equatable {
-        public let value: PFMValue
+        public let value: FormValue
         public let title: String
-        public var id: PFMValue { value }
+        public var id: FormValue { value }
     }
 
     /// How a `datePicker` presents its components. `nil` in the enclosing case means
@@ -40,11 +40,11 @@ public enum Control: Equatable {
 /// type default. Container types return `.unsupported` — they're structural and the
 /// form tree turns them into group/array nodes, so this is never asked of them in
 /// practice. Never traps.
-func control(for key: ManifestSubkey) -> Control {
+func control(for key: PFMSubkey) -> Control {
     if let values = key.rangeList {
         let titles = key.rangeListTitles ?? values.map(\.displayString)
         let options = zip(values, titles).map { Control.Option(value: $0.0, title: $0.1) }
-        return .popUp(options: options, allowsCustom: key.rangeListAllowsCustom ?? false)
+        return .popUp(options: options, allowsCustom: key.rangeListAllowCustom ?? false)
     }
 
     switch key.typeInput ?? key.type {
@@ -60,7 +60,7 @@ func control(for key: ManifestSubkey) -> Control {
         case .integer, .real:
             let lo = key.rangeMin?.doubleValue
             let hi = key.rangeMax?.doubleValue
-            if key.view == "slider", let lo, let hi {
+            if key.view == .slider, let lo, let hi {
                 return .slider(min: lo, max: hi)
             }
             if lo != nil || hi != nil {
@@ -69,7 +69,7 @@ func control(for key: ManifestSubkey) -> Control {
             return .textField(secure: false)
 
         case .date:
-            return .datePicker(style: datePickerStyle(key.dateStyle))
+            return .datePicker(style: datePickerStyle(key.dateStyle?.rawValue))
 
         case .data:
             return .fileDrop(types: key.allowedFileTypes ?? [])
