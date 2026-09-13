@@ -9,26 +9,26 @@ import Foundation
 
 /// One editable leaf the app renders. Carries everything the app needs to draw
 /// and bind the control; the app reads `subkey` for labels/help text.
-struct Field: Identifiable, Equatable {
-    var path: FormPath
-    var subkey: ManifestSubkey
-    var control: Control
-    var isRequired: Bool
-    var errors: [String]
+public struct Field: Identifiable, Equatable {
+    public var path: FormPath
+    public var subkey: ManifestSubkey
+    public var control: Control
+    public var isRequired: Bool
+    public var errors: [String]
 
-    var id: FormPath { path }
-    var title: String { subkey.title ?? subkey.name ?? "" }
+    public var id: FormPath { path }
+    public var title: String { subkey.title ?? subkey.name ?? "" }
 }
 
 /// The render tree the app walks. Structure mirrors the manifest: scalars are
 /// `field`s, dictionaries are `group`s, arrays are repeatable `array` rows. The
 /// framework decides structure and control; the app decides how each node looks.
-enum FormNode: Identifiable, Equatable {
+public enum FormNode: Identifiable, Equatable {
     case field(Field)
     case group(id: FormPath, title: String?, children: [FormNode])
     case array(id: FormPath, title: String?, template: ManifestSubkey, rows: [FormNode])
 
-    var id: FormPath {
+    public var id: FormPath {
         switch self {
             case .field(let field):
                 return field.path
@@ -44,7 +44,7 @@ extension FormModel {
     /// The visible render tree for the whole manifest, rebuilt from current state.
     /// Reading this inside a SwiftUI view establishes observation, so edits that
     /// change visibility re-render automatically.
-    var formTree: [FormNode] {
+    public var formTree: [FormNode] {
         nodes(for: manifest.subkeys, at: .root)
     }
 

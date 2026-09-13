@@ -9,15 +9,15 @@ import Foundation
 
 /// A decoded payload manifest — the top-level `.plist` describing one payload domain
 /// and its keys. Maps the `pfm_*` payload-level keys from the ProfileManifests format.
-struct PayloadManifest: Sendable, Decodable {
+public struct PayloadManifest: Sendable, Decodable {
     /// `pfm_domain` — the payload's domain, written as `PayloadType` on export.
-    var domain: String
+    public var domain: String
 
     /// `pfm_title` — human-readable payload title.
-    var title: String
+    public var title: String
 
     /// `pfm_description` — description of the payload.
-    var description: String?
+    public var description: String?
 
     /// `pfm_format_version` — the preference-manifest format version.
     var formatVersion: Int?
@@ -26,7 +26,7 @@ struct PayloadManifest: Sendable, Decodable {
     var version: Int?
 
     /// `pfm_subkeys` — the payload's keys, in display order.
-    var subkeys: [ManifestSubkey]
+    public var subkeys: [ManifestSubkey]
 
     /// `pfm_unique` — whether only one payload of this type may be installed.
     var unique: Bool?

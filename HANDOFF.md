@@ -50,9 +50,9 @@ paraphrase in this doc.
 4. Form model (`FormModel`, `FormPath`, bindings) ✅
 5. Condition evaluator (visibility + requirement) ✅
 6. Control resolution ✅
-7. **Headless render tree (`FormNode` + `Field`, `FormModel.formTree()`) — NEXT**
-8. Public headless API (make the model/logic/tree `public`; app writes the render loop)
-9. Export to `.mobileconfig`
+7. Headless render tree (`FormNode` + `Field`, `FormModel.formTree`) ✅
+8. Public headless API + sample render loop (`ProfilePal/ManifestFormView.swift`) ✅
+9. **Export to `.mobileconfig` — NEXT**
 10. Packaging + sample app (the render loop lives in ProfilePal)
 
 ## Done and tested (headless), steps 1–5

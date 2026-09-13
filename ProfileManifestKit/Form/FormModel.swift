@@ -10,12 +10,12 @@ import Observation
 import SwiftUI
 
 @Observable @MainActor
-final class FormModel {
-    let manifest: PayloadManifest
+public final class FormModel {
+    public let manifest: PayloadManifest
     private(set) var root: PFMValue
     private(set) var errors: [FormPath: [String]] = [:]
 
-    init(manifest: PayloadManifest) {
+    public init(manifest: PayloadManifest) {
         self.manifest = manifest
         self.root = Self.initialTree(for: manifest.subkeys)
     }
@@ -38,7 +38,8 @@ final class FormModel {
                 guard let subs = key.subkeys else { return PFMValue.seed(for: key) }
                 let nested = initialTree(for: subs)
                 if case .dictionary(let d) = nested, d.isEmpty {
-                    return PFMValue.seed(for: key)  // no nested defaults → fall back to own default (usually nil)
+                    // no nested defaults → fall back to own default (usually nil)
+                    return PFMValue.seed(for: key)
                 }
                 return nested
             case .array:
@@ -51,7 +52,7 @@ final class FormModel {
 
     // MARK: Read
 
-    func value(at path: FormPath) -> PFMValue? {
+    public func value(at path: FormPath) -> PFMValue? {
         var current: PFMValue? = root
         for component in path.components {
             switch (current, component) {
@@ -68,7 +69,7 @@ final class FormModel {
 
     // MARK: Write
 
-    func setValue(_ newValue: PFMValue?, at path: FormPath) {
+    public func setValue(_ newValue: PFMValue?, at path: FormPath) {
         root = Self.set(newValue, at: path.components, in: root)
         // validation hook lands in step 5; for now, writing is enough
     }
@@ -111,7 +112,7 @@ final class FormModel {
 
 extension FormModel {
     /// Generic binding to the raw PFMValue at a path.
-    func binding(at path: FormPath) -> Binding<PFMValue?> {
+    public func binding(at path: FormPath) -> Binding<PFMValue?> {
         Binding(
             get: { self.value(at: path) },
             set: { self.setValue($0, at: path) },
@@ -119,7 +120,7 @@ extension FormModel {
     }
 
     /// String-typed binding for text fields. Empty string clears the key.
-    func stringBinding(at path: FormPath) -> Binding<String> {
+    public func stringBinding(at path: FormPath) -> Binding<String> {
         Binding(
             get: {
                 if case .string(let s) = self.value(at: path) { return s }
@@ -130,7 +131,7 @@ extension FormModel {
     }
 
     /// Bool-typed binding, honoring pfm_value_inverted.
-    func boolBinding(at path: FormPath, inverted: Bool = false) -> Binding<Bool> {
+    public func boolBinding(at path: FormPath, inverted: Bool = false) -> Binding<Bool> {
         Binding(
             get: {
                 if case .boolean(let b) = self.value(at: path) { return inverted ? !b : b }
@@ -145,7 +146,7 @@ extension FormModel {
     // (unlike stringBinding/boolBinding, there's no coercion to the declared type here).
     // Fine while only `real` subkeys use this binding; if an integer-typed slider
     // shows up, coerce via PFMValue.normalized(to:) like PFMValue.seed(for:) does.
-    func doubleBinding(at path: FormPath) -> Binding<Double> {
+    public func doubleBinding(at path: FormPath) -> Binding<Double> {
         Binding(
             get: { self.value(at: path)?.asDouble ?? 0 },
             set: { self.setValue(.real($0), at: path) },
@@ -250,7 +251,7 @@ extension FormModel {
 
     /// Whether a key should render at all: not excluded, not statically hidden,
     /// and applicable to the current platform.
-    func isVisible(_ key: ManifestSubkey) -> Bool {
+    public func isVisible(_ key: ManifestSubkey) -> Bool {
         if key.hidden == .all { return false }
         if isExcluded(key) { return false }
         if let platforms = key.platforms, !platforms.contains(currentPlatform) {
@@ -263,7 +264,7 @@ extension FormModel {
 
     /// A key is required if a static flag says so, OR any pfm_conditionals entry
     /// with a non-nil pfm_require has all its conditions holding.
-    func isRequired(_ key: ManifestSubkey) -> Bool {
+    public func isRequired(_ key: ManifestSubkey) -> Bool {
         if key.required == true { return true }
         if key.require == .always || key.require == .alwaysNested { return true }
 

@@ -9,7 +9,7 @@ import Foundation
 
 /// How a visible subkey renders. `control(for:)` decides the case; the step-7
 /// renderer is a plain switch over it.
-enum Control: Equatable {
+public enum Control: Equatable {
     case textField(secure: Bool)
     case toggle(inverted: Bool)
     case radioTwoState(titles: [String])
@@ -29,7 +29,7 @@ enum Control: Equatable {
 /// Order is load-bearing: enumerated/explicit-hint controls must win before
 /// type-based defaults, or an enumerated string would render as a plain text box.
 /// Never traps — an unrecognized shape degrades to `.unsupported`.
-func control(for key: ManifestSubkey) -> Control {
+public func control(for key: ManifestSubkey) -> Control {
     if let segments = key.segments {
         return .segmented(segments)
     }

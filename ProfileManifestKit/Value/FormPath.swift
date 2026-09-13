@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct FormPath: Hashable, Sendable {
+public struct FormPath: Hashable, Sendable {
     enum Component: Hashable, Sendable {
         case key(String)
         case index(Int)

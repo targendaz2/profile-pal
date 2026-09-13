@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum PFMValue: Sendable, Hashable {
+public enum PFMValue: Sendable, Hashable {
     case string(String)
     case integer(Int)
     case real(Double)
@@ -20,7 +20,7 @@ enum PFMValue: Sendable, Hashable {
 
 // MARK: - Decodable
 extension PFMValue: Decodable {
-    init(from decoder: any Decoder) throws {
+    public init(from decoder: any Decoder) throws {
         let container = try decoder.singleValueContainer()
 
         // Order matters: Bool before Int (a plist <true/> will also decode as Int 1)
@@ -51,7 +51,7 @@ extension PFMValue: Decodable {
 
 // MARK: - Encodable
 extension PFMValue: Encodable {
-    func encode(to encoder: any Encoder) throws {
+    public func encode(to encoder: any Encoder) throws {
         var c = encoder.singleValueContainer()
 
         switch self {
@@ -77,7 +77,7 @@ extension PFMValue: Encodable {
 
 // MARK: - Convenience Accessors
 extension PFMValue {
-    var asDouble: Double? {
+    public var asDouble: Double? {
         switch self {
             case .integer(let i):
                 return Double(i)
@@ -88,7 +88,7 @@ extension PFMValue {
         }
     }
 
-    var displayString: String {
+    public var displayString: String {
         switch self {
             case .string(let s):
                 return s
