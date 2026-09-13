@@ -10,7 +10,7 @@ import Testing
 
 @testable import ProfileManifestKit
 
-struct FormValueTests {
+struct PFMValueTests {
 
     @Test func decodes_each_scalar_type() throws {
         let plist = try PlistFixture.xmlData([
