@@ -113,4 +113,65 @@ struct FormTreeTests {
         #expect(a.isRequired)
         #expect(a.control == .textField(secure: false))
     }
+
+    // MARK: Segmented controls
+
+    @Test func segmented_groups_members_and_hides_them_from_flat_list() throws {
+        let m = try model([
+            PlistFixture.key(
+                name: "View", type: "string",
+                rangeListTitles: ["Basic", "Advanced"],
+                extra: ["pfm_segments": ["Basic": ["A"], "Advanced": ["B"]]],
+            ),
+            PlistFixture.key(name: "A", type: "string"),
+            PlistFixture.key(name: "B", type: "boolean"),
+            PlistFixture.key(name: "C", type: "string"),
+        ])
+        let tree = m.formTree
+
+        // The segmented control replaces A and B in the flat list; C stays flat.
+        #expect(tree.count == 2)
+        guard case .segmented(let id, let tabs, let groups) = tree[0] else {
+            Issue.record("expected a segmented node first")
+            return
+        }
+        #expect(id == FormPath.root.appending(key: "View"))
+        #expect(tabs == ["Basic", "Advanced"])
+
+        guard case .field(let a)? = groups["Basic"]?.first else {
+            Issue.record("expected field A under Basic")
+            return
+        }
+        #expect(a.path == FormPath.root.appending(key: "A"))
+
+        guard case .field(let b)? = groups["Advanced"]?.first else {
+            Issue.record("expected field B under Advanced")
+            return
+        }
+        #expect(b.control == .toggle(inverted: false))
+
+        guard case .field(let c) = tree[1] else {
+            Issue.record("expected C to remain flat")
+            return
+        }
+        #expect(c.path == FormPath.root.appending(key: "C"))
+    }
+
+    @Test func segmented_tab_order_follows_range_list_titles() throws {
+        let m = try model([
+            PlistFixture.key(
+                name: "View", type: "string",
+                rangeListTitles: ["Second", "First"],
+                extra: ["pfm_segments": ["First": ["A"], "Second": ["B"]]],
+            ),
+            PlistFixture.key(name: "A", type: "string"),
+            PlistFixture.key(name: "B", type: "string"),
+        ])
+        guard case .segmented(_, let tabs, _) = m.formTree[0] else {
+            Issue.record("expected a segmented node")
+            return
+        }
+        // Order comes from pfm_range_list_titles, not the (unordered) segments dict.
+        #expect(tabs == ["Second", "First"])
+    }
 }

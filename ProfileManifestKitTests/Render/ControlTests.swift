@@ -92,7 +92,8 @@ struct ControlTests {
         // pfm_segments is the first decision-order check: a dictionary with
         // segments renders segmented, not as a nested dictionary.
         let key = try subkey(type: "dictionary", extra: ["pfm_segments": ["Basic": ["ServerURL"]]])
-        #expect(control(for: key) == .segmented(["Basic": ["ServerURL"]]))
+        #expect(
+            control(for: key) == .segmented(tabs: ["Basic"], segments: ["Basic": ["ServerURL"]]))
     }
 
     @Test func range_list_on_string_is_pop_up_not_text_field() throws {

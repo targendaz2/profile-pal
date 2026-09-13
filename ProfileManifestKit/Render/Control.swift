@@ -20,7 +20,7 @@ public enum Control: Equatable {
     case fileDrop(types: [String])
     case arrayTable(element: ManifestSubkey)
     case dictionary(subkeys: [ManifestSubkey])
-    case segmented([String: [String]])
+    case segmented(tabs: [String], segments: [String: [String]])
     case unsupported
 }
 
@@ -31,7 +31,7 @@ public enum Control: Equatable {
 /// Never traps — an unrecognized shape degrades to `.unsupported`.
 public func control(for key: ManifestSubkey) -> Control {
     if let segments = key.segments {
-        return .segmented(segments)
+        return .segmented(tabs: key.rangeListTitles ?? Array(segments.keys), segments: segments)
     }
 
     if let values = key.rangeList {

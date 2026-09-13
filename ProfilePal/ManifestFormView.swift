@@ -41,9 +41,31 @@ private struct NodeView: View {
                 Section(title ?? "") {
                     ForEach(rows) { NodeView(node: $0, model: model) }
                 }
+            case .segmented(let id, let tabs, let groups):
+                SegmentedNodeView(id: id, tabs: tabs, groups: groups, model: model)
             @unknown default:
                 EmptyView()
         }
+    }
+}
+
+/// A tab selector whose selection (a string stored at `id`) chooses which member
+/// nodes to show. Selection binding and layout are entirely the app's concern.
+private struct SegmentedNodeView: View {
+    let id: FormPath
+    let tabs: [String]
+    let groups: [String: [FormNode]]
+    let model: FormModel
+
+    var body: some View {
+        let selection = model.stringBinding(at: id)
+        let current = selection.wrappedValue.isEmpty ? (tabs.first ?? "") : selection.wrappedValue
+        Picker("", selection: selection) {
+            ForEach(tabs, id: \.self) { Text($0).tag($0) }
+        }
+        .pickerStyle(.segmented)
+        .labelsHidden()
+        ForEach(groups[current] ?? []) { NodeView(node: $0, model: model) }
     }
 }
 
@@ -93,12 +115,12 @@ private struct FieldView: View {
             case .datePicker:
                 DatePicker(field.title, selection: dateBinding(field.path))
 
-            case .fileDrop, .segmented:
+            case .fileDrop:
                 LabeledContent(field.title) { Text("(unsupported in sample)") }
 
-            // The tree renders dictionaries/arrays as nodes, so these never reach a
-            // leaf; the switch stays exhaustive so an unexpected manifest can't crash.
-            case .arrayTable, .dictionary, .unsupported:
+            // Containers/segmented become nodes, not leaves, so they never reach a
+            // FieldView; the switch stays exhaustive so an unexpected manifest can't crash.
+            case .arrayTable, .dictionary, .segmented, .unsupported:
                 EmptyView()
 
             @unknown default:
@@ -151,7 +173,14 @@ private func sampleManifest() -> PayloadManifest {
         "pfm_name": "Tags", "pfm_type": "array", "pfm_title": "Tags",
         "pfm_subkeys": [["pfm_type": "string"]],
     ]
-    let subkeys: [[String: Any]] = [serverURL, enabled, mode, level, advanced, tags]
+    // A segmented control groups four of the fields above under two tabs.
+    let section: [String: Any] = [
+        "pfm_name": "Section", "pfm_type": "string", "pfm_title": "Section",
+        "pfm_default": "Connection",
+        "pfm_range_list_titles": ["Connection", "Options"],
+        "pfm_segments": ["Connection": ["ServerURL", "Enabled"], "Options": ["Mode", "Level"]],
+    ]
+    let subkeys: [[String: Any]] = [section, serverURL, enabled, mode, level, advanced, tags]
     let dict: [String: Any] = [
         "pfm_domain": "com.example.sample",
         "pfm_title": "Sample",

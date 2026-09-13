@@ -27,6 +27,10 @@ public enum FormNode: Identifiable, Equatable {
     case field(Field)
     case group(id: FormPath, title: String?, children: [FormNode])
     case array(id: FormPath, title: String?, template: ManifestSubkey, rows: [FormNode])
+    /// A tab selector: `tabs` in display order, `groups` maps each tab to the
+    /// member nodes shown while it's selected. The selection is a string stored at
+    /// `id` (bind it there); the members are pulled out of the flat sibling list.
+    case segmented(id: FormPath, tabs: [String], groups: [String: [FormNode]])
 
     public var id: FormPath {
         switch self {
@@ -35,6 +39,8 @@ public enum FormNode: Identifiable, Equatable {
             case .group(let id, _, _):
                 return id
             case .array(let id, _, _, _):
+                return id
+            case .segmented(let id, _, _):
                 return id
         }
     }
@@ -49,7 +55,49 @@ extension FormModel {
     }
 
     private func nodes(for subkeys: [ManifestSubkey], at base: FormPath) -> [FormNode] {
-        subkeys.compactMap { node(for: $0, at: base) }
+        // Names claimed by a segmented control render inside it, not in the flat list.
+        let consumed = segmentMembers(of: subkeys)
+        return subkeys.compactMap { subkey -> FormNode? in
+            if let name = subkey.name, consumed.contains(name) { return nil }
+            if subkey.segments != nil {
+                return segmentedNode(for: subkey, siblings: subkeys, at: base)
+            }
+            return node(for: subkey, at: base)
+        }
+    }
+
+    /// Every sibling name referenced by any segmented control at this level.
+    private func segmentMembers(of subkeys: [ManifestSubkey]) -> Set<String> {
+        var names: Set<String> = []
+        for subkey in subkeys {
+            guard let segments = subkey.segments else { continue }
+            for members in segments.values { names.formUnion(members) }
+        }
+        return names
+    }
+
+    /// Build a segmented node: tabs from `pfm_range_list_titles` (order matters),
+    /// each tab's members resolved against the sibling list into child nodes. A
+    /// referenced member that's missing or hidden is simply dropped.
+    private func segmentedNode(
+        for key: ManifestSubkey,
+        siblings: [ManifestSubkey],
+        at base: FormPath,
+    ) -> FormNode? {
+        guard isVisible(key), let name = key.name, let segments = key.segments else { return nil }
+        let path = base.appending(key: name)
+        let tabs = key.rangeListTitles ?? Array(segments.keys)
+        let byName = Dictionary(
+            siblings.compactMap { sibling in sibling.name.map { ($0, sibling) } },
+            uniquingKeysWith: { first, _ in first },
+        )
+        var groups: [String: [FormNode]] = [:]
+        for tab in tabs {
+            groups[tab] = (segments[tab] ?? []).compactMap { member in
+                byName[member].flatMap { node(for: $0, at: base) }
+            }
+        }
+        return .segmented(id: path, tabs: tabs, groups: groups)
     }
 
     private func node(for subkey: ManifestSubkey, at base: FormPath) -> FormNode? {
