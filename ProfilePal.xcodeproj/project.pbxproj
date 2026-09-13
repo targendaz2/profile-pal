@@ -53,7 +53,6 @@
 		EC06B2F9305397DB0053B03A /* .mcp.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = .mcp.json; sourceTree = "<group>"; };
 		EC06B31D3053BC090053B03A /* CLAUDE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CLAUDE.md; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.markdown; };
 		EC06B31E30544A950053B03A /* HANDOFF.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = HANDOFF.md; sourceTree = "<group>"; };
-		EC06B3B2305648080053B03A /* ProfilePal.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = ProfilePal.xcodeproj; sourceTree = "<group>"; };
 		EC557BA430538A94006554A9 /* ProfilePal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ProfilePal.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EC557BB730538AE0006554A9 /* ProfileManifestKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ProfileManifestKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -131,13 +130,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		EC06B3B3305648080053B03A /* Products */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		EC557B9B30538A94006554A9 = {
 			isa = PBXGroup;
 			children = (
@@ -286,12 +278,6 @@
 			preferredProjectObjectVersion = 77;
 			productRefGroup = EC557BA530538A94006554A9 /* Products */;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = EC06B3B3305648080053B03A /* Products */;
-					ProjectRef = EC06B3B2305648080053B03A /* ProfilePal.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
 				EC557BA330538A94006554A9 /* ProfilePal */,
