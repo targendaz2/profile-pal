@@ -2,25 +2,19 @@
 
 ## What this is
 
-A Swift 6 / macOS 14+ embeddable framework that renders **ProfileManifests**
-(https://github.com/ProfileManifests/ProfileManifests) as runtime SwiftUI forms
-and exports `.mobileconfig` configuration profiles.
+A macOS 26+ app for editing Apple configuration profiles from **ProfileManifests**
+(https://github.com/ProfileManifests/ProfileManifests), split into a **headless
+framework** (`ProfileManifestKit` — parsing, conditionals, control resolution, value
+model, export) and a **thin SwiftUI app** (`ProfilePal` — all rendering and styling).
 
-Manifests are `.plist` files describing the structure of *another* plist (a
-config profile). They're the format powering ProfileCreator and iMazing Profile
-Editor. This framework parses them, renders an editing form, and serializes the
-user's input back out as a profile.
+Manifests are `.plist` files describing the structure of *another* plist (a config
+profile) — the format behind ProfileCreator and iMazing Profile Editor.
 
-**Design line (UPDATED — headless):** the framework owns everything about manifest
-*logic* — decode, value model, conditions, control resolution, and a render *tree*
-(`FormNode`), plus export. It ships **no SwiftUI**. The **app** owns all rendering,
-presentation, and styling: it walks `FormNode` and switches on each field's `Control`.
-If you find yourself writing SwiftUI/presentation code (views, styling) or app-policy
-code (where files live, window management), it belongs in the app, not here.
-
-> Supersedes the original plan where the framework rendered the form (a `ManifestForm`
-> view). Steps 7–8 and the public-surface convention below reflect the headless pivot;
-> CLAUDE.md's "What this is" is authoritative on the boundary.
+**Design & decisions live in `docs/`:** see [`docs/architecture.md`](docs/architecture.md)
+(the two-layer design, public API, value seam, status) and
+[`docs/decisions.md`](docs/decisions.md). `CLAUDE.md` is authoritative on the
+framework/app boundary. **This file is build status + gotchas.** (`api-proposals/`
+is gitignored local scratch — not a source of truth.)
 
 **Authoritative spec:** the ProfileManifests wiki "Manifest Format" page. Fetch
 it directly when you need a `pfm_*` key's exact semantics — prefer it over any
@@ -30,30 +24,31 @@ paraphrase in this doc.
 
 - Swift 6 language mode, strict concurrency **on** (`swiftLanguageModes: [.v6]`).
 - `FormModel` is `@MainActor`; every other type is `Sendable`.
-- Public surface (headless): the app renders, so the model + logic are public —
-  `FormModel` (`@Observable`), its bindings, `Control` + `control(for:)`,
-  `isVisible`/`isRequired`, `validate()`/`errors`, the `FormNode` tree + `Field`
-  descriptor, and the model types a consumer reads (`PayloadManifest`,
-  `ManifestSubkey`, `PFMValue`, `PFMType`, and the supporting condition types).
-  There is **no** public view. Keep genuinely-internal helpers `internal`.
+- Public surface is the headless **prepared-field** API (`FormModel`, `formTree`,
+  `FormNode`, `Field`, leaf `Control`, `PayloadManifest` identity, `FormPath`,
+  `PFMValue`) — see [`docs/architecture.md`](docs/architecture.md). Keep the manifest
+  model (`ManifestSubkey`, `PFMType`, condition types), `control(for:)`, and
+  `isVisible`/`isRequired` **internal**; the app sees only form concepts. No public view.
 - Tests use **Swift Testing** (`@Test` / `#expect`), not XCTest.
 - UI restraint lives in the **app**: native macOS controls, System-Settings look,
   no decoration. The framework has no UI.
 - No fetching at test time — tests run offline. Build plist fixtures in code
   with `PlistFixture` (see below).
 
-## Build plan (10 steps)
+## Build plan
 
-1. Scaffold ✅
-2. `PFMValue` — type-erased plist scalar ✅
-3. Manifest model (`PayloadManifest`, `ManifestSubkey`) ✅
-4. Form model (`FormModel`, `FormPath`, bindings) ✅
-5. Condition evaluator (visibility + requirement) ✅
-6. Control resolution ✅
+1–6. `PFMValue`, manifest model, `FormModel` + value tree, condition evaluator,
+   control resolution ✅
 7. Headless render tree (`FormNode` + `Field`, `FormModel.formTree`) ✅
-8. Public headless API + sample render loop (`ProfilePal/ManifestFormView.swift`) ✅
-9. **Export to `.mobileconfig` — NEXT**
-10. Packaging + sample app (the render loop lives in ProfilePal)
+8. Headless **prepared-field** API + one-file app renderer (the reshape) ✅
+   — leaf-only `Control`, `Field` with bindings + `isSet`, array add/remove; manifest
+   model back to `internal`. See [`docs/architecture.md`](docs/architecture.md).
+9. **`ManifestStore` + `PayloadPlaceholder` — NEXT** (source-keyed lazy loading/caching)
+10. `ValueProcessor` seam wired into `.mobileconfig` export
+11. Packaging + sample app polish
+
+Deferred: concrete value processors, `pfm_overrides`, non-manifest payload sources
+(`PayloadCustom`, managed preferences), remote/GitHub manifest sources.
 
 ## Done and tested (headless), steps 1–5
 

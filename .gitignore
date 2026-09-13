@@ -1,6 +1,10 @@
 # Created by https://www.toptal.com/developers/gitignore/api/swift,swiftpm,swiftpackagemanager,xcode,macos,git
 # Edit at https://www.toptal.com/developers/gitignore?templates=swift,swiftpm,swiftpackagemanager,xcode,macos,git
 
+### ProfilePal (project) ###
+# Local design/exploration scratch — kept out of the repo. Durable design lives in docs/.
+api-proposals/
+
 ### Git ###
 # Created by git for backups. To disable backups in Git:
 # $ git config --global mergetool.keepBackup false

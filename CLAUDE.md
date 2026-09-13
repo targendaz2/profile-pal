@@ -16,6 +16,10 @@ SwiftUI: it walks `FormNode`, switches on each field's `Control`, and applies it
 SwiftUI ships from `ProfileManifestKit`. Keep that boundary: rendering/presentation decisions
 belong in the app, manifest semantics belong in the framework.
 
+**Design docs:** `docs/architecture.md` (the two-layer design, public API, value seam, status)
+and `docs/decisions.md` (decision log) are authoritative for design intent. `HANDOFF.md` holds
+build status/step notes. (`api-proposals/` is local, gitignored scratch — not the source of truth.)
+
 ## Build & test
 
 This is an Xcode project (`ProfilePal.xcodeproj`), not SwiftPM. Use `xcodebuild` or the `xcode` MCP
