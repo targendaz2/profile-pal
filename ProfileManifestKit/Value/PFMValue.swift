@@ -77,7 +77,8 @@ extension PFMValue: Encodable {
 
 // MARK: - Convenience Accessors
 extension PFMValue {
-    public var asDouble: Double? {
+    /// This value as a `Double` when it is numeric (`integer` or `real`), otherwise `nil`.
+    public var doubleValue: Double? {
         switch self {
             case .integer(let i):
                 return Double(i)

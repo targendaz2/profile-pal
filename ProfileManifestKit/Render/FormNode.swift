@@ -34,14 +34,19 @@ public enum FormNode: Identifiable {
     case field(Field)
     case group(id: FormPath, title: String?, isSet: Binding<Bool>, children: [FormNode])
     case array(id: FormPath, title: String?, rows: [FormNode])
-    case segmented(id: FormPath, tabs: [String], groups: [String: [FormNode]])
+    case segmented(
+        id: FormPath,
+        selection: Binding<String>,
+        tabs: [String],
+        groups: [String: [FormNode]],
+    )
 
     public var id: FormPath {
         switch self {
             case .field(let field): return field.id
             case .group(let id, _, _, _): return id
             case .array(let id, _, _): return id
-            case .segmented(let id, _, _): return id
+            case .segmented(let id, _, _, _): return id
         }
     }
 }
@@ -102,7 +107,7 @@ extension FormModel {
             bool: boolBinding(at: path, inverted: subkey.valueInverted ?? false),
             number: doubleBinding(at: path),
             date: dateBinding(at: path),
-            selection: binding(at: path),
+            selection: valueBinding(at: path),
         )
     }
 
@@ -152,6 +157,11 @@ extension FormModel {
                 byName[member].flatMap { node(for: $0, at: base) }
             }
         }
-        return .segmented(id: path, tabs: tabs, groups: groups)
+        return .segmented(
+            id: path,
+            selection: stringBinding(at: path),
+            tabs: tabs,
+            groups: groups,
+        )
     }
 }

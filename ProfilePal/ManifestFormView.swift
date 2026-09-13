@@ -63,8 +63,7 @@ private struct NodeView: View {
                     Button("Add") { model.addArrayElement(at: id) }
                 }
 
-            case .segmented(let id, let tabs, let groups):
-                let selection = model.stringBinding(at: id)
+            case .segmented(_, let selection, let tabs, let groups):
                 Picker("", selection: selection) {
                     ForEach(tabs, id: \.self) { Text($0).tag($0) }
                 }

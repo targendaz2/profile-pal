@@ -132,7 +132,7 @@ struct FormTreeTests {
 
         // The segmented control replaces A and B in the flat list; C stays flat.
         #expect(tree.count == 2)
-        guard case .segmented(let id, let tabs, let groups) = tree[0] else {
+        guard case .segmented(let id, _, let tabs, let groups) = tree[0] else {
             Issue.record("expected a segmented node first")
             return
         }
@@ -168,7 +168,7 @@ struct FormTreeTests {
             PlistFixture.key(name: "A", type: "string"),
             PlistFixture.key(name: "B", type: "string"),
         ])
-        guard case .segmented(_, let tabs, _) = m.formTree[0] else {
+        guard case .segmented(_, _, let tabs, _) = m.formTree[0] else {
             Issue.record("expected a segmented node")
             return
         }
