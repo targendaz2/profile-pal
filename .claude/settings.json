@@ -3,11 +3,14 @@
     "xcode"
   ],
   "enabledPlugins": {
+    "claude-md-management@claude-plugins-official": true,
+    "swift-lsp@claude-plugins-official": true,
     "swiftui-pro@swiftui-agent-skill": true,
     "swift-concurrency-pro@swift-concurrency-agent-skill": true,
     "swift-testing-pro@swift-testing-agent-skill": true,
     "swift-architecture-skill@swift-architecture-skill": true,
-    "swift-security-expert@swift-security-skill": true
+    "swift-security-expert@swift-security-skill": true,
+    "swift-api-design-guidelines@swift-api-design-guidelines-skill": true
   },
   "extraKnownMarketplaces": {
     "swiftui-agent-skill": {
@@ -26,6 +29,12 @@
       "source": {
         "source": "github",
         "repo": "twostraws/Swift-Testing-Agent-Skill"
+      }
+    },
+    "swift-api-design-guidelines-skill": {
+      "source": {
+        "source": "github",
+        "repo": "Erikote04/Swift-API-Design-Guidelines-Agent-Skill"
       }
     },
     "swift-architecture-skill": {
