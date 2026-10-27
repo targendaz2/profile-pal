@@ -23,6 +23,7 @@
 		EC2DB79D30904E9700B2A25F /* .editorconfig */ = {isa = PBXFileReference; lastKnownFileType = text; path = .editorconfig; sourceTree = "<group>"; };
 		EC2DB7A430904EEC00B2A25F /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		EC2DB7A630904F0000B2A25F /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		EC2DB8B03090775C00B2A25F /* CLAUDE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CLAUDE.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -68,6 +69,7 @@
 				EC2DB7A630904F0000B2A25F /* .gitignore */,
 				EC2DB79930904E6300B2A25F /* .mcp.json */,
 				EC2DB79730904E3200B2A25F /* .swift-format */,
+				EC2DB8B03090775C00B2A25F /* CLAUDE.md */,
 				EC2DB79B30904E8800B2A25F /* LICENSE */,
 				EC2DB7A430904EEC00B2A25F /* README.md */,
 				EC2DB78A30904DA100B2A25F /* Products */,
