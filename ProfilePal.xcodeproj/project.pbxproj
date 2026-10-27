@@ -13,6 +13,7 @@
 		EC2DB79E30904E9700B2A25F /* .editorconfig in Resources */ = {isa = PBXBuildFile; fileRef = EC2DB79D30904E9700B2A25F /* .editorconfig */; };
 		EC2DB7A530904EEC00B2A25F /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = EC2DB7A430904EEC00B2A25F /* README.md */; };
 		EC2DB7A730904F0000B2A25F /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = EC2DB7A630904F0000B2A25F /* .gitignore */; };
+		EC2DB7BD30905D1000B2A25F /* SemanticVersion in Frameworks */ = {isa = PBXBuildFile; productRef = EC2DB7BC30905D1000B2A25F /* SemanticVersion */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -52,6 +53,7 @@
 		EC2DB78630904DA100B2A25F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
+				EC2DB7BD30905D1000B2A25F /* SemanticVersion in Frameworks */,
 			);
 		};
 /* End PBXFrameworksBuildPhase section */
@@ -102,6 +104,9 @@
 				EC2DB7A130904EB400B2A25F /* docs */,
 			);
 			name = ProfilePal;
+			packageProductDependencies = (
+				EC2DB7BC30905D1000B2A25F /* SemanticVersion */,
+			);
 			productName = ProfilePal;
 			productReference = EC2DB78930904DA100B2A25F /* ProfilePal.app */;
 			productType = "com.apple.product-type.application";
@@ -130,6 +135,9 @@
 			);
 			mainGroup = EC2DB78030904DA000B2A25F;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				EC2DB7BB30905D1000B2A25F /* XCRemoteSwiftPackageReference "SemanticVersion" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = EC2DB78A30904DA100B2A25F /* Products */;
 			projectDirPath = "";
@@ -371,6 +379,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		EC2DB7BB30905D1000B2A25F /* XCRemoteSwiftPackageReference "SemanticVersion" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SwiftPackageIndex/SemanticVersion";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.5.3;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		EC2DB7BC30905D1000B2A25F /* SemanticVersion */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EC2DB7BB30905D1000B2A25F /* XCRemoteSwiftPackageReference "SemanticVersion" */;
+			productName = SemanticVersion;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = EC2DB78130904DA000B2A25F /* Project object */;
 	validationLevel = 1;
