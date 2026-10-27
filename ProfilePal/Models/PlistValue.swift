@@ -73,4 +73,15 @@ enum PlistValue: Codable, Sendable, Equatable {
             case .dictionary(let v): try container.encode(v)
         }
     }
+
+    /// The value coerced to `type`, for numbers the plist decoder can't tell apart.
+    ///
+    /// `PropertyListDecoder` decodes a whole-number `<real>` as `.int`, so call this before
+    /// encoding a value whose field type is known.
+    func coerced(to type: ManifestFieldType) -> Self {
+        switch (self, type) {
+            case (.int(let v), .real): .double(Double(v))
+            default: self
+        }
+    }
 }
