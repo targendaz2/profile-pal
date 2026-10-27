@@ -32,7 +32,7 @@ struct Manifest: Codable, Sendable {
     let version: Int?
 
     /// The version of the manifest format.
-    let formatVersion: Int
+    let formatVersion: Int?
 
     // MARK: - Extended keys
 
@@ -42,7 +42,7 @@ struct Manifest: Codable, Sendable {
     let subdomain: String?
 
     /// How settings combine when multiple payloads of this type are installed on a device.
-    let interaction: ManifestInteraction
+    let interaction: ManifestInteraction?
 
     /// A 64×64 pixel image representing the payload.
     let icon: Data?

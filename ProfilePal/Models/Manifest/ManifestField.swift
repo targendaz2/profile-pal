@@ -93,7 +93,7 @@ struct ManifestField: Codable, Sendable {
     let note: String?
 
     /// A URL to additional documentation for the field.
-    let documentationURL: URL?
+    let documentationURL: String?
 
     /// Whether the field's value may be sensitive enough to warrant encrypting the profile.
     let sensitive: Bool?
