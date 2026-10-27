@@ -9,7 +9,7 @@ import Foundation
 
 /// A condition that tests the state of another field.
 struct ManifestTargetCondition: Codable, Sendable {
-    /// The name of the field being tested.
+    /// The name of the target field.
     let target: String
 
     /// Whether the target field must be present in the payload.
