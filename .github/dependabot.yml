@@ -5,5 +5,5 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
-    pull-request-branch-name:
+    commit-message:
       prefix: "chore"
