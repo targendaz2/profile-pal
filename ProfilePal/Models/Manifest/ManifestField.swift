@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import SemanticVersion
 
 /// A single field in the manifest schema.
 struct ManifestField: Codable, Sendable {
@@ -108,31 +107,31 @@ struct ManifestField: Codable, Sendable {
     let userApproved: Bool?
 
     /// The iOS version that started supporting the field.
-    let iOSMin: SemanticVersion?
+    let iOSMin: String?
 
     /// The iOS version that deprecated the field.
-    let iOSDeprecated: SemanticVersion?
+    let iOSDeprecated: String?
 
     /// The iOS version that stopped supporting the field.
-    let iOSMax: SemanticVersion?
+    let iOSMax: String?
 
     /// The macOS version that started supporting the field.
-    let macOSMin: SemanticVersion?
+    let macOSMin: String?
 
     /// The macOS version that deprecated the field.
-    let macOSDeprecated: SemanticVersion?
+    let macOSDeprecated: String?
 
     /// The macOS version that stopped supporting the field.
-    let macOSMax: SemanticVersion?
+    let macOSMax: String?
 
     /// The tvOS version that started supporting the field.
-    let tvOSMin: SemanticVersion?
+    let tvOSMin: String?
 
     /// The tvOS version that deprecated the field.
-    let tvOSDeprecated: SemanticVersion?
+    let tvOSDeprecated: String?
 
     /// The tvOS version that stopped supporting the field.
-    let tvOSMax: SemanticVersion?
+    let tvOSMax: String?
 
     enum CodingKeys: String, CodingKey {
         case name = "pfm_name"

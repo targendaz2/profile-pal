@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import SemanticVersion
 
 /// A payload manifest describing one payload domain and its fields.
 struct Manifest: Codable, Sendable {
@@ -60,31 +59,31 @@ struct Manifest: Codable, Sendable {
     let userApproved: Bool?
 
     /// The iOS version that started supporting the payload.
-    let iOSMin: SemanticVersion?
+    let iOSMin: String?
 
     /// The iOS version that deprecated the payload.
-    let iOSDeprecated: SemanticVersion?
+    let iOSDeprecated: String?
 
     /// The iOS version that stopped supporting the payload.
-    let iOSMax: SemanticVersion?
+    let iOSMax: String?
 
     /// The macOS version that started supporting the payload.
-    let macOSMin: SemanticVersion?
+    let macOSMin: String?
 
     /// The macOS version that deprecated the payload.
-    let macOSDeprecated: SemanticVersion?
+    let macOSDeprecated: String?
 
     /// The macOS version that stopped supporting the payload.
-    let macOSMax: SemanticVersion?
+    let macOSMax: String?
 
     /// The tvOS version that started supporting the payload.
-    let tvOSMin: SemanticVersion?
+    let tvOSMin: String?
 
     /// The tvOS version that deprecated the payload.
-    let tvOSDeprecated: SemanticVersion?
+    let tvOSDeprecated: String?
 
     /// The tvOS version that stopped supporting the payload.
-    let tvOSMax: SemanticVersion?
+    let tvOSMax: String?
 
     /// The date the manifest was last modified.
     let lastModified: Date?
