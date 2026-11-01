@@ -45,6 +45,14 @@
 			);
 			name = "Embed Frameworks";
 		};
+		EC2DB9CE3097DC9800B2A25F /* Copy PlistValue Fixtures */ = {
+			isa = PBXCopyFilesBuildPhase;
+			dstPath = Fixtures/PlistValue;
+			dstSubfolder = Resources;
+			files = (
+			);
+			name = "Copy PlistValue Fixtures";
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
@@ -59,6 +67,29 @@
 		EC2DB9653097D82E00B2A25F /* ProfileManifestKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ProfileManifestKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		EC2DB96D3097D82E00B2A25F /* ProfileManifestKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ProfileManifestKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		EC2DB9DD3097DCC600B2A25F /* Exceptions for "ProfileManifestKitTests" folder in "Copy PlistValue Fixtures" phase from "ProfileManifestKitTests" target */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = EC2DB9CE3097DC9800B2A25F /* Copy PlistValue Fixtures */;
+			membershipExceptions = (
+				"Fixtures/PlistValue/array-empty.plist",
+				"Fixtures/PlistValue/array-small-integers.plist",
+				"Fixtures/PlistValue/bool-false.plist",
+				"Fixtures/PlistValue/bool-true.plist",
+				Fixtures/PlistValue/data.plist,
+				Fixtures/PlistValue/date.plist,
+				"Fixtures/PlistValue/dict-empty.plist",
+				"Fixtures/PlistValue/integer-one.plist",
+				"Fixtures/PlistValue/integer-zero.plist",
+				Fixtures/PlistValue/nested.plist,
+				"Fixtures/PlistValue/real-fractional.plist",
+				"Fixtures/PlistValue/real-whole.plist",
+				"Fixtures/PlistValue/string-boolean.plist",
+				"Fixtures/PlistValue/string-numeric.plist",
+			);
+		};
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		EC2DB78B30904DA100B2A25F /* ProfilePal */ = {
@@ -88,6 +119,9 @@
 		};
 		EC2DB9733097D82E00B2A25F /* ProfileManifestKitTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				EC2DB9DD3097DCC600B2A25F /* Exceptions for "ProfileManifestKitTests" folder in "Copy PlistValue Fixtures" phase from "ProfileManifestKitTests" target */,
+			);
 			path = ProfileManifestKitTests;
 			sourceTree = "<group>";
 		};
@@ -205,7 +239,7 @@
 			buildPhases = (
 				EC2DB9693097D82E00B2A25F /* Sources */,
 				EC2DB96A3097D82E00B2A25F /* Frameworks */,
-				EC2DB96B3097D82E00B2A25F /* Resources */,
+				EC2DB9CE3097DC9800B2A25F /* Copy PlistValue Fixtures */,
 			);
 			buildRules = (
 			);
@@ -277,11 +311,6 @@
 			);
 		};
 		EC2DB9633097D82E00B2A25F /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			files = (
-			);
-		};
-		EC2DB96B3097D82E00B2A25F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			files = (
 			);
