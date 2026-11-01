@@ -27,6 +27,23 @@ struct PlistValueTests {
         #expect(value == .bool(expected))
     }
 
+    @Test("Parses ints as ints", arguments: zip(["integer-one", "integer-zero"], [1, 0]))
+    func parseInt(fileName: String, expected: Int) async throws {
+        // Given a plist whose value is an <integer> tag of 1 or 0
+        let data = try fixtureData(named: fileName)
+
+        // When the value is decoded as a PlistValue
+        let value = try decodeValue(from: data)
+
+        // Then it's a .int holding the tag's value
+        #expect(value == .int(expected))
+
+        // And not a .bool, which is tried before Int when decoding
+        if case .bool = value {
+            Issue.record("Decoded an <integer> tag as a .bool")
+        }
+    }
+
 }
 
 // MARK: - Fixtures
