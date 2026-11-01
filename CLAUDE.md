@@ -23,7 +23,7 @@ The project is early: the manifest model layer exists, while the UI is still the
 
 ## Project setup
 
-- Targets: the `ProfilePal` app, the `ProfileManifestKit` framework (embedded in the app), and `ProfileManifestKitTests`. One scheme, `ProfilePal`. Swift 6, set at the project level, with approachable concurrency; the models are all `Sendable`.
+- Targets: the `ProfilePal` app, the `ProfileManifestKit` framework (embedded in the app), and `ProfileManifestKitTests`. Two shared schemes: `ProfilePal` builds and runs the app; `ProfileManifestKit` builds the framework and runs its tests, so make it the active scheme before running tests. Swift 6, set at the project level, with approachable concurrency; the models are all `Sendable`.
 - The project uses Xcode file-system-synchronized groups, so files added under each target's folder are picked up without editing `project.pbxproj`.
 - The app is sandboxed with read-only access to user-selected files.
 
