@@ -14,20 +14,20 @@ The project is early: the manifest model layer exists, while the UI is still the
   ```sh
   xcodebuild -project ProfilePal.xcodeproj -scheme ProfilePal -configuration Debug build
   ```
-- There is no test target yet. When one is added, use **Swift Testing** (`import Testing`, `@Test`, `#expect`), not XCTest.
+- Tests live in the `ProfileManifestKitTests` target and use **Swift Testing** (`import Testing`, `@Test`, `#expect`), not XCTest.
 - Format with the toolchain's swift-format (config in `.swift-format`: 4-space indent, 100-column lines, trailing commas on multiline collections, `switch` case labels indented):
   ```sh
-  xcrun swift-format format -i -r ProfilePal
-  xcrun swift-format lint -r ProfilePal
+  xcrun swift-format format -i -r ProfilePal ProfileManifestKit ProfileManifestKitTests
+  xcrun swift-format lint -r ProfilePal ProfileManifestKit ProfileManifestKitTests
   ```
 
 ## Project setup
 
-- One target and scheme, `ProfilePal`. Swift 6 with approachable concurrency; the models are all `Sendable`.
-- The project uses Xcode file-system-synchronized groups, so files added under `ProfilePal/` are picked up without editing `project.pbxproj`.
+- Targets: the `ProfilePal` app, the `ProfileManifestKit` framework (embedded in the app), and `ProfileManifestKitTests`. One scheme, `ProfilePal`. Swift 6, set at the project level, with approachable concurrency; the models are all `Sendable`.
+- The project uses Xcode file-system-synchronized groups, so files added under each target's folder are picked up without editing `project.pbxproj`.
 - The app is sandboxed with read-only access to user-selected files.
 
-## Architecture: manifest models (`ProfilePal/Models`)
+## Architecture: manifest models (`ProfileManifestKit`)
 
 - `Manifest` is one payload domain (`pfm_domain`). Its `subkeys` is a tree of `ManifestField`s, nested through `subkeys` for arrays and dictionaries. Load one with `Manifest.load(from:)`, which uses `PropertyListDecoder`.
 - `ManifestField.require`/`conditionals`/`exclude` hold requirement logic. `ManifestConditionalRule` and `ManifestExclusionRule` each contain `ManifestTargetCondition`s that test *another* field by name (`pfm_target`).
@@ -37,7 +37,7 @@ The project is early: the manifest model layer exists, while the UI is still the
 ### Rules for model code
 
 - **The spec is the source of truth.** Models mirror the documented ProfileManifests format. Don't add undocumented keys or enum cases, even ones real-world manifests use, and don't add derived logic that "fixes" spec quirks (for example, merging `require` and `required`). Flag spec ambiguity as deferred work instead.
-- Path-scoped rules in `.claude/rules/` govern every type in `ProfilePal/Models/`. `coding-model-property-order.md` sets the property and `CodingKeys` order (Apple-defined keys, then extended keys, each ordered by purpose). `coding-model-doc-comments.md` sets the `///` comment style. `ManifestField` is the reference implementation for both.
+- Path-scoped rules in `.claude/rules/` govern every type in `ProfileManifestKit/`. Types the app uses must be `public`. `coding-model-property-order.md` sets the property and `CodingKeys` order (Apple-defined keys, then extended keys, each ordered by purpose). `coding-model-doc-comments.md` sets the `///` comment style. `ManifestField` is the reference implementation for both.
 - Skip doc comments on enum cases whose names already say everything (such as `ManifestFieldType`).
 
 ## Workflow

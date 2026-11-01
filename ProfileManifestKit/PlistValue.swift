@@ -1,6 +1,6 @@
 //
 //  PlistValue.swift
-//  ProfilePal
+//  ProfileManifestKit
 //
 //  Created by David Rosenberg on 10/26/26.
 //
@@ -10,7 +10,7 @@ import Foundation
 /// A property list value whose type isn't known until it's decoded.
 ///
 /// Used where a manifest or payload key can hold any plist type, such as a field's default value.
-enum PlistValue: Codable, Sendable, Equatable {
+public enum PlistValue: Codable, Sendable, Equatable {
     case string(String)
     case bool(Bool)
     case int(Int)
@@ -21,7 +21,7 @@ enum PlistValue: Codable, Sendable, Equatable {
     case dictionary([String: PlistValue])
 
     /// The wrapped value as an untyped Swift value, with nested arrays and dictionaries unwrapped.
-    var value: Any {
+    public var value: Any {
         switch self {
             case .string(let v): v
             case .bool(let v): v
@@ -34,7 +34,7 @@ enum PlistValue: Codable, Sendable, Equatable {
         }
     }
 
-    init(from decoder: any Decoder) throws {
+    public init(from decoder: any Decoder) throws {
         let container = try decoder.singleValueContainer()
 
         if let v = try? container.decode(Bool.self) {
@@ -59,7 +59,7 @@ enum PlistValue: Codable, Sendable, Equatable {
         }
     }
 
-    func encode(to encoder: any Encoder) throws {
+    public func encode(to encoder: any Encoder) throws {
         var container = encoder.singleValueContainer()
 
         switch self {
@@ -78,7 +78,7 @@ enum PlistValue: Codable, Sendable, Equatable {
     ///
     /// `PropertyListDecoder` decodes a whole-number `<real>` as `.int`, so call this before
     /// encoding a value whose field type is known.
-    func coerced(to type: ManifestFieldType) -> Self {
+    public func coerced(to type: ManifestFieldType) -> Self {
         switch (self, type) {
             case (.int(let v), .real): .double(Double(v))
             default: self

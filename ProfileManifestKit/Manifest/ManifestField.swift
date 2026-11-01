@@ -1,6 +1,6 @@
 //
 //  ManifestField.swift
-//  ProfilePal
+//  ProfileManifestKit
 //
 //  Created by David Rosenberg on 10/26/26.
 //
@@ -8,22 +8,22 @@
 import Foundation
 
 /// A single field in the manifest schema.
-struct ManifestField: Codable, Sendable {
+public struct ManifestField: Codable, Sendable {
     // MARK: - Apple-defined keys
 
     /// The name of the field.
     ///
     /// Required on all fields except immediate subkeys of an array.
-    let name: String?
+    public let name: String?
 
     /// The human-readable title of the field.
-    let title: String?
+    public let title: String?
 
     /// A description of the field.
-    let description: String?
+    public let description: String?
 
     /// The data type of the field's value.
-    let type: ManifestFieldType
+    public let type: ManifestFieldType
 
     /// The field's default value.
     ///
@@ -31,47 +31,47 @@ struct ManifestField: Codable, Sendable {
     /// `placeholder` for example values. Don't combine with `require`.
     ///
     /// - Important: Must match the field's `type`.
-    let defaultValue: PlistValue?
+    public let defaultValue: PlistValue?
 
     /// The allowed values for the field.
     ///
     /// - Important: Each value must match the field's `type`.
-    let rangeList: [PlistValue]?
+    public let rangeList: [PlistValue]?
 
     /// The minimum value for the field.
-    let rangeMin: Double?
+    public let rangeMin: Double?
 
     /// The maximum value for the field.
-    let rangeMax: Double?
+    public let rangeMax: Double?
 
     /// A regular expression the field's value must match.
-    let format: String?
+    public let format: String?
 
     /// The field's nested fields.
-    let subkeys: [ManifestField]?
+    public let subkeys: [ManifestField]?
 
     /// The minimum number of items allowed in an array.
-    let repetitionMin: Int?
+    public let repetitionMin: Int?
 
     /// The maximum number of items allowed in an array.
-    let repetitionMax: Int?
+    public let repetitionMax: Int?
 
     /// When the field must be present in the payload.
-    let require: ManifestRequirement?
+    public let require: ManifestRequirement?
 
     /// Whether the field must be present in the payload.
     ///
     /// `true` is equivalent to setting `require` to `.always`.
-    let required: Bool?
+    public let required: Bool?
 
     /// The conditions under which the field is required.
-    let conditionals: [ManifestConditionalRule]?
+    public let conditionals: [ManifestConditionalRule]?
 
     /// The conditions under which the field is excluded from the payload.
-    let exclude: [ManifestExclusionRule]?
+    public let exclude: [ManifestExclusionRule]?
 
     /// The scopes where the field is valid. Defaults to `.user`.
-    let targets: [ManifestTarget]?
+    public let targets: [ManifestTarget]?
 
     // MARK: - Extended keys
 
@@ -79,59 +79,59 @@ struct ManifestField: Codable, Sendable {
     ///
     /// Use instead of `defaultValue` when the app doesn't define a real default.
     /// Ignored when `defaultValue` is set.
-    let placeholder: PlistValue?
+    public let placeholder: PlistValue?
 
     /// The human-readable titles for the values in `rangeList`.
     ///
     /// - Important: Must contain the same number of items as `rangeList`.
-    let rangeListTitles: [String]?
+    public let rangeListTitles: [String]?
 
     /// The unit the field's value represents, such as milliseconds, hours, or characters.
-    let valueUnit: String?
+    public let valueUnit: String?
 
     /// A note that draws the user's attention to something specific about the field.
-    let note: String?
+    public let note: String?
 
     /// A URL to additional documentation for the field.
-    let documentationURL: String?
+    public let documentationURL: String?
 
     /// Whether the field's value may be sensitive enough to warrant encrypting the profile.
-    let sensitive: Bool?
+    public let sensitive: Bool?
 
     /// Whether the device must be supervised for the field to work.
     ///
     /// - Note: Supervision isn't available on macOS; see `userApproved`.
-    let supervised: Bool?
+    public let supervised: Bool?
 
     /// Whether the device must be user approved, or enrolled using DEP, for the field to work.
-    let userApproved: Bool?
+    public let userApproved: Bool?
 
     /// The iOS version that started supporting the field.
-    let iOSMin: String?
+    public let iOSMin: String?
 
     /// The iOS version that deprecated the field.
-    let iOSDeprecated: String?
+    public let iOSDeprecated: String?
 
     /// The iOS version that stopped supporting the field.
-    let iOSMax: String?
+    public let iOSMax: String?
 
     /// The macOS version that started supporting the field.
-    let macOSMin: String?
+    public let macOSMin: String?
 
     /// The macOS version that deprecated the field.
-    let macOSDeprecated: String?
+    public let macOSDeprecated: String?
 
     /// The macOS version that stopped supporting the field.
-    let macOSMax: String?
+    public let macOSMax: String?
 
     /// The tvOS version that started supporting the field.
-    let tvOSMin: String?
+    public let tvOSMin: String?
 
     /// The tvOS version that deprecated the field.
-    let tvOSDeprecated: String?
+    public let tvOSDeprecated: String?
 
     /// The tvOS version that stopped supporting the field.
-    let tvOSMax: String?
+    public let tvOSMax: String?
 
     enum CodingKeys: String, CodingKey {
         case name = "pfm_name"
@@ -173,7 +173,7 @@ struct ManifestField: Codable, Sendable {
 }
 
 /// The data type of a field's value.
-enum ManifestFieldType: String, Codable, Sendable {
+public enum ManifestFieldType: String, Codable, Sendable {
     case string
     case boolean
     case integer
@@ -185,7 +185,7 @@ enum ManifestFieldType: String, Codable, Sendable {
 }
 
 /// When a field must be present in the payload.
-enum ManifestRequirement: String, Codable, Sendable {
+public enum ManifestRequirement: String, Codable, Sendable {
     /// The field is always required.
     case always
 

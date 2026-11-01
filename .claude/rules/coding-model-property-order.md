@@ -1,6 +1,6 @@
 ---
 paths:
-  - "ProfilePal/Models/**/*.swift"
+  - "ProfileManifestKit/**/*.swift"
 ---
 
 # Property ordering for profile coding models

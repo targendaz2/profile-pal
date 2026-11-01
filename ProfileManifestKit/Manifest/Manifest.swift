@@ -1,6 +1,6 @@
 //
 //  Manifest.swift
-//  ProfilePal
+//  ProfileManifestKit
 //
 //  Created by David Rosenberg on 10/27/26.
 //
@@ -8,85 +8,85 @@
 import Foundation
 
 /// A payload manifest describing one payload domain and its fields.
-struct Manifest: Codable, Sendable {
+public struct Manifest: Codable, Sendable {
     // MARK: - Apple-defined keys
 
     /// The payload's domain, used as its `PayloadType`.
-    let domain: String
+    public let domain: String
 
     /// The human-readable title of the payload.
-    let title: String?
+    public let title: String?
 
     /// A description of the payload.
-    let description: String?
+    public let description: String?
 
     /// The payload's fields.
-    let subkeys: [ManifestField]
+    public let subkeys: [ManifestField]
 
     /// The scopes where the payload is valid. Defaults to `.user`.
-    let targets: [ManifestTarget]?
+    public let targets: [ManifestTarget]?
 
     /// The version of the manifest file.
     ///
     /// Bump only when subkeys are added or removed.
-    let version: Int?
+    public let version: Int?
 
     /// The version of the manifest format.
-    let formatVersion: Int?
+    public let formatVersion: Int?
 
     // MARK: - Extended keys
 
     /// An identifier that lets one payload domain be split across multiple manifest files.
     ///
     /// Without it, files sharing a `domain` are treated as duplicates and overwrite each other.
-    let subdomain: String?
+    public let subdomain: String?
 
     /// How settings combine when multiple payloads of this type are installed on a device.
-    let interaction: ManifestInteraction?
+    public let interaction: ManifestInteraction?
 
     /// A 64×64 pixel image representing the payload.
-    let icon: Data?
+    public let icon: Data?
 
     /// A note that draws the user's attention to something specific about the payload.
-    let note: String?
+    public let note: String?
 
     /// Whether the device must be supervised for the payload to work.
     ///
     /// - Note: Supervision isn't available on macOS; see `userApproved`.
-    let supervised: Bool?
+    public let supervised: Bool?
 
     /// Whether the device must be user approved, or enrolled using DEP, for the payload to work.
-    let userApproved: Bool?
+    public let userApproved: Bool?
 
     /// The iOS version that started supporting the payload.
-    let iOSMin: String?
+    public let iOSMin: String?
 
     /// The iOS version that deprecated the payload.
-    let iOSDeprecated: String?
+    public let iOSDeprecated: String?
 
     /// The iOS version that stopped supporting the payload.
-    let iOSMax: String?
+    public let iOSMax: String?
 
     /// The macOS version that started supporting the payload.
-    let macOSMin: String?
+    public let macOSMin: String?
 
     /// The macOS version that deprecated the payload.
-    let macOSDeprecated: String?
+    public let macOSDeprecated: String?
 
     /// The macOS version that stopped supporting the payload.
-    let macOSMax: String?
+    public let macOSMax: String?
 
     /// The tvOS version that started supporting the payload.
-    let tvOSMin: String?
+    public let tvOSMin: String?
 
     /// The tvOS version that deprecated the payload.
-    let tvOSDeprecated: String?
+    public let tvOSDeprecated: String?
 
     /// The tvOS version that stopped supporting the payload.
-    let tvOSMax: String?
+    public let tvOSMax: String?
 
     /// The date the manifest was last modified.
-    let lastModified: Date?
+    public let lastModified: Date?
 
     enum CodingKeys: String, CodingKey {
         case domain = "pfm_domain"
@@ -118,14 +118,14 @@ struct Manifest: Codable, Sendable {
     /// Decodes a manifest from the property list file at `url`.
     ///
     /// - Throws: An error if the file can't be read or isn't a valid manifest.
-    static func load(from url: URL) throws -> Self {
+    public static func load(from url: URL) throws -> Self {
         let data = try Data(contentsOf: url)
         return try PropertyListDecoder().decode(Self.self, from: data)
     }
 }
 
 /// How settings combine when multiple payloads of the same type are installed on a device.
-enum ManifestInteraction: String, Codable, Sendable {
+public enum ManifestInteraction: String, Codable, Sendable {
     /// The settings from every installed payload are merged.
     case combined
 
@@ -137,7 +137,7 @@ enum ManifestInteraction: String, Codable, Sendable {
 }
 
 /// A scope where a payload or field is valid.
-enum ManifestTarget: String, Codable, Sendable {
+public enum ManifestTarget: String, Codable, Sendable {
     /// The user channel, whether installed manually or by MDM.
     case user
 
