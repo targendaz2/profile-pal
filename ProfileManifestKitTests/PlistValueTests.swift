@@ -289,6 +289,22 @@ struct PlistValueTests {
         // Then it's unchanged, with the item still a .int
         #expect(coerced == value)
     }
+
+    @Test("Unwraps nested arrays and dictionaries into plain Swift values")
+    func unwrapValue() async throws {
+        // Given an .array holding a .int and a .dictionary of a .string
+        let value = PlistValue.array([.int(1), .dictionary(["key": .string("text")])])
+
+        // When it's unwrapped into an untyped Swift value
+        let unwrapped = value.value
+
+        // Then it's a Swift array of an Int and a Swift dictionary holding a String
+        let array = try #require(unwrapped as? [Any])
+        #expect(array.count == 2)
+        #expect(array[0] as? Int == 1)
+        let dictionary = try #require(array[1] as? [String: Any])
+        #expect(dictionary["key"] as? String == "text")
+    }
 }
 
 // MARK: - Fixtures
