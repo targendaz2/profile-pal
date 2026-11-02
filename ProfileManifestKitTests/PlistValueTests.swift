@@ -96,6 +96,19 @@ struct PlistValueTests {
         // Then it's a .data holding the tag's bytes
         #expect(value == .data(Data([1, 2, 3])))
     }
+
+    @Test("Parses dates as dates")
+    func parseDates() async throws {
+        // Given a plist whose value is a <date> tag of 2026-01-02T03:04:05Z
+        let data = try fixtureData(named: "date")
+
+        // When the value is decoded as a PlistValue
+        let value = try decodeValue(from: data)
+
+        // Then it's a .date holding the tag's value
+        let expected = try Date("2026-01-02T03:04:05Z", strategy: .iso8601)
+        #expect(value == .date(expected))
+    }
 }
 
 // MARK: - Fixtures
