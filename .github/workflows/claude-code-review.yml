@@ -11,7 +11,11 @@ on:
       - "**/Package.resolved"
 
 jobs:
+  tests:
+    uses: ./.github/workflows/tests.yml
+
   claude-review:
+    needs: tests
     if: >-
       github.event.pull_request.draft == false &&
       github.event.pull_request.user.login == 'targendaz2'

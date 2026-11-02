@@ -1,0 +1,67 @@
+name: Tests
+
+on:
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  # The project needs Xcode 27, which only the xcode-27 image ships, so build once there
+  # and run the built tests on each macOS version.
+  build:
+    runs-on: xcode-27
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Build for testing
+        run: >-
+          xcodebuild build-for-testing
+          -project ProfilePal.xcodeproj
+          -scheme ProfileManifestKit
+          -destination 'platform=macOS'
+          -derivedDataPath DerivedData
+          CODE_SIGNING_ALLOWED=NO
+
+      # tar keeps the framework symlinks and permissions that upload-artifact drops.
+      - name: Package test products
+        run: tar -czf products.tar.gz -C DerivedData/Build Products
+
+      - name: Upload test products
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: test-products
+          path: products.tar.gz
+          retention-days: 1
+
+  test:
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS 26
+            runner: macos-26
+          - name: macOS 27
+            runner: xcode-27
+    name: test (${{ matrix.name }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+
+    steps:
+      - name: Download test products
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: test-products
+
+      - name: Run unit tests
+        run: |
+          sw_vers
+          tar -xzf products.tar.gz
+          xcodebuild test-without-building \
+            -xctestrun Products/*.xctestrun \
+            -destination 'platform=macOS'
