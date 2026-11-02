@@ -244,6 +244,51 @@ struct PlistValueTests {
         // Then it comes back as a .int
         #expect(decoded == [.int(2)])
     }
+
+    @Test("Coerces ints to doubles for real fields")
+    func coerceIntToReal() async throws {
+        // Given a whole-number .int, as a <real> of 2.0 decodes
+        let value = PlistValue.int(2)
+
+        // When it's coerced to the real field type
+        let coerced = value.coerced(to: .real)
+
+        // Then it's a .double holding the same number
+        #expect(coerced == .double(2.0))
+    }
+
+    @Test(
+        "Leaves values unchanged unless coercing an int to real",
+        arguments: [
+            (PlistValue.int(2), ManifestFieldType.integer),
+            (.int(2), .string),
+            (.double(1.5), .real),
+            (.string("2"), .real),
+            (.bool(true), .real),
+        ],
+    )
+    func coerceUnchanged(value: PlistValue, type: ManifestFieldType) async throws {
+        // Given a value and field type other than an .int and real
+        // When the value is coerced to the field type
+        let coerced = value.coerced(to: type)
+
+        // Then it's unchanged
+        #expect(coerced == value)
+    }
+
+    // coerced(to:) only converts a top-level .int, so callers must coerce array items themselves.
+    // This test catches that changing.
+    @Test("Doesn't coerce ints inside arrays")
+    func coerceArray() async throws {
+        // Given an .array holding a whole-number .int
+        let value = PlistValue.array([.int(1)])
+
+        // When it's coerced to the real field type
+        let coerced = value.coerced(to: .real)
+
+        // Then it's unchanged, with the item still a .int
+        #expect(coerced == value)
+    }
 }
 
 // MARK: - Fixtures
