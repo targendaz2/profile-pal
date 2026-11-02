@@ -84,6 +84,18 @@ struct PlistValueTests {
         // Then it's a .string holding the tag's value
         #expect(value == .string(expected))
     }
+
+    @Test("Parses data as data")
+    func parseData() async throws {
+        // Given a plist whose value is a <data> tag holding the bytes 1, 2, 3
+        let data = try fixtureData(named: "data")
+
+        // When the value is decoded as a PlistValue
+        let value = try decodeValue(from: data)
+
+        // Then it's a .data holding the tag's bytes
+        #expect(value == .data(Data([1, 2, 3])))
+    }
 }
 
 // MARK: - Fixtures
