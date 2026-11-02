@@ -11,7 +11,6 @@ import Testing
 @testable import ProfileManifestKit
 
 struct PlistValueTests {
-
     @Test(
         "Parses bool values correctly",
         arguments: zip(["bool-false", "bool-true"], [false, true]),
@@ -69,6 +68,21 @@ struct PlistValueTests {
 
         // Then it's a .int holding the tag's value
         #expect(value == .int(2))
+    }
+
+    @Test(
+        "Parses numeric and boolean strings as strings",
+        arguments: zip(["string-numeric", "string-boolean"], ["123", "true"]),
+    )
+    func parseStrings(fileName: String, expected: String) async throws {
+        // Given a plist whose value is a <string> tag of "123" or "true"
+        let data = try fixtureData(named: fileName)
+
+        // When the value is decoded as a PlistValue
+        let value = try decodeValue(from: data)
+
+        // Then it's a .string holding the tag's value
+        #expect(value == .string(expected))
     }
 }
 
