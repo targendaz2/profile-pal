@@ -109,6 +109,23 @@ struct PlistValueTests {
         let expected = try Date("2026-01-02T03:04:05Z", strategy: .iso8601)
         #expect(value == .date(expected))
     }
+
+    @Test("Parses arrays of small integers as arrays, not data")
+    func parseArray() async throws {
+        // Given a plist whose value is an <array> of <integer> tags 1 and 2
+        let data = try fixtureData(named: "array-small-integers")
+
+        // When the value is decoded as a PlistValue
+        let value = try decodeValue(from: data)
+
+        // Then it's an .array of .int values matching the tags
+        #expect(value == .array([.int(1), .int(2)]))
+
+        // And not a .data, which is tried before arrays and can decode from a list of bytes
+        if case .data = value {
+            Issue.record("Decoded an <array> of integers as .data")
+        }
+    }
 }
 
 // MARK: - Fixtures
