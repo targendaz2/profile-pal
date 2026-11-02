@@ -53,6 +53,11 @@ struct PlistValueTests {
 
         // Then it's a .double holding the tag's value
         #expect(value == .double(1.5))
+
+        // And not a .int, which is tried before Double when decoding
+        if case .int = value {
+            Issue.record("Decoded a fractional <real> tag as a .int")
+        }
     }
 
     // PropertyListDecoder lets a whole-number <real> decode as Int, and PlistValue tries Int
@@ -83,6 +88,12 @@ struct PlistValueTests {
 
         // Then it's a .string holding the tag's value
         #expect(value == .string(expected))
+
+        // And not a .int or .bool, which are tried before String when decoding
+        switch value {
+            case .int, .bool: Issue.record("Decoded a <string> tag as \(value)")
+            default: break
+        }
     }
 
     @Test("Parses data as data")
@@ -108,6 +119,11 @@ struct PlistValueTests {
         // Then it's a .date holding the tag's value
         let expected = try Date("2026-01-02T03:04:05Z", strategy: .iso8601)
         #expect(value == .date(expected))
+
+        // And not a .double, which is tried before Date when decoding
+        if case .double = value {
+            Issue.record("Decoded a <date> tag as a .double")
+        }
     }
 
     @Test("Parses arrays of small integers as arrays, not data")
