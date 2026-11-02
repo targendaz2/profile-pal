@@ -44,6 +44,32 @@ struct PlistValueTests {
         }
     }
 
+    @Test("Parses fractional reals as doubles")
+    func parseFractionalReal() async throws {
+        // Given a plist whose value is a <real> tag of 1.5
+        let data = try fixtureData(named: "real-fractional")
+
+        // When the value is decoded as a PlistValue
+        let value = try decodeValue(from: data)
+
+        // Then it's a .double holding the tag's value
+        #expect(value == .double(1.5))
+    }
+
+    // PropertyListDecoder lets a whole-number <real> decode as Int, and PlistValue tries Int
+    // before Double, so 2.0 comes back as .int. coerced(to:) relies on this; this test
+    // catches it changing.
+    @Test("Parses whole reals as ints (decoder quirk)")
+    func parseWholeReal() async throws {
+        // Given a plist whose value is a <real> tag of 2.0
+        let data = try fixtureData(named: "real-whole")
+
+        // When the value is decoded as a PlistValue
+        let value = try decodeValue(from: data)
+
+        // Then it's a .int holding the tag's value
+        #expect(value == .int(2))
+    }
 }
 
 // MARK: - Fixtures
