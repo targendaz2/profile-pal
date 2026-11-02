@@ -176,6 +176,28 @@ struct PlistValueTests {
             Issue.record("Decoded an empty <dict/> as an .array")
         }
     }
+
+    @Test("Parses nested arrays and dictionaries with mixed types")
+    func parseNested() async throws {
+        // Given a plist whose value is an <array> of a mixed-type <dict> and an empty <dict>
+        let data = try fixtureData(named: "nested")
+
+        // When the value is decoded as a PlistValue
+        let value = try decodeValue(from: data)
+
+        // Then every level decodes as the case matching its tag
+        let expected: PlistValue = .array([
+            .dictionary([
+                "name": .string("first"),
+                "count": .int(3),
+                "ratio": .double(0.25),
+                "enabled": .bool(true),
+                "tags": .array([.string("a"), .string("b")]),
+            ]),
+            .dictionary([:]),
+        ])
+        #expect(value == expected)
+    }
 }
 
 // MARK: - Fixtures
