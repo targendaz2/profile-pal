@@ -10,7 +10,9 @@ Applies to every Swift Testing unit test. Use `PlistValueTests.parseBool` as the
 - **Structure:** every test body is split into `// Given`, `// When`, and `// Then` sections, in that order, each followed by its code.
 - **Say what, not just which step:** each section comment states what's given, what happens, or what's expected (e.g. `// When the value is decoded as a PlistValue`), never a bare `// Given`.
 - **One thing per line:** each comment line describes exactly one concept. Add another concept on an extra line starting with `// And` (all apply) or `// Or` (alternatives), which also describes one concept.
-  - Variants of the same concept, such as the values a parameterized test runs over, stay on one line (`a <true/> or <false/> tag`). Split only when the concepts are distinct:
+  - Variants of the same concept, such as the values a parameterized test runs over, stay on one line (`a <true/> or <false/> tag`).
+  - So do details describing that one thing, such as a value's contents (`an <array> of a mixed-type <dict> and an empty <dict>`), not separate `// And` lines.
+  - Split only when the concepts are distinct:
 
     ```swift
     // Given a value decoded as .int
