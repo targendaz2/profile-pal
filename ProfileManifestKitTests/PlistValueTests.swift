@@ -198,6 +198,52 @@ struct PlistValueTests {
         ])
         #expect(value == expected)
     }
+
+    @Test(
+        "Round-trips every case through encoding and decoding",
+        arguments: [
+            PlistValue.string("text"),
+            .bool(true),
+            .int(42),
+            .double(1.5),
+            .data(Data([1, 2, 3])),
+            .date(Date(timeIntervalSinceReferenceDate: 0)),
+            .array([.int(1), .string("a")]),
+            .dictionary(["key": .bool(false)]),
+        ],
+        [PropertyListSerialization.PropertyListFormat.xml, .binary],
+    )
+    func roundTrip(
+        original: PlistValue,
+        format: PropertyListSerialization.PropertyListFormat,
+    ) async throws {
+        // Given a PlistValue of each case
+        // And an XML or binary output format
+        let encoder = PropertyListEncoder()
+        encoder.outputFormat = format
+
+        // When it's encoded to a plist and decoded back
+        let data = try encoder.encode([original])
+        let decoded = try PropertyListDecoder().decode([PlistValue].self, from: data)
+
+        // Then it's unchanged
+        #expect(decoded == [original])
+    }
+
+    // A whole-number double encodes as <real> but decodes as .int, since PlistValue tries Int
+    // before Double. coerced(to:) exists to undo this; this test catches it changing.
+    @Test("Round-trips whole doubles as ints (decoder quirk)")
+    func roundTripWholeDouble() async throws {
+        // Given a .double holding a whole number
+        let original = PlistValue.double(2.0)
+
+        // When it's encoded to a plist and decoded back
+        let data = try PropertyListEncoder().encode([original])
+        let decoded = try PropertyListDecoder().decode([PlistValue].self, from: data)
+
+        // Then it comes back as a .int
+        #expect(decoded == [.int(2)])
+    }
 }
 
 // MARK: - Fixtures
