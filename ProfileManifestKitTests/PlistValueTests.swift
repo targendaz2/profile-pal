@@ -142,6 +142,40 @@ struct PlistValueTests {
             Issue.record("Decoded an <array> of integers as .data")
         }
     }
+
+    @Test("Parses empty arrays as arrays, not data")
+    func parseEmptyArray() async throws {
+        // Given a plist whose value is an empty <array/> tag
+        let data = try fixtureData(named: "array-empty")
+
+        // When the value is decoded as a PlistValue
+        let value = try decodeValue(from: data)
+
+        // Then it's an empty .array
+        #expect(value == .array([]))
+
+        // And not a .data, which is tried before arrays and can decode from an empty list of bytes
+        if case .data = value {
+            Issue.record("Decoded an empty <array/> as .data")
+        }
+    }
+
+    @Test("Parses empty dictionaries as dictionaries, not arrays")
+    func parseEmptyDictionary() async throws {
+        // Given a plist whose value is an empty <dict/> tag
+        let data = try fixtureData(named: "dict-empty")
+
+        // When the value is decoded as a PlistValue
+        let value = try decodeValue(from: data)
+
+        // Then it's an empty .dictionary
+        #expect(value == .dictionary([:]))
+
+        // And not an .array, which is tried before dictionaries when decoding
+        if case .array = value {
+            Issue.record("Decoded an empty <dict/> as an .array")
+        }
+    }
 }
 
 // MARK: - Fixtures
