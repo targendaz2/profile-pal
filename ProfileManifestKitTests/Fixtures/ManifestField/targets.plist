@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>pfm_name</key>
+	<string>Scoped</string>
+	<key>pfm_type</key>
+	<string>string</string>
+	<key>pfm_targets</key>
+	<array>
+		<string>user</string>
+		<string>user-managed</string>
+		<string>system</string>
+		<string>system-managed</string>
+	</array>
+</dict>
+</plist>

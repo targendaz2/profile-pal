@@ -53,6 +53,14 @@
 			);
 			name = "Copy PlistValue Fixtures";
 		};
+		EC2DB9E03097DD0000B2A25F /* Copy ManifestField Fixtures */ = {
+			isa = PBXCopyFilesBuildPhase;
+			dstPath = Fixtures/ManifestField;
+			dstSubfolder = Resources;
+			files = (
+			);
+			name = "Copy ManifestField Fixtures";
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
@@ -89,6 +97,22 @@
 				"Fixtures/PlistValue/string-numeric.plist",
 			);
 		};
+		EC2DB9E13097DD0000B2A25F /* Exceptions for "ProfileManifestKitTests" folder in "Copy ManifestField Fixtures" phase from "ProfileManifestKitTests" target */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = EC2DB9E03097DD0000B2A25F /* Copy ManifestField Fixtures */;
+			membershipExceptions = (
+				"Fixtures/ManifestField/all-keys.plist",
+				"Fixtures/ManifestField/integer-range.plist",
+				"Fixtures/ManifestField/minimal.plist",
+				"Fixtures/ManifestField/missing-type.plist",
+				"Fixtures/ManifestField/nested.plist",
+				"Fixtures/ManifestField/require-always.plist",
+				"Fixtures/ManifestField/require-and-required.plist",
+				"Fixtures/ManifestField/require-push.plist",
+				"Fixtures/ManifestField/targets.plist",
+				"Fixtures/ManifestField/unknown-type.plist",
+			);
+		};
 /* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -120,6 +144,7 @@
 		EC2DB9733097D82E00B2A25F /* ProfileManifestKitTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
+				EC2DB9E13097DD0000B2A25F /* Exceptions for "ProfileManifestKitTests" folder in "Copy ManifestField Fixtures" phase from "ProfileManifestKitTests" target */,
 				EC2DB9DD3097DCC600B2A25F /* Exceptions for "ProfileManifestKitTests" folder in "Copy PlistValue Fixtures" phase from "ProfileManifestKitTests" target */,
 			);
 			path = ProfileManifestKitTests;
@@ -239,6 +264,7 @@
 			buildPhases = (
 				EC2DB9693097D82E00B2A25F /* Sources */,
 				EC2DB96A3097D82E00B2A25F /* Frameworks */,
+				EC2DB9E03097DD0000B2A25F /* Copy ManifestField Fixtures */,
 				EC2DB9CE3097DC9800B2A25F /* Copy PlistValue Fixtures */,
 			);
 			buildRules = (

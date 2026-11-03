@@ -15,15 +15,15 @@ New fixture folder `Fixtures/ManifestField/` with a `Copy ManifestField Fixtures
 
 | Test | Fixture | Checks |
 | --- | --- | --- |
-| Every key | `field-all-keys` | All 34 keys set; every property matches. Guards every `CodingKeys` string against typos. |
-| Minimal | `field-minimal` | Only `pfm_type`; every optional property is `nil`, including `name` (allowed for array subkeys). |
-| Missing type | `field-missing-type` | Throws `DecodingError.keyNotFound`. |
-| Unknown type | `field-unknown-type` | A `pfm_type` of `url` throws. Pins the strict-spec policy. |
-| Integer ranges | `field-integer-range` | `pfm_range_min` / `pfm_range_max` written as `<integer>` decode into `Double`. Real manifests nearly always use `<integer>`. |
-| Recursion | `field-nested` | A dictionary inside an array inside a dictionary decodes at every level. |
-| Require and required | `field-require-and-required` | Both decode independently, with no merging (spec rule). |
-| Requirement values | `field-require-always`, `field-require-push` | `ManifestRequirement` raw values. |
-| Target values | `field-targets` | All four `ManifestTarget` values, including the hyphenated `user-managed` and `system-managed`. |
+| Every key | `all-keys` | All 34 keys set; every property matches. Guards every `CodingKeys` string against typos. |
+| Minimal | `minimal` | Only `pfm_type`; every optional property is `nil`, including `name` (allowed for array subkeys). |
+| Missing type | `missing-type` | Throws `DecodingError.keyNotFound`. |
+| Unknown type | `unknown-type` | A `pfm_type` of `url` throws. Pins the strict-spec policy. |
+| Integer ranges | `integer-range` | `pfm_range_min` / `pfm_range_max` written as `<integer>` decode into `Double`. Real manifests nearly always use `<integer>`. |
+| Recursion | `nested` | A dictionary inside an array inside a dictionary decodes at every level. |
+| Require and required | `require-and-required` | Both decode independently, with no merging (spec rule). |
+| Requirement values | `require-always`, `require-push` | `ManifestRequirement` raw values. |
+| Target values | `targets` | All four `ManifestTarget` values, including the hyphenated `user-managed` and `system-managed`. |
 
 ## 2. `ManifestConditionTests`
 
