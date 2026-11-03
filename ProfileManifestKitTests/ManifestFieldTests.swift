@@ -124,6 +124,21 @@ struct ManifestFieldTests {
         // And the invalid value is pfm_type's
         #expect(context.codingPath.last?.stringValue == "pfm_type")
     }
+
+    // Real manifests nearly always write range bounds as <integer>, while the models store them
+    // as Double, so decoding must accept the integer form.
+    @Test("Decodes integer range bounds as Double")
+    func integerRange() async throws {
+        // Given a field whose pfm_range_min and pfm_range_max are <integer> values
+        let data = try fixtureData(subject: "ManifestField", named: "integer-range")
+
+        // When the field is decoded as a ManifestField
+        let field = try PropertyListDecoder().decode(ManifestField.self, from: data)
+
+        // Then each bound holds its integer's value
+        #expect(field.rangeMin == 1)
+        #expect(field.rangeMax == 100)
+    }
 }
 
 extension Collection {
