@@ -21,6 +21,7 @@ Applies to every Swift Testing unit test. Use `PlistValueTests.parseBool` as the
 - **Naming:** keep the function name minimal (`parseBool`). Put the context in the `@Test` display name, which is what test reports show.
 - **Layout:** `@Test(...)` sits on its own line(s), with `func` on the line below, never `@Test func` on one line.
 - **Suites:** one `struct <Subject>Tests` per type under test, marked `@Suite("<Subject>")` on the line above it (`@Suite("PlistValue")` over `struct PlistValueTests`). The display name is the type's name alone, since the test names already say what each test checks.
+- **Don't test what Swift synthesizes:** skip tests whose only subject is compiler-generated behavior, such as an enum's implicit raw values (`case push` decoding from `"push"`). Do test raw values written out by hand (`case userManaged = "user-managed"`).
 
 ```swift
 @Test(
