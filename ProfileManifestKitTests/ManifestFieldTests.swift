@@ -187,6 +187,20 @@ struct ManifestFieldTests {
         // And required keeps its own value
         #expect(field.required == true)
     }
+
+    // The two managed targets have hand-written, hyphenated raw values, so a typo in either would
+    // break every manifest that targets a managed channel.
+    @Test("Decodes every pfm_targets value")
+    func targets() async throws {
+        // Given a field whose pfm_targets lists user, user-managed, system, and system-managed
+        let data = try fixtureData(subject: "ManifestField", named: "targets")
+
+        // When the field is decoded as a ManifestField
+        let field = try PropertyListDecoder().decode(ManifestField.self, from: data)
+
+        // Then targets holds each value's ManifestTarget case, in order
+        #expect(field.targets == [.user, .userManaged, .system, .systemManaged])
+    }
 }
 
 extension Collection {
