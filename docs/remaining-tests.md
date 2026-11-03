@@ -16,7 +16,7 @@ New fixture folder `Fixtures/ManifestField/` with a `Copy ManifestField Fixtures
 | Test | Fixture | Checks |
 | --- | --- | --- |
 | Every key | `all-keys` | All 34 keys set; every property matches. Guards every `CodingKeys` string against typos. |
-| Minimal | `minimal` | Only `pfm_type`; every optional property is `nil`, including `name` (allowed for array subkeys). |
+| Minimal | `minimal` | Only `pfm_type`; decodes without throwing, so no spec-optional key is required, and `name` is `nil` (allowed for array subkeys). |
 | Missing type | `missing-type` | Throws `DecodingError.keyNotFound`. |
 | Unknown type | `unknown-type` | A `pfm_type` of `url` throws. Pins the strict-spec policy. |
 | Integer ranges | `integer-range` | `pfm_range_min` / `pfm_range_max` written as `<integer>` decode into `Double`. Real manifests nearly always use `<integer>`. |

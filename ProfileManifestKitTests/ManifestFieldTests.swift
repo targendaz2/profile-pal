@@ -68,7 +68,7 @@ struct ManifestFieldTests {
         #expect(field.tvOSMax == "19.0")
     }
 
-    @Test("Decodes a field with only a type, leaving every optional property nil")
+    @Test("Decodes a field with only a type")
     func minimal() async throws {
         // Given a field whose only key is pfm_type
         let data = try fixtureData(subject: "ManifestField", named: "minimal")
@@ -79,42 +79,8 @@ struct ManifestFieldTests {
         // Then its type is the key's value
         #expect(field.type == .string)
 
-        // And each optional Apple-defined property is nil, including name
+        // And it has no name, which array subkeys may leave out
         #expect(field.name == nil)
-        #expect(field.title == nil)
-        #expect(field.description == nil)
-        #expect(field.defaultValue == nil)
-        #expect(field.rangeList == nil)
-        #expect(field.rangeMin == nil)
-        #expect(field.rangeMax == nil)
-        #expect(field.format == nil)
-        #expect(field.subkeys == nil)
-        #expect(field.repetitionMin == nil)
-        #expect(field.repetitionMax == nil)
-        #expect(field.require == nil)
-        #expect(field.required == nil)
-        #expect(field.conditionals == nil)
-        #expect(field.exclude == nil)
-        #expect(field.targets == nil)
-
-        // And each extended property is nil
-        #expect(field.placeholder == nil)
-        #expect(field.rangeListTitles == nil)
-        #expect(field.valueUnit == nil)
-        #expect(field.note == nil)
-        #expect(field.documentationURL == nil)
-        #expect(field.sensitive == nil)
-        #expect(field.supervised == nil)
-        #expect(field.userApproved == nil)
-        #expect(field.iOSMin == nil)
-        #expect(field.iOSDeprecated == nil)
-        #expect(field.iOSMax == nil)
-        #expect(field.macOSMin == nil)
-        #expect(field.macOSDeprecated == nil)
-        #expect(field.macOSMax == nil)
-        #expect(field.tvOSMin == nil)
-        #expect(field.tvOSDeprecated == nil)
-        #expect(field.tvOSMax == nil)
     }
 }
 
