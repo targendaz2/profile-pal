@@ -82,6 +82,48 @@ struct ManifestFieldTests {
         // And it has no name, which array subkeys may leave out
         #expect(field.name == nil)
     }
+
+    @Test("Throws when pfm_type is missing")
+    func missingType() async throws {
+        // Given a field with no pfm_type key
+        let data = try fixtureData(subject: "ManifestField", named: "missing-type")
+
+        // When the field is decoded as a ManifestField
+        let error = try #require(throws: DecodingError.self) {
+            try PropertyListDecoder().decode(ManifestField.self, from: data)
+        }
+
+        // Then decoding fails because a required key is absent
+        guard case .keyNotFound(let key, _) = error else {
+            Issue.record("Expected keyNotFound, got \(error)")
+            return
+        }
+
+        // And the absent key is pfm_type
+        #expect(key.stringValue == "pfm_type")
+    }
+
+    // The spec lists eight pfm_type values. Real manifests sometimes use others, but the models
+    // follow the spec strictly, so an undocumented type fails the whole field.
+    @Test("Throws when pfm_type isn't a documented type")
+    func unknownType() async throws {
+        // Given a field whose pfm_type is url, which the spec doesn't define
+        let data = try fixtureData(subject: "ManifestField", named: "unknown-type")
+
+        // When the field is decoded as a ManifestField
+        let error = try #require(throws: DecodingError.self) {
+            try PropertyListDecoder().decode(ManifestField.self, from: data)
+        }
+
+        // Then decoding fails because a value is invalid
+        guard case .dataCorrupted(let context) = error else {
+            Issue.record("Expected dataCorrupted, got \(error)")
+            return
+        }
+
+        // And the invalid value is pfm_type's
+        #expect(context.codingPath.last?.stringValue == "pfm_type")
+    }
 }
 
 extension Collection {
