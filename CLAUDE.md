@@ -44,3 +44,4 @@ The project is early: the manifest model layer exists, while the UI is still the
 
 - Work on feature branches and open PRs into `main`. When a non-draft PR touches Swift, pbxproj, plist, or entitlements files, `.github/workflows/claude-code-review.yml` runs an automated Claude code review on it.
 - When a pre-commit check (security review, diagnostics) finds an issue, report it and wait for the user. Don't fix it yourself.
+- Record product and engineering decisions (scope cuts, deferrals, conventions) in `docs/decisions.md` when they're made. Check it before proposing work it rules out.
