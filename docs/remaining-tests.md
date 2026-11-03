@@ -22,7 +22,6 @@ New fixture folder `Fixtures/ManifestField/` with a `Copy ManifestField Fixtures
 | Integer ranges | `integer-range` | `pfm_range_min` / `pfm_range_max` written as `<integer>` decode into `Double`. Real manifests nearly always use `<integer>`. |
 | Recursion | `nested` | A dictionary inside an array inside a dictionary decodes at every level. |
 | Require and required | `require-and-required` | Both decode independently, with no merging (spec rule). |
-| Requirement values | `require-always`, `require-push` | `ManifestRequirement` raw values. |
 | Target values | `targets` | All four `ManifestTarget` values, including the hyphenated `user-managed` and `system-managed`. |
 
 ## 2. `ManifestConditionTests`

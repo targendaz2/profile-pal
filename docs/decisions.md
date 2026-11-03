@@ -4,6 +4,7 @@ A log of product and engineering decisions, newest first. Add a row when a decis
 
 | Date | Decision | Why | Where it applies |
 | --- | --- | --- | --- |
+| 2026-11-02 | **Don't test enum raw values the compiler synthesizes.** Only test cases whose raw value is written out (such as hyphenated `ManifestTarget` values). Dropped the planned Requirement values test and its fixtures. | Implicit raw values just test Swift's `Codable`. `allKeys` already decodes both `ManifestRequirement` values, so a renamed case still fails a test. | [remaining-tests.md](remaining-tests.md), `ManifestFieldTests` |
 | 2026-11-02 | **Manifests are XML plists only in v1.** Binary manifest support, and binary-format manifest tests, are deferred to v2. | Keeps v1 scope to the format ProfileManifests ships. | [remaining-tests.md](remaining-tests.md), Deferred to v2 |
 | 2026-11-01 | **Unit tests use described Given / When / Then comments,** one concept per line, minimal `func` names with context in the `@Test` display name. | Tests read as specifications, and reports show the display names. | `.claude/rules/testing-unit-test-style.md` |
 | 2026-11-01 | **Fixtures are copied by one Copy Files phase per subject folder**, into `Resources/Fixtures/<Subject>/`, instead of the Resources phase. | The Resources phase flattens folders into one namespace and may process plists. Copy Files keeps the folder and copies files byte for byte. | `.claude/rules/testing-plist-fixtures.md` |
