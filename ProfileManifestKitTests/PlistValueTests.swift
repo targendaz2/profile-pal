@@ -17,7 +17,7 @@ struct PlistValueTests {
     )
     func parseBool(fileName: String, expected: Bool) async throws {
         // Given a plist whose value is a <true/> or <false/> tag
-        let data = try fixtureData(named: fileName)
+        let data = try fixtureData(subject: "PlistValue", named: fileName)
 
         // When the value is decoded as a PlistValue
         let value = try decodeValue(from: data)
@@ -29,7 +29,7 @@ struct PlistValueTests {
     @Test("Parses ints as ints", arguments: zip(["integer-one", "integer-zero"], [1, 0]))
     func parseInt(fileName: String, expected: Int) async throws {
         // Given a plist whose value is an <integer> tag of 1 or 0
-        let data = try fixtureData(named: fileName)
+        let data = try fixtureData(subject: "PlistValue", named: fileName)
 
         // When the value is decoded as a PlistValue
         let value = try decodeValue(from: data)
@@ -46,7 +46,7 @@ struct PlistValueTests {
     @Test("Parses fractional reals as doubles")
     func parseFractionalReal() async throws {
         // Given a plist whose value is a <real> tag of 1.5
-        let data = try fixtureData(named: "real-fractional")
+        let data = try fixtureData(subject: "PlistValue", named: "real-fractional")
 
         // When the value is decoded as a PlistValue
         let value = try decodeValue(from: data)
@@ -66,7 +66,7 @@ struct PlistValueTests {
     @Test("Parses whole reals as ints (decoder quirk)")
     func parseWholeReal() async throws {
         // Given a plist whose value is a <real> tag of 2.0
-        let data = try fixtureData(named: "real-whole")
+        let data = try fixtureData(subject: "PlistValue", named: "real-whole")
 
         // When the value is decoded as a PlistValue
         let value = try decodeValue(from: data)
@@ -81,7 +81,7 @@ struct PlistValueTests {
     )
     func parseStrings(fileName: String, expected: String) async throws {
         // Given a plist whose value is a <string> tag of "123" or "true"
-        let data = try fixtureData(named: fileName)
+        let data = try fixtureData(subject: "PlistValue", named: fileName)
 
         // When the value is decoded as a PlistValue
         let value = try decodeValue(from: data)
@@ -99,7 +99,7 @@ struct PlistValueTests {
     @Test("Parses data as data")
     func parseData() async throws {
         // Given a plist whose value is a <data> tag holding the bytes 1, 2, 3
-        let data = try fixtureData(named: "data")
+        let data = try fixtureData(subject: "PlistValue", named: "data")
 
         // When the value is decoded as a PlistValue
         let value = try decodeValue(from: data)
@@ -111,7 +111,7 @@ struct PlistValueTests {
     @Test("Parses dates as dates")
     func parseDates() async throws {
         // Given a plist whose value is a <date> tag of 2026-01-02T03:04:05Z
-        let data = try fixtureData(named: "date")
+        let data = try fixtureData(subject: "PlistValue", named: "date")
 
         // When the value is decoded as a PlistValue
         let value = try decodeValue(from: data)
@@ -129,7 +129,7 @@ struct PlistValueTests {
     @Test("Parses arrays of small integers as arrays, not data")
     func parseArray() async throws {
         // Given a plist whose value is an <array> of <integer> tags 1 and 2
-        let data = try fixtureData(named: "array-small-integers")
+        let data = try fixtureData(subject: "PlistValue", named: "array-small-integers")
 
         // When the value is decoded as a PlistValue
         let value = try decodeValue(from: data)
@@ -146,7 +146,7 @@ struct PlistValueTests {
     @Test("Parses empty arrays as arrays, not data")
     func parseEmptyArray() async throws {
         // Given a plist whose value is an empty <array/> tag
-        let data = try fixtureData(named: "array-empty")
+        let data = try fixtureData(subject: "PlistValue", named: "array-empty")
 
         // When the value is decoded as a PlistValue
         let value = try decodeValue(from: data)
@@ -163,7 +163,7 @@ struct PlistValueTests {
     @Test("Parses empty dictionaries as dictionaries, not arrays")
     func parseEmptyDictionary() async throws {
         // Given a plist whose value is an empty <dict/> tag
-        let data = try fixtureData(named: "dict-empty")
+        let data = try fixtureData(subject: "PlistValue", named: "dict-empty")
 
         // When the value is decoded as a PlistValue
         let value = try decodeValue(from: data)
@@ -180,7 +180,7 @@ struct PlistValueTests {
     @Test("Parses nested arrays and dictionaries with mixed types")
     func parseNested() async throws {
         // Given a plist whose value is an <array> of a mixed-type <dict> and an empty <dict>
-        let data = try fixtureData(named: "nested")
+        let data = try fixtureData(subject: "PlistValue", named: "nested")
 
         // When the value is decoded as a PlistValue
         let value = try decodeValue(from: data)
@@ -308,21 +308,6 @@ struct PlistValueTests {
 }
 
 // MARK: - Fixtures
-
-/// A class defined in the test bundle, so `Bundle(for:)` can find the bundle and its fixtures.
-private final class BundleToken {}
-
-/// The contents of the fixture `Fixtures/PlistValue/<name>.plist` in the test bundle.
-private func fixtureData(named name: String) throws -> Data {
-    let url = try #require(
-        Bundle(for: BundleToken.self).url(
-            forResource: name,
-            withExtension: "plist",
-            subdirectory: "Fixtures/PlistValue",
-        )
-    )
-    return try Data(contentsOf: url)
-}
 
 /// The `PlistValue` stored under the `value` key of a fixture.
 private func decodeValue(from data: Data) throws -> PlistValue {
