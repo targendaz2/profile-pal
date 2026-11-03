@@ -1,7 +1,10 @@
 name: Tests
 
 on:
+  # Only new pushes: claude-code-review.yml calls this workflow when a PR is opened,
+  # reopened, or marked ready, so triggering on those too would run every test twice.
   pull_request:
+    types: [synchronize]
   workflow_call:
 
 permissions:
