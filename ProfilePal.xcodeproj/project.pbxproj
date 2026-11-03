@@ -103,13 +103,13 @@
 			membershipExceptions = (
 				"Fixtures/ManifestField/all-keys.plist",
 				"Fixtures/ManifestField/integer-range.plist",
-				"Fixtures/ManifestField/minimal.plist",
+				Fixtures/ManifestField/minimal.plist,
 				"Fixtures/ManifestField/missing-type.plist",
-				"Fixtures/ManifestField/nested.plist",
+				Fixtures/ManifestField/nested.plist,
 				"Fixtures/ManifestField/require-always.plist",
 				"Fixtures/ManifestField/require-and-required.plist",
 				"Fixtures/ManifestField/require-push.plist",
-				"Fixtures/ManifestField/targets.plist",
+				Fixtures/ManifestField/targets.plist,
 				"Fixtures/ManifestField/unknown-type.plist",
 			);
 		};
