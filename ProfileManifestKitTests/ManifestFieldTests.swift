@@ -139,6 +139,35 @@ struct ManifestFieldTests {
         #expect(field.rangeMin == 1)
         #expect(field.rangeMax == 100)
     }
+
+    @Test("Decodes subkeys at every nesting level")
+    func nested() async throws {
+        // Given a dictionary containing an array of dictionaries that each contain a string
+        let data = try fixtureData(subject: "ManifestField", named: "nested")
+
+        // When the field is decoded as a ManifestField
+        let outer = try PropertyListDecoder().decode(ManifestField.self, from: data)
+
+        // Then the outer field is the dictionary
+        #expect(outer.name == "Outer")
+        #expect(outer.type == .dictionary)
+
+        // And its subkey is the array
+        let items = try #require(outer.subkeys?.only)
+        #expect(items.name == "Items")
+        #expect(items.type == .array)
+
+        // And the array's subkey is an unnamed dictionary
+        let item = try #require(items.subkeys?.only)
+        #expect(item.name == nil)
+        #expect(item.type == .dictionary)
+
+        // And that dictionary's subkey is the string
+        let leaf = try #require(item.subkeys?.only)
+        #expect(leaf.name == "Leaf")
+        #expect(leaf.type == .string)
+        #expect(leaf.subkeys == nil)
+    }
 }
 
 extension Collection {
