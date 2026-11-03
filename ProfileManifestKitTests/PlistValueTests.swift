@@ -10,6 +10,7 @@ import Testing
 
 @testable import ProfileManifestKit
 
+@Suite("PlistValue")
 struct PlistValueTests {
     @Test(
         "Parses bool values correctly",

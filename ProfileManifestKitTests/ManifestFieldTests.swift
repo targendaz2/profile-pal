@@ -10,6 +10,7 @@ import Testing
 
 @testable import ProfileManifestKit
 
+@Suite("ManifestField")
 struct ManifestFieldTests {
     @Test("Decodes every key into its property")
     func allKeys() async throws {
