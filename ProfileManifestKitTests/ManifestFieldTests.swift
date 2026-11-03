@@ -168,6 +168,25 @@ struct ManifestFieldTests {
         #expect(leaf.type == .string)
         #expect(leaf.subkeys == nil)
     }
+
+    // The spec defines pfm_required = true as equivalent to pfm_require = always, but the models
+    // don't reconcile the two, so a field that sets both keeps each value as written, even when
+    // they conflict.
+    @Test("Decodes pfm_require and pfm_required independently")
+    func requireAndRequired() async throws {
+        // Given a field whose pfm_require is push
+        // And whose pfm_required is true, which the spec equates with always
+        let data = try fixtureData(subject: "ManifestField", named: "require-and-required")
+
+        // When the field is decoded as a ManifestField
+        let field = try PropertyListDecoder().decode(ManifestField.self, from: data)
+
+        // Then require keeps its own value rather than becoming .always
+        #expect(field.require == .push)
+
+        // And required keeps its own value
+        #expect(field.required == true)
+    }
 }
 
 extension Collection {
