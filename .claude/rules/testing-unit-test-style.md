@@ -30,7 +30,7 @@ Applies to every Swift Testing unit test. Use `PlistValueTests.parseBool` as the
 )
 func parseBool(fileName: String, expected: Bool) async throws {
     // Given a plist whose value is a <true/> or <false/> tag
-    let data = try fixtureData(named: fileName)
+    let data = try fixtureData(subject: "PlistValue", named: fileName)
 
     // When the value is decoded as a PlistValue
     let value = try decodeValue(from: data)
