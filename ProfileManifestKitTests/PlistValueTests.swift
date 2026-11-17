@@ -35,7 +35,7 @@ struct PlistValueTests {
         // When the value is decoded as a PlistValue
         let value = try decodeValue(from: data)
 
-        // Then it's a .int holding the tag's value
+        // Then it's an .int holding the tag's value
         #expect(value == .int(expected))
 
         // And not a .bool, which is tried before Int when decoding
@@ -55,9 +55,9 @@ struct PlistValueTests {
         // Then it's a .double holding the tag's value
         #expect(value == .double(1.5))
 
-        // And not a .int, which is tried before Double when decoding
+        // And not an .int, which is tried before Double when decoding
         if case .int = value {
-            Issue.record("Decoded a fractional <real> tag as a .int")
+            Issue.record("Decoded a fractional <real> tag as an .int")
         }
     }
 
@@ -72,7 +72,7 @@ struct PlistValueTests {
         // When the value is decoded as a PlistValue
         let value = try decodeValue(from: data)
 
-        // Then it's a .int holding the tag's value
+        // Then it's an .int holding the tag's value
         #expect(value == .int(2))
     }
 
@@ -90,7 +90,7 @@ struct PlistValueTests {
         // Then it's a .string holding the tag's value
         #expect(value == .string(expected))
 
-        // And not a .int or .bool, which are tried before String when decoding
+        // And not an .int or .bool, which are tried before String when decoding
         switch value {
             case .int, .bool: Issue.record("Decoded a <string> tag as \(value)")
             default: break
@@ -242,7 +242,7 @@ struct PlistValueTests {
         let data = try PropertyListEncoder().encode([original])
         let decoded = try PropertyListDecoder().decode([PlistValue].self, from: data)
 
-        // Then it comes back as a .int
+        // Then it comes back as an .int
         #expect(decoded == [.int(2)])
     }
 
@@ -270,11 +270,13 @@ struct PlistValueTests {
     )
     func coerceUnchanged(value: PlistValue, type: ManifestFieldType) async throws {
         // Given a value and field type other than an .int and real
+        let original = value
+
         // When the value is coerced to the field type
-        let coerced = value.coerced(to: type)
+        let coerced = original.coerced(to: type)
 
         // Then it's unchanged
-        #expect(coerced == value)
+        #expect(coerced == original)
     }
 
     // coerced(to:) only converts a top-level .int, so callers must coerce array items themselves.
@@ -287,13 +289,13 @@ struct PlistValueTests {
         // When it's coerced to the real field type
         let coerced = value.coerced(to: .real)
 
-        // Then it's unchanged, with the item still a .int
+        // Then it's unchanged, with the item still an .int
         #expect(coerced == value)
     }
 
     @Test("Unwraps nested arrays and dictionaries into plain Swift values")
     func unwrapValue() async throws {
-        // Given an .array holding a .int and a .dictionary of a .string
+        // Given an .array holding an .int and a .dictionary of a .string
         let value = PlistValue.array([.int(1), .dictionary(["key": .string("text")])])
 
         // When it's unwrapped into an untyped Swift value
