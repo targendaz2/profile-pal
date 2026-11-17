@@ -45,7 +45,6 @@ Copy one or two real manifests from [ProfileManifests](https://github.com/Profil
 
 - [ ] **Real manifests vs. the strict spec.** Real manifests with undocumented `pfm_type` or target values fail to load, by design. Choose fixtures that pass, or treat a failure as a finding.
 - [ ] **One bad enum value fails the whole manifest.** The tests above pin this behavior. Decide whether that's the intended product behavior before the UI depends on it.
-- [ ] **Coercing array items.** `coerced(to:)` doesn't recurse into arrays (pinned by `coerceArray`). Decide who coerces the items of a real-typed array or `rangeList`.
 
 ## Deferred to v2
 

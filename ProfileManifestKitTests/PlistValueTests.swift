@@ -248,11 +248,13 @@ struct PlistValueTests {
 
     @Test("Coerces ints to doubles for real fields")
     func coerceIntToReal() async throws {
-        // Given a whole-number .int, as a <real> of 2.0 decodes
+        // Given a real field
+        // And a whole-number .int, as a <real> of 2.0 decodes
+        let field = try decodeField(named: "field-real")
         let value = PlistValue.int(2)
 
-        // When it's coerced to the real field type
-        let coerced = value.coerced(to: .real)
+        // When the value is coerced to the field
+        let coerced = value.coerced(to: field)
 
         // Then it's a .double holding the same number
         #expect(coerced == .double(2.0))
@@ -261,35 +263,64 @@ struct PlistValueTests {
     @Test(
         "Leaves values unchanged unless coercing an int to real",
         arguments: [
-            (PlistValue.int(2), ManifestFieldType.integer),
-            (.int(2), .string),
-            (.double(1.5), .real),
-            (.string("2"), .real),
-            (.bool(true), .real),
+            (PlistValue.int(2), "field-integer"),
+            (.int(2), "field-string"),
+            (.double(1.5), "field-real"),
+            (.string("2"), "field-real"),
+            (.bool(true), "field-real"),
         ],
     )
-    func coerceUnchanged(value: PlistValue, type: ManifestFieldType) async throws {
-        // Given a value and field type other than an .int and real
-        let original = value
+    func coerceUnchanged(value: PlistValue, fieldName: String) async throws {
+        // Given a value and field other than an .int and a real field
+        let field = try decodeField(named: fieldName)
 
-        // When the value is coerced to the field type
-        let coerced = original.coerced(to: type)
+        // When the value is coerced to the field
+        let coerced = value.coerced(to: field)
 
         // Then it's unchanged
-        #expect(coerced == original)
+        #expect(coerced == value)
     }
 
-    // coerced(to:) only converts a top-level .int, so callers must coerce array items themselves.
-    // This test catches that changing.
-    @Test("Doesn't coerce ints inside arrays")
-    func coerceArray() async throws {
-        // Given an .array holding a whole-number .int
-        let value = PlistValue.array([.int(1)])
+    @Test("Coerces array items to the array's subkey")
+    func coerceArrayToField() async throws {
+        // Given an array field whose subkey is real
+        // And whose default is an <array> of <real> tags 1.0 and 2.5
+        let field = try decodeField(named: "field-array-of-reals")
+        let value = try #require(field.defaultValue)
 
-        // When it's coerced to the real field type
-        let coerced = value.coerced(to: .real)
+        // When the default is coerced to the field
+        let coerced = value.coerced(to: field)
 
-        // Then it's unchanged, with the item still an .int
+        // Then every item is a .double
+        #expect(coerced == .array([.double(1.0), .double(2.5)]))
+    }
+
+    @Test("Coerces dictionary values to the subkey with the same name")
+    func coerceDictionaryToField() async throws {
+        // Given a dictionary field with a real Ratio subkey and an integer Count subkey
+        // And whose default holds a whole Ratio, a Count, and an Extra key with no subkey
+        let field = try decodeField(named: "field-dictionary-with-real")
+        let value = try #require(field.defaultValue)
+
+        // When the default is coerced to the field
+        let coerced = value.coerced(to: field)
+
+        // Then Ratio is a .double and the other values are unchanged
+        #expect(
+            coerced == .dictionary(["Ratio": .double(2.0), "Count": .int(3), "Extra": .int(4)]))
+    }
+
+    @Test("Leaves values unchanged when their shape doesn't match the field")
+    func coerceMismatchedField() async throws {
+        // Given an array field whose subkey is real
+        // And a .dictionary holding a whole-number .int
+        let field = try decodeField(named: "field-array-of-reals")
+        let value = PlistValue.dictionary(["key": .int(1)])
+
+        // When the value is coerced to the field
+        let coerced = value.coerced(to: field)
+
+        // Then it's unchanged
         #expect(coerced == value)
     }
 
@@ -316,4 +347,10 @@ struct PlistValueTests {
 private func decodeValue(from data: Data) throws -> PlistValue {
     let root = try PropertyListDecoder().decode([String: PlistValue].self, from: data)
     return try #require(root["value"])
+}
+
+/// The `ManifestField` in the fixture `Fixtures/PlistValue/<name>.plist`.
+private func decodeField(named name: String) throws -> ManifestField {
+    let data = try fixtureData(subject: "PlistValue", named: name)
+    return try PropertyListDecoder().decode(ManifestField.self, from: data)
 }

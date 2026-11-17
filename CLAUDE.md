@@ -31,7 +31,7 @@ The project is early: the manifest model layer exists, while the UI is still the
 
 - `Manifest` is one payload domain (`pfm_domain`). Its `subkeys` is a tree of `ManifestField`s, nested through `subkeys` for arrays and dictionaries. Load one with `Manifest.load(from:)`, which uses `PropertyListDecoder`.
 - `ManifestField.require`/`conditionals`/`exclude` hold requirement logic. `ManifestConditionalRule` and `ManifestExclusionRule` each contain `ManifestTargetCondition`s that test *another* field by name (`pfm_target`).
-- `PlistValue` is a type-erased plist value used wherever a key can hold any type (defaults, range lists, placeholders). `PropertyListDecoder` decodes a whole-number `<real>` as `.int`, so call `coerced(to:)` with the field's `ManifestFieldType` before encoding.
+- `PlistValue` is a type-erased plist value used wherever a key can hold any type (defaults, range lists, placeholders). `PropertyListDecoder` decodes a whole-number `<real>` as `.int`, so call `coerced(to:)` with the value's `ManifestField` before encoding. It also reaches values nested in arrays and dictionaries.
 - Every model property maps to a `pfm_*` key through an explicit `CodingKeys` enum. Every key is optional except where the spec requires it.
 
 ### Rules for model code

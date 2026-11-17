@@ -74,14 +74,45 @@ public enum PlistValue: Codable, Sendable, Equatable {
         }
     }
 
-    /// The value coerced to `type`, for numbers the plist decoder can't tell apart.
+    /// The value coerced to `field`'s type, for numbers the plist decoder can't tell apart.
     ///
     /// `PropertyListDecoder` decodes a whole-number `<real>` as `.int`, so call this before
-    /// encoding a value whose field type is known.
-    public func coerced(to type: ManifestFieldType) -> Self {
-        switch (self, type) {
-            case (.int(let v), .real): .double(Double(v))
-            default: self
+    /// encoding a value whose field is known. An array's items are coerced to the array's first
+    /// subkey, and a dictionary's values to the subkey with the same name. Values with no matching
+    /// subkey are left unchanged.
+    public func coerced(to field: ManifestField) -> Self {
+        switch (self, field.type) {
+            // A whole-number <real> that the decoder read as an int: turn it back into a double.
+            case (.int(let v), .real):
+                return .double(Double(v))
+
+            // An array: every item shares one definition, the array's first subkey.
+            case (.array(let items), .array):
+                guard let itemField = field.subkeys?.first else {
+                    return self
+                }
+
+                return .array(items.map { $0.coerced(to: itemField) })
+
+            // A dictionary: each value is defined by the subkey whose name matches its key.
+            case (.dictionary(let values), .dictionary):
+                let subkeys = field.subkeys ?? []
+                var coercedValues: [String: PlistValue] = [:]
+
+                for (key, value) in values {
+                    if let subkey = subkeys.first(where: { $0.name == key }) {
+                        coercedValues[key] = value.coerced(to: subkey)
+                    } else {
+                        // No subkey describes this key, so there's no type to coerce to.
+                        coercedValues[key] = value
+                    }
+                }
+
+                return .dictionary(coercedValues)
+
+            // Everything else already decodes as the right case.
+            default:
+                return self
         }
     }
 }

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>pfm_name</key>
+	<string>Settings</string>
+	<key>pfm_type</key>
+	<string>dictionary</string>
+	<key>pfm_subkeys</key>
+	<array>
+		<dict>
+			<key>pfm_name</key>
+			<string>Ratio</string>
+			<key>pfm_type</key>
+			<string>real</string>
+		</dict>
+		<dict>
+			<key>pfm_name</key>
+			<string>Count</string>
+			<key>pfm_type</key>
+			<string>integer</string>
+		</dict>
+	</array>
+	<key>pfm_default</key>
+	<dict>
+		<key>Ratio</key>
+		<real>2.0</real>
+		<key>Count</key>
+		<integer>3</integer>
+		<key>Extra</key>
+		<integer>4</integer>
+	</dict>
+</dict>
+</plist>
