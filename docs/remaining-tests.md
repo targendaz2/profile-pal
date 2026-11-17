@@ -2,7 +2,7 @@
 
 As of 2026-11-03.
 
-`PlistValue` and `ManifestField` are fully tested on `feat/manifest-framework`: 39 passing cases in `PlistValueTests` and 8 tests in `ManifestFieldTests`. What's left is suites for the other two manifest model files: `ManifestCondition` and `Manifest`. Manifests are XML plists only; binary manifest support is deferred to v2 (see [decisions.md](decisions.md)).
+`PlistValue` and `ManifestField` are fully tested on `feat/manifest-framework`, in `PlistValueTests` and `ManifestFieldTests`. What's left is suites for the other two manifest model files: `ManifestCondition` and `Manifest`. Manifests are XML plists only; binary manifest support is deferred to v2 (see [decisions.md](decisions.md)).
 
 Every new test follows the two rules in `.claude/rules/`:
 
