@@ -2,36 +2,21 @@
 
 As of 2026-11-20.
 
-`PlistValue`, `ManifestField`, and the `ManifestCondition` types are fully tested on `feat/manifest-framework`, in `PlistValueTests`, `ManifestFieldTests`, and `ManifestConditionTests`. What's left is a suite for `Manifest`. Manifests are XML plists only; binary manifest support is deferred to v2 (see [decisions.md](decisions.md)).
+Every manifest model is fully tested on `feat/manifest-framework`, in `PlistValueTests`, `ManifestFieldTests`, `ManifestConditionTests`, and `ManifestTests`. What's left is an optional smoke test against real manifests. Manifests are XML plists only; binary manifest support is deferred to v2 (see [decisions.md](decisions.md)).
 
 Every new test follows the two rules in `.claude/rules/`:
 
 - **`testing-unit-test-style.md`:** Given / When / Then comments that say what each step is, one concept per line. Minimal `func` names, with context in the `@Test` display name. `func` on the line below `@Test(...)`. An "And not" check where an earlier-tried type could realistically claim the value. No tests of behavior Swift synthesizes, such as an enum's implicit raw values.
 - **`testing-plist-fixtures.md`:** XML fixtures in `ProfileManifestKitTests/Fixtures/<Subject>/`, one case per file. Each folder gets its own `Copy <Subject> Fixtures` build phase, and every new fixture must be added to that phase by hand.
 
-## 1. `ManifestTests`
-
-New fixture folder `Fixtures/Manifest/` with a `Copy Manifest Fixtures` phase.
-
-| Test | Fixture | Checks |
-| --- | --- | --- |
-| Every key | `manifest-all-keys` | All 23 keys set, including `pfm_icon` (`<data>`) and `pfm_last_modified` (`<date>`); every property matches. |
-| Minimal | `manifest-minimal` | Only `pfm_domain` and `pfm_subkeys`; every optional property is `nil`. |
-| Missing domain | `manifest-missing-domain` | Throws `keyNotFound`. |
-| Missing subkeys | `manifest-missing-subkeys` | Throws `keyNotFound`. |
-| Unknown interaction | `manifest-interaction-unknown` | An undocumented `pfm_interaction` value throws. Pins the strict-spec policy. The documented values' raw values are synthesized, so they aren't tested. |
-| `load(from:)` | `manifest-minimal` | Loads from the fixture's bundle URL. |
-| `load(from:)`, missing file | none | A URL that doesn't exist throws. |
-| `load(from:)`, not a plist | `not-a-plist.txt` | A text file throws. |
-
-## 2. Real-manifest smoke test (optional)
+## Real-manifest smoke test (optional)
 
 Copy one or two real manifests from [ProfileManifests](https://github.com/ProfileManifests/ProfileManifests) (MIT licensed) into `Fixtures/Manifest/`, such as `com.apple.applicationaccess` or a domain that uses conditionals. Check that each loads and has subkeys.
 
 ## Open decisions
 
 - [ ] **Real manifests vs. the strict spec.** Real manifests with undocumented `pfm_type` or target values fail to load, by design. Choose fixtures that pass, or treat a failure as a finding.
-- [ ] **One bad enum value fails the whole manifest.** The tests above pin this behavior. Decide whether that's the intended product behavior before the UI depends on it.
+- [ ] **One bad enum value fails the whole manifest.** `ManifestFieldTests.unknownType` and `ManifestTests.unknownInteraction` pin this behavior. Decide whether that's the intended product behavior before the UI depends on it.
 
 ## Deferred to v2
 
