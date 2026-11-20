@@ -8,7 +8,7 @@
 import Foundation
 
 /// A condition that tests the state of another field.
-public struct ManifestTargetCondition: Codable, Sendable {
+public struct ManifestTargetCondition: Decodable, Sendable {
     /// The name of the target field.
     ///
     /// `nil` when the condition doesn't test a field, such as one that tests only the platform.
@@ -42,7 +42,7 @@ public struct ManifestTargetCondition: Codable, Sendable {
 }
 
 /// A rule that changes when the field is required once all of its conditions match.
-public struct ManifestConditionalRule: Codable, Sendable {
+public struct ManifestConditionalRule: Decodable, Sendable {
     /// When the field must be present in the payload if the conditions match.
     ///
     /// - Note: The spec allows only `.always` and `.push` here, but `.alwaysNested` decodes too.
@@ -58,7 +58,7 @@ public struct ManifestConditionalRule: Codable, Sendable {
 }
 
 /// A rule that excludes the field from the payload once all of its conditions match.
-public struct ManifestExclusionRule: Codable, Sendable {
+public struct ManifestExclusionRule: Decodable, Sendable {
     /// The conditions that must all match for the field to be excluded.
     public let targetConditions: [ManifestTargetCondition]
 

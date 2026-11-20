@@ -134,12 +134,12 @@ struct ManifestTests {
             .appending(path: "\(UUID().uuidString).plist")
 
         // When the manifest is loaded from the URL
-        let result = Result { try Manifest.load(from: url) }
-
-        // Then loading fails
-        #expect(throws: (any Error).self) {
-            try result.get()
+        let error = try #require(throws: CocoaError.self) {
+            try Manifest.load(from: url)
         }
+
+        // Then loading fails because the file doesn't exist
+        #expect(error.code == .fileReadNoSuchFile)
     }
 
     @Test("Throws when loading from a file that isn't a property list")
@@ -148,11 +148,14 @@ struct ManifestTests {
         let url = try fixtureURL(subject: "Manifest", named: "not-a-plist", withExtension: "txt")
 
         // When the manifest is loaded from the URL
-        let result = Result { try Manifest.load(from: url) }
+        let error = try #require(throws: DecodingError.self) {
+            try Manifest.load(from: url)
+        }
 
         // Then loading fails because the file can't be decoded
-        #expect(throws: DecodingError.self) {
-            try result.get()
+        guard case .dataCorrupted = error else {
+            Issue.record("Expected dataCorrupted, got \(error)")
+            return
         }
     }
 

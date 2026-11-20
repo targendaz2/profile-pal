@@ -8,7 +8,7 @@
 import Foundation
 
 /// A single field in the manifest schema.
-public struct ManifestField: Codable, Sendable {
+public struct ManifestField: Decodable, Sendable {
     // MARK: - Apple-defined keys
 
     /// The name of the field.

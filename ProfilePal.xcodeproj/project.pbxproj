@@ -109,6 +109,7 @@
 				"Fixtures/PlistValue/field-integer.plist",
 				"Fixtures/PlistValue/field-real.plist",
 				"Fixtures/PlistValue/field-string.plist",
+				"Fixtures/PlistValue/integer-above-int-max.plist",
 				"Fixtures/PlistValue/integer-one.plist",
 				"Fixtures/PlistValue/integer-zero.plist",
 				Fixtures/PlistValue/nested.plist,

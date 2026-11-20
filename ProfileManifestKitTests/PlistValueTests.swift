@@ -44,6 +44,18 @@ struct PlistValueTests {
         }
     }
 
+    @Test("Parses ints above Int.max as exact uints")
+    func parseIntAboveIntMax() async throws {
+        // Given a plist whose value is an <integer> tag of UInt64.max
+        let data = try fixtureData(subject: "PlistValue", named: "integer-above-int-max")
+
+        // When the value is decoded as a PlistValue
+        let value = try decodeValue(from: data)
+
+        // Then it's a .uint holding the tag's exact value
+        #expect(value == .uint(UInt64.max))
+    }
+
     @Test("Parses fractional reals as doubles")
     func parseFractionalReal() async throws {
         // Given a plist whose value is a <real> tag of 1.5
@@ -206,6 +218,7 @@ struct PlistValueTests {
             PlistValue.string("text"),
             .bool(true),
             .int(42),
+            .uint(UInt64.max),
             .double(1.5),
             .data(Data([1, 2, 3])),
             .date(Date(timeIntervalSinceReferenceDate: 0)),
@@ -322,22 +335,6 @@ struct PlistValueTests {
 
         // Then it's unchanged
         #expect(coerced == value)
-    }
-
-    @Test("Unwraps nested arrays and dictionaries into plain Swift values")
-    func unwrapValue() async throws {
-        // Given an .array holding an .int and a .dictionary of a .string
-        let value = PlistValue.array([.int(1), .dictionary(["key": .string("text")])])
-
-        // When it's unwrapped into an untyped Swift value
-        let unwrapped = value.value
-
-        // Then it's a Swift array of an Int and a Swift dictionary holding a String
-        let array = try #require(unwrapped as? [Any])
-        #expect(array.count == 2)
-        #expect(array[0] as? Int == 1)
-        let dictionary = try #require(array[1] as? [String: Any])
-        #expect(dictionary["key"] as? String == "text")
     }
 }
 

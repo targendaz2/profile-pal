@@ -23,7 +23,3 @@ The spec's table says `pfm_app_min`, `pfm_app_max`, and `pfm_app_deprecated` app
 ## How malformed can a manifest be and still load?
 
 v2 or later should load partly malformed manifests and flag each problem in the GUI (see [decisions.md](decisions.md)). Some problems, such as a missing `pfm_domain` or a file that isn't a plist, must still fail. Where the line is for the rest, such as a manifest with many fields skipped, isn't decided.
-
-## Do the models need to be `Encodable`?
-
-The model structs are `Codable`, but only `PlistValue` is ever encoded in tests. If the app only reads manifests (and writes profiles, a different format), they could be `Decodable` only, which would also halve the hand-written decoding that graceful handling will need. Otherwise their encoding needs tests.

@@ -8,7 +8,7 @@
 import Foundation
 
 /// A payload manifest describing one payload domain and its fields.
-public struct Manifest: Codable, Sendable {
+public struct Manifest: Decodable, Sendable {
     // MARK: - Apple-defined keys
 
     /// The payload's domain, used as its `PayloadType`.

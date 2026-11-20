@@ -14,33 +14,27 @@ public enum PlistValue: Codable, Sendable, Equatable {
     case string(String)
     case bool(Bool)
     case int(Int)
+    /// An integer above `Int.max`, which plists allow up to `UInt64.max`.
+    case uint(UInt64)
     case double(Double)
     case data(Data)
     case date(Date)
     case array([PlistValue])
     case dictionary([String: PlistValue])
 
-    /// The wrapped value as an untyped Swift value, with nested arrays and dictionaries unwrapped.
-    public var value: Any {
-        switch self {
-            case .string(let v): v
-            case .bool(let v): v
-            case .int(let v): v
-            case .double(let v): v
-            case .data(let v): v
-            case .date(let v): v
-            case .array(let v): v.map(\.value)
-            case .dictionary(let v): v.mapValues(\.value)
-        }
-    }
-
     public init(from decoder: any Decoder) throws {
         let container = try decoder.singleValueContainer()
 
+        // Each failed attempt builds and discards a DecodingError, so a dictionary costs eight
+        // before it matches. Fine at manifest sizes; check the container's shape first if
+        // profiling ever shows it.
         if let v = try? container.decode(Bool.self) {
             self = .bool(v)
         } else if let v = try? container.decode(Int.self) {
             self = .int(v)
+        } else if let v = try? container.decode(UInt64.self) {
+            // Too big for Int: keep it exact rather than let Double round it.
+            self = .uint(v)
         } else if let v = try? container.decode(Double.self) {
             self = .double(v)
         } else if let v = try? container.decode(String.self) {
@@ -66,6 +60,7 @@ public enum PlistValue: Codable, Sendable, Equatable {
             case .string(let v): try container.encode(v)
             case .bool(let v): try container.encode(v)
             case .int(let v): try container.encode(v)
+            case .uint(let v): try container.encode(v)
             case .double(let v): try container.encode(v)
             case .data(let v): try container.encode(v)
             case .date(let v): try container.encode(v)
@@ -84,6 +79,10 @@ public enum PlistValue: Codable, Sendable, Equatable {
         switch (self, field.type) {
             // A whole-number <real> that the decoder read as an int: turn it back into a double.
             case (.int(let v), .real):
+                return .double(Double(v))
+
+            // The same for a whole-number <real> above Int.max, which the decoder read as a uint.
+            case (.uint(let v), .real):
                 return .double(Double(v))
 
             // An array: every item shares one definition, the array's first subkey.
