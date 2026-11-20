@@ -30,9 +30,9 @@ The project is early: the manifest model layer exists, while the UI is still the
 ## Architecture: manifest models (`ProfileManifestKit`)
 
 - `Manifest` is one payload domain (`pfm_domain`). Its `subkeys` is a tree of `ManifestField`s, nested through `subkeys` for arrays and dictionaries. Load one with `Manifest.load(from:)`, which uses `PropertyListDecoder`.
-- `ManifestField.require`/`conditionals`/`exclude` hold requirement logic. `ManifestConditionalRule` and `ManifestExclusionRule` each contain `ManifestTargetCondition`s that test *another* field by name (`pfm_target`).
+- `ManifestField.require`/`conditionals`/`exclude` hold requirement logic. `ManifestConditionalRule` and `ManifestExclusionRule` each contain `ManifestTargetCondition`s that test *another* field by name (`pfm_target`, which is optional because some real conditions test the platform instead).
 - `PlistValue` is a type-erased plist value used wherever a key can hold any type (defaults, range lists, placeholders). `PropertyListDecoder` decodes a whole-number `<real>` as `.int`, so call `coerced(to:)` with the value's `ManifestField` before encoding. It also reaches values nested in arrays and dictionaries.
-- Every model property maps to a `pfm_*` key through an explicit `CodingKeys` enum. Every key is optional except where the spec requires it.
+- Every model property maps to a `pfm_*` key through an explicit `CodingKeys` enum. In v1, loading existing manifests comes first: a property is non-optional only when the spec requires its key and real manifests reliably include it. A spec-required key that real manifests leave out stays optional, with a row in `docs/decisions.md` saying why.
 
 ### Rules for model code
 
@@ -44,4 +44,4 @@ The project is early: the manifest model layer exists, while the UI is still the
 
 - Work on feature branches and open PRs into `main`. When a non-draft PR touches Swift, pbxproj, plist, or entitlements files, `.github/workflows/claude-code-review.yml` runs an automated Claude code review on it.
 - When a pre-commit check (security review, diagnostics) finds an issue, report it and wait for the user. Don't fix it yourself.
-- When a decision becomes a convention, write it as a rule (here or in `.claude/rules/`) instead of logging it. Log other decisions that shape the shipped app (scope cuts, deferrals) in `docs/decisions.md` when they're made, and check it before proposing work it rules out.
+- When a decision becomes a convention, write it as a rule (here or in `.claude/rules/`) instead of logging it. Log other decisions that shape the shipped app (scope cuts, deferrals) in `docs/decisions.md` when they're made, and check it before proposing work it rules out. Track unsettled questions in `docs/outstanding-questions.md`; when one is settled, log it (or write the rule) and remove it from that file.
