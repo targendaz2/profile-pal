@@ -1,0 +1,42 @@
+---
+paths:
+  - "ProfileManifestKitTests/**/*.swift"
+---
+
+# Unit test style
+
+Applies to every Swift Testing unit test. Use `PlistValueTests.parseBool` as the reference.
+
+- **Structure:** every test body is split into `// Given`, `// When`, and `// Then` sections, in that order, each followed by its code.
+- **Say what, not just which step:** each section comment states what's given, what happens, or what's expected (e.g. `// When the value is decoded as a PlistValue`), never a bare `// Given`.
+- **One thing per line:** each comment line describes exactly one concept. Add another concept on an extra line starting with `// And` (all apply) or `// Or` (alternatives), which also describes one concept.
+  - Variants of the same concept, such as the values a parameterized test runs over, stay on one line (`a <true/> or <false/> tag`).
+  - So do details describing that one thing, such as a value's contents (`an <array> of a mixed-type <dict> and an empty <dict>`), not separate `// And` lines.
+  - Split only when the concepts are distinct:
+
+    ```swift
+    // Given a value decoded as .int
+    // And a field whose type is real
+    ```
+- **Naming:** keep the function name minimal (`parseBool`). Put the context in the `@Test` display name, which is what test reports show.
+- **Layout:** `@Test(...)` sits on its own line(s), with `func` on the line below, never `@Test func` on one line.
+- **Suites:** one `struct <Subject>Tests` per type under test, marked `@Suite("<Subject>")` on the line above it (`@Suite("PlistValue")` over `struct PlistValueTests`). The display name is the type's name alone, since the test names already say what each test checks.
+  - A short source file whose types form one concept may share one suite named after the file (`@Suite("ManifestCondition")` over `struct ManifestConditionTests`). Prefix each `func` with the type it tests (`targetConditionAllKeys`) so names stay unambiguous.
+- **Don't test what Swift synthesizes:** skip tests whose only subject is compiler-generated behavior, such as an enum's implicit raw values (`case push` decoding from `"push"`). Do test raw values written out by hand (`case userManaged = "user-managed"`).
+
+```swift
+@Test(
+    "Parses bool values correctly",
+    arguments: zip(["bool-false", "bool-true"], [false, true]),
+)
+func parseBool(fileName: String, expected: Bool) async throws {
+    // Given a plist whose value is a <true/> or <false/> tag
+    let data = try fixtureData(subject: "PlistValue", named: fileName)
+
+    // When the value is decoded as a PlistValue
+    let value = try decodeValue(from: data)
+
+    // Then it's a .bool holding the tag's value
+    #expect(value == .bool(expected))
+}
+```

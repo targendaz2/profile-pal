@@ -1,6 +1,6 @@
 //
 //  ManifestCondition.swift
-//  ProfilePal
+//  ProfileManifestKit
 //
 //  Created by David Rosenberg on 10/26/26.
 //
@@ -8,24 +8,28 @@
 import Foundation
 
 /// A condition that tests the state of another field.
-struct ManifestTargetCondition: Codable, Sendable {
+public struct ManifestTargetCondition: Decodable, Sendable {
     /// The name of the target field.
-    let target: String
+    ///
+    /// `nil` when the condition doesn't test a field, such as one that tests only the platform.
+    ///
+    /// - Note: The spec requires this key; it's optional so real manifests that leave it out load.
+    public let target: String?
 
     /// Whether the target field must be present in the payload.
-    let present: Bool?
+    public let present: Bool?
 
     /// The values the target field's value must be one of.
-    let rangeList: [PlistValue]?
+    public let rangeList: [PlistValue]?
 
     /// The values the target field's value must not be one of.
-    let negatedRangeList: [PlistValue]?
+    public let negatedRangeList: [PlistValue]?
 
     /// The values the target field's value must contain at least one of.
-    let containsAny: [PlistValue]?
+    public let containsAny: [PlistValue]?
 
     /// The values the target field's value must not contain any of.
-    let negatedContainsAny: [PlistValue]?
+    public let negatedContainsAny: [PlistValue]?
 
     enum CodingKeys: String, CodingKey {
         case target = "pfm_target"
@@ -38,12 +42,14 @@ struct ManifestTargetCondition: Codable, Sendable {
 }
 
 /// A rule that changes when the field is required once all of its conditions match.
-struct ManifestConditionalRule: Codable, Sendable {
+public struct ManifestConditionalRule: Decodable, Sendable {
     /// When the field must be present in the payload if the conditions match.
-    let require: ManifestRequirement?
+    ///
+    /// - Note: The spec allows only `.always` and `.push` here, but `.alwaysNested` decodes too.
+    public let require: ManifestRequirement?
 
     /// The conditions that must all match for the rule to apply.
-    let targetConditions: [ManifestTargetCondition]
+    public let targetConditions: [ManifestTargetCondition]
 
     enum CodingKeys: String, CodingKey {
         case require = "pfm_require"
@@ -52,9 +58,9 @@ struct ManifestConditionalRule: Codable, Sendable {
 }
 
 /// A rule that excludes the field from the payload once all of its conditions match.
-struct ManifestExclusionRule: Codable, Sendable {
+public struct ManifestExclusionRule: Decodable, Sendable {
     /// The conditions that must all match for the field to be excluded.
-    let targetConditions: [ManifestTargetCondition]
+    public let targetConditions: [ManifestTargetCondition]
 
     enum CodingKeys: String, CodingKey {
         case targetConditions = "pfm_target_conditions"

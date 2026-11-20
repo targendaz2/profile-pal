@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>pfm_target</key>
+	<string>Mode</string>
+	<key>pfm_present</key>
+	<false/>
+	<key>pfm_range_list</key>
+	<array>
+		<string>auto</string>
+		<integer>2</integer>
+	</array>
+	<key>pfm_n_range_list</key>
+	<array>
+		<true/>
+		<real>1.5</real>
+	</array>
+	<key>pfm_contains_any</key>
+	<array>
+		<string>wifi</string>
+	</array>
+	<key>pfm_n_contains_any</key>
+	<array>
+		<integer>7</integer>
+	</array>
+</dict>
+</plist>

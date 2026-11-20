@@ -1,6 +1,6 @@
 ---
 paths:
-  - "ProfilePal/Models/**/*.swift"
+  - "ProfileManifestKit/**/*.swift"
 ---
 
 # Doc comments for profile coding models
