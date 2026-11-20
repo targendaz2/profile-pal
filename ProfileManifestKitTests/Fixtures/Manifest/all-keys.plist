@@ -57,5 +57,14 @@
 	<string>19.0</string>
 	<key>pfm_last_modified</key>
 	<date>2026-10-27T12:00:00Z</date>
+	<key>pfm_platforms</key>
+	<array>
+		<string>iOS</string>
+		<string>macOS</string>
+	</array>
+	<key>pfm_unique</key>
+	<true/>
+	<key>pfm_app_url</key>
+	<string>https://example.com/app</string>
 </dict>
 </plist>

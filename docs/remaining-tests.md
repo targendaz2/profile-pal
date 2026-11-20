@@ -17,17 +17,19 @@ Every new test follows the two rules in `.claude/rules/`:
 
 ## Findings from the real-manifest survey
 
-On 2026-11-20, 112 of ProfileManifests' 118 Apple manifests (commit `0d01e64`) loaded. The 6 failures, and keys that load but are dropped, point at these gaps. None is fixed yet.
+On 2026-11-20, 286 of ProfileManifests' 288 manifests (commit `0d01e64`) loaded. The 2 failures, and keys that load but are dropped, point at these gaps. None is fixed yet.
 
-- [ ] **`always-nested` is missing from `ManifestRequirement`.** The spec documents it for a field's `pfm_require` (format version 2), but for a conditional's `pfm_require` it lists only `always` and `push`, and both use the same enum. 2 Apple manifests fail on it.
+- [ ] **A conditional's `require` accepts `.alwaysNested`.** The spec allows `always-nested` on a field's `pfm_require` but lists only `always` and `push` for a conditional's, and both use `ManifestRequirement`. One manifest (`com.jamf.connect.login-OpenID`) uses it in a conditional and loads. A separate two-case enum would enforce the spec but reject that manifest.
 - [ ] **`ManifestTargetCondition` lacks two documented keys.** `pfm_value_empty`, which the spec oddly marks required, and the extended condition key `pfm_domain`. Both are silently dropped (`com.apple.dock` uses `pfm_value_empty`).
-- [ ] **Undocumented condition keys fail the whole manifest.** 4 Apple manifests have conditions with only `pfm_platforms`, `pfm_n_platforms`, or `pfm_distribution` and no `pfm_target`, which the spec requires. This is the strict-spec policy working as designed.
-- [ ] **The models implement a subset of the documented extended keys.** Both open-source manifests use `pfm_app_min`, `pfm_app_max`, `pfm_app_deprecated`, `pfm_app_url`, `pfm_platforms`, `pfm_unique`, `pfm_hidden`, or `pfm_description_reference`, which load but are dropped. No decision records this as a scope cut.
+- [ ] **Conditions without `pfm_target` load but say nothing.** 4 Apple manifests have conditions with only `pfm_platforms`, `pfm_n_platforms`, or `pfm_distribution`. `target` is optional so they load (see [decisions.md](decisions.md)), but none of those three keys is modeled, so these conditions have no target and no test. The spec's own example (under "Example Conditions & Exclusions") uses `pfm_platforms` in a condition; `pfm_n_platforms` and `pfm_distribution` aren't documented there.
+- [ ] **2 manifests use the undocumented `pfm_type` value `float`.** These fail by design under the strict-spec policy.
+- [ ] **`pfm_app_min`, `pfm_app_max`, and `pfm_app_deprecated` are modeled on fields only.** The spec's table says they don't apply to payloads, but their descriptions say "key or payload", and 10 manifests set `pfm_app_min` on the payload. Those payload values are dropped.
+- [ ] **`interaction` and `lastModified` are optional on `Manifest`, though the spec requires them on a payload.** `platforms` is required, as the spec says, and `unique` is deliberately optional (see [decisions.md](decisions.md)), so `Manifest` is inconsistent until these two are decided.
+- [ ] **The models implement a subset of the documented extended keys.** Still unmodeled, and dropped when present: `pfm_allowed_file_types`, `pfm_default_copy`, `pfm_value_copy`, `pfm_description_extended`, `pfm_description_reference`, `pfm_enabled`, `pfm_excluded`, `pfm_hidden`, `pfm_value_decimal_places`, `pfm_substitution_variables`, `pfmx_comment`, and the 10 keys the spec marks as ProfileCreator-only. No decision records this as a scope cut.
 
 ## Open decisions
 
-- [ ] **Real manifests vs. the strict spec.** Real manifests with undocumented values fail to load, by design, while undocumented keys are silently dropped. The smoke-test fixtures were chosen to pass; the findings above list the failures seen.
-- [ ] **One bad enum value fails the whole manifest.** `ManifestFieldTests.unknownType` and `ManifestTests.unknownInteraction` pin this behavior. Decide whether that's the intended product behavior before the UI depends on it.
+- [ ] **Real manifests vs. the strict spec.** Real manifests with undocumented values fail to load for now, while undocumented keys are silently dropped. Both should eventually become findings shown in the GUI (see [decisions.md](decisions.md)). The smoke-test fixtures were chosen to pass; the findings above list the failures seen.
 
 ## Deferred to v2
 

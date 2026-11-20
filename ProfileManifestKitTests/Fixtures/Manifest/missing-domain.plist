@@ -13,5 +13,9 @@
 			<string>boolean</string>
 		</dict>
 	</array>
+	<key>pfm_platforms</key>
+	<array>
+		<string>macOS</string>
+	</array>
 </dict>
 </plist>

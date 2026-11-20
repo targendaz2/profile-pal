@@ -52,11 +52,14 @@ struct ManifestFieldTests {
         #expect(field.placeholder == .int(15))
         #expect(field.rangeListTitles == ["One", "Five", "Ten"])
         #expect(field.valueUnit == "minutes")
+        #expect(field.valueInverted == true)
         #expect(field.note == "Applies after restart.")
         #expect(field.documentationURL == "https://example.com/docs")
         #expect(field.sensitive == true)
         #expect(field.supervised == false)
         #expect(field.userApproved == true)
+        #expect(field.platforms == ["iOS", "macOS"])
+        #expect(field.unsupportedPlatforms == ["tvOS"])
         #expect(field.iOSMin == "14.0")
         #expect(field.iOSDeprecated == "15.0")
         #expect(field.iOSMax == "16.0")
@@ -66,6 +69,9 @@ struct ManifestFieldTests {
         #expect(field.tvOSMin == "17.0")
         #expect(field.tvOSDeprecated == "18.0")
         #expect(field.tvOSMax == "19.0")
+        #expect(field.appMin == "2.0")
+        #expect(field.appDeprecated == "3.0")
+        #expect(field.appMax == "4.0")
     }
 
     @Test("Decodes a field with only a type")
@@ -186,6 +192,20 @@ struct ManifestFieldTests {
 
         // And required keeps its own value
         #expect(field.required == true)
+    }
+
+    // always-nested has a hand-written, hyphenated raw value, so a typo would break every manifest
+    // that requires a nested field.
+    @Test("Decodes pfm_require always-nested as .alwaysNested")
+    func requireAlwaysNested() async throws {
+        // Given a field whose pfm_require is always-nested
+        let data = try fixtureData(subject: "ManifestField", named: "require-always-nested")
+
+        // When the field is decoded as a ManifestField
+        let field = try PropertyListDecoder().decode(ManifestField.self, from: data)
+
+        // Then require is .alwaysNested
+        #expect(field.require == .alwaysNested)
     }
 
     // The two managed targets have hand-written, hyphenated raw values, so a typo in either would

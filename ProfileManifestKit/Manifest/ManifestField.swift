@@ -89,6 +89,13 @@ public struct ManifestField: Codable, Sendable {
     /// The unit the field's value represents, such as milliseconds, hours, or characters.
     public let valueUnit: String?
 
+    /// Whether the user's value is inverted before it's written to the payload.
+    ///
+    /// Set when `title` or `description` is worded as the opposite of the field's value.
+    ///
+    /// - Important: Only valid when `type` is `.boolean`.
+    public let valueInverted: Bool?
+
     /// A note that draws the user's attention to something specific about the field.
     public let note: String?
 
@@ -105,6 +112,12 @@ public struct ManifestField: Codable, Sendable {
 
     /// Whether the device must be user approved, or enrolled using DEP, for the field to work.
     public let userApproved: Bool?
+
+    /// The platforms that support the field, such as `iOS`, `macOS`, or `tvOS`.
+    public let platforms: [String]?
+
+    /// The platforms that don't support the field.
+    public let unsupportedPlatforms: [String]?
 
     /// The iOS version that started supporting the field.
     public let iOSMin: String?
@@ -133,6 +146,15 @@ public struct ManifestField: Codable, Sendable {
     /// The tvOS version that stopped supporting the field.
     public let tvOSMax: String?
 
+    /// The app version that started supporting the field.
+    public let appMin: String?
+
+    /// The app version that deprecated the field.
+    public let appDeprecated: String?
+
+    /// The app version that stopped supporting the field.
+    public let appMax: String?
+
     enum CodingKeys: String, CodingKey {
         case name = "pfm_name"
         case title = "pfm_title"
@@ -155,11 +177,14 @@ public struct ManifestField: Codable, Sendable {
         case placeholder = "pfm_value_placeholder"
         case rangeListTitles = "pfm_range_list_titles"
         case valueUnit = "pfm_value_unit"
+        case valueInverted = "pfm_value_inverted"
         case note = "pfm_note"
         case documentationURL = "pfm_documentation_url"
         case sensitive = "pfm_sensitive"
         case supervised = "pfm_supervised"
         case userApproved = "pfm_user_approved"
+        case platforms = "pfm_platforms"
+        case unsupportedPlatforms = "pfm_n_platforms"
         case iOSMin = "pfm_ios_min"
         case iOSDeprecated = "pfm_ios_deprecated"
         case iOSMax = "pfm_ios_max"
@@ -169,6 +194,9 @@ public struct ManifestField: Codable, Sendable {
         case tvOSMin = "pfm_tvos_min"
         case tvOSDeprecated = "pfm_tvos_deprecated"
         case tvOSMax = "pfm_tvos_max"
+        case appMin = "pfm_app_min"
+        case appDeprecated = "pfm_app_deprecated"
+        case appMax = "pfm_app_max"
     }
 }
 
@@ -188,6 +216,9 @@ public enum ManifestFieldType: String, Codable, Sendable {
 public enum ManifestRequirement: String, Codable, Sendable {
     /// The field is always required.
     case always
+
+    /// The field is always required, even when it's inside a nested dictionary.
+    case alwaysNested = "always-nested"
 
     /// The field is required only when the profile is pushed by MDM.
     case push

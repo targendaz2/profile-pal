@@ -35,27 +35,24 @@ struct ManifestConditionTests {
         #expect(condition.negatedContainsAny == [.int(7)])
     }
 
-    @Test("Throws when a target condition's pfm_target is missing")
+    // The spec requires pfm_target, but real manifests leave it out of conditions that test the
+    // platform instead of a field, so the models accept it missing (see docs/decisions.md).
+    @Test("Decodes a target condition without pfm_target")
     func targetConditionMissingTarget() async throws {
-        // Given a target condition with no pfm_target key
+        // Given a target condition whose only key is pfm_present
         let data = try fixtureData(
             subject: "ManifestCondition",
             named: "target-condition-missing-target",
         )
 
         // When the condition is decoded as a ManifestTargetCondition
-        let error = try #require(throws: DecodingError.self) {
-            try PropertyListDecoder().decode(ManifestTargetCondition.self, from: data)
-        }
+        let condition = try PropertyListDecoder().decode(ManifestTargetCondition.self, from: data)
 
-        // Then decoding fails because a required key is absent
-        guard case .keyNotFound(let key, _) = error else {
-            Issue.record("Expected keyNotFound, got \(error)")
-            return
-        }
+        // Then it has no target
+        #expect(condition.target == nil)
 
-        // And the absent key is pfm_target
-        #expect(key.stringValue == "pfm_target")
+        // And its other keys still decode
+        #expect(condition.present == true)
     }
 
     @Test("Decodes a conditional rule with only target conditions")

@@ -15,5 +15,9 @@
 	</array>
 	<key>pfm_interaction</key>
 	<string>merged</string>
+	<key>pfm_platforms</key>
+	<array>
+		<string>macOS</string>
+	</array>
 </dict>
 </plist>

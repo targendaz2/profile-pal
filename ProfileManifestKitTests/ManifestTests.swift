@@ -32,10 +32,13 @@ struct ManifestTests {
         // And each extended key's value is in its property
         #expect(manifest.subdomain == "network")
         #expect(manifest.interaction == .exclusive)
+        #expect(manifest.unique == true)
         #expect(manifest.icon == Data([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]))
         #expect(manifest.note == "Requires a restart.")
+        #expect(manifest.appURL == "https://example.com/app")
         #expect(manifest.supervised == true)
         #expect(manifest.userApproved == false)
+        #expect(manifest.platforms == ["iOS", "macOS"])
         #expect(manifest.iOSMin == "14.0")
         #expect(manifest.iOSDeprecated == "15.0")
         #expect(manifest.iOSMax == "16.0")
@@ -48,25 +51,31 @@ struct ManifestTests {
         #expect(manifest.lastModified == (try Date("2026-10-27T12:00:00Z", strategy: .iso8601)))
     }
 
-    @Test("Decodes a manifest with only a domain and subkeys")
+    @Test("Decodes a manifest with only its required keys")
     func minimal() async throws {
-        // Given a manifest whose only keys are pfm_domain and pfm_subkeys
+        // Given a manifest with only pfm_domain, pfm_subkeys, and pfm_platforms
         let data = try fixtureData(subject: "Manifest", named: "minimal")
 
         // When the manifest is decoded as a Manifest
         let manifest = try PropertyListDecoder().decode(Manifest.self, from: data)
 
-        // Then its domain is the key's value
+        // Then each required key's value is in its property
         #expect(manifest.domain == "com.example.settings")
-
-        // And its subkeys are the key's fields
         #expect(manifest.subkeys.map(\.name) == ["Enabled"])
+        #expect(manifest.platforms == ["macOS"])
     }
 
-    @Test("Throws when pfm_domain is missing")
-    func missingDomain() async throws {
-        // Given a manifest with subkeys but no pfm_domain key
-        let data = try fixtureData(subject: "Manifest", named: "missing-domain")
+    @Test(
+        "Throws when a required key is missing",
+        arguments: zip(
+            ["missing-domain", "missing-subkeys", "missing-platforms"],
+            ["pfm_domain", "pfm_subkeys", "pfm_platforms"],
+        ),
+    )
+    func missingRequiredKey(fileName: String, missingKey: String) async throws {
+        // Given a manifest missing pfm_domain, pfm_subkeys, or pfm_platforms
+        // And containing every other required key
+        let data = try fixtureData(subject: "Manifest", named: fileName)
 
         // When the manifest is decoded as a Manifest
         let error = try #require(throws: DecodingError.self) {
@@ -79,28 +88,8 @@ struct ManifestTests {
             return
         }
 
-        // And the absent key is pfm_domain
-        #expect(key.stringValue == "pfm_domain")
-    }
-
-    @Test("Throws when pfm_subkeys is missing")
-    func missingSubkeys() async throws {
-        // Given a manifest with a domain but no pfm_subkeys key
-        let data = try fixtureData(subject: "Manifest", named: "missing-subkeys")
-
-        // When the manifest is decoded as a Manifest
-        let error = try #require(throws: DecodingError.self) {
-            try PropertyListDecoder().decode(Manifest.self, from: data)
-        }
-
-        // Then decoding fails because a required key is absent
-        guard case .keyNotFound(let key, _) = error else {
-            Issue.record("Expected keyNotFound, got \(error)")
-            return
-        }
-
-        // And the absent key is pfm_subkeys
-        #expect(key.stringValue == "pfm_subkeys")
+        // And the absent key is the one the manifest leaves out
+        #expect(key.stringValue == missingKey)
     }
 
     // The spec lists three pfm_interaction values. The models follow the spec strictly, so an

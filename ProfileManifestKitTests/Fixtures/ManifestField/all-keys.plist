@@ -115,5 +115,22 @@
 	<string>18.0</string>
 	<key>pfm_tvos_max</key>
 	<string>19.0</string>
+	<key>pfm_value_inverted</key>
+	<true/>
+	<key>pfm_platforms</key>
+	<array>
+		<string>iOS</string>
+		<string>macOS</string>
+	</array>
+	<key>pfm_n_platforms</key>
+	<array>
+		<string>tvOS</string>
+	</array>
+	<key>pfm_app_min</key>
+	<string>2.0</string>
+	<key>pfm_app_deprecated</key>
+	<string>3.0</string>
+	<key>pfm_app_max</key>
+	<string>4.0</string>
 </dict>
 </plist>

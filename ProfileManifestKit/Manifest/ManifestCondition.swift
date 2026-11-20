@@ -10,7 +10,11 @@ import Foundation
 /// A condition that tests the state of another field.
 public struct ManifestTargetCondition: Codable, Sendable {
     /// The name of the target field.
-    public let target: String
+    ///
+    /// `nil` when the condition doesn't test a field, such as one that tests only the platform.
+    ///
+    /// - Note: The spec requires this key; it's optional so real manifests that leave it out load.
+    public let target: String?
 
     /// Whether the target field must be present in the payload.
     public let present: Bool?
@@ -40,6 +44,8 @@ public struct ManifestTargetCondition: Codable, Sendable {
 /// A rule that changes when the field is required once all of its conditions match.
 public struct ManifestConditionalRule: Codable, Sendable {
     /// When the field must be present in the payload if the conditions match.
+    ///
+    /// - Note: The spec allows only `.always` and `.push` here, but `.alwaysNested` decodes too.
     public let require: ManifestRequirement?
 
     /// The conditions that must all match for the rule to apply.

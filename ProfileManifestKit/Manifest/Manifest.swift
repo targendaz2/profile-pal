@@ -44,11 +44,19 @@ public struct Manifest: Codable, Sendable {
     /// How settings combine when multiple payloads of this type are installed on a device.
     public let interaction: ManifestInteraction?
 
+    /// Whether only one payload of this type can be installed on a device.
+    public let unique: Bool?
+
     /// A 64×64 pixel image representing the payload.
     public let icon: Data?
 
     /// A note that draws the user's attention to something specific about the payload.
     public let note: String?
+
+    /// The URL of the app's homepage.
+    ///
+    /// Use the marketing or product page, never a download link.
+    public let appURL: String?
 
     /// Whether the device must be supervised for the payload to work.
     ///
@@ -57,6 +65,9 @@ public struct Manifest: Codable, Sendable {
 
     /// Whether the device must be user approved, or enrolled using DEP, for the payload to work.
     public let userApproved: Bool?
+
+    /// The platforms that support the payload, such as `iOS`, `macOS`, or `tvOS`.
+    public let platforms: [String]
 
     /// The iOS version that started supporting the payload.
     public let iOSMin: String?
@@ -99,10 +110,13 @@ public struct Manifest: Codable, Sendable {
 
         case subdomain = "pfm_subdomain"
         case interaction = "pfm_interaction"
+        case unique = "pfm_unique"
         case icon = "pfm_icon"
         case note = "pfm_note"
+        case appURL = "pfm_app_url"
         case supervised = "pfm_supervised"
         case userApproved = "pfm_user_approved"
+        case platforms = "pfm_platforms"
         case iOSMin = "pfm_ios_min"
         case iOSDeprecated = "pfm_ios_deprecated"
         case iOSMax = "pfm_ios_max"

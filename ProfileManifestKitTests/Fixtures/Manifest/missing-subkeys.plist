@@ -4,5 +4,9 @@
 <dict>
 	<key>pfm_domain</key>
 	<string>com.example.settings</string>
+	<key>pfm_platforms</key>
+	<array>
+		<string>macOS</string>
+	</array>
 </dict>
 </plist>
