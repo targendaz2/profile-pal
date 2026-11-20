@@ -166,4 +166,49 @@ struct ManifestTests {
             try result.get()
         }
     }
+
+    // Smoke test: each fixture is an unmodified manifest from an open-source project (see
+    // Fixtures/Manifest/THIRD-PARTY-NOTICES.md), so it uses the keys and layouts real authors
+    // write rather than ones chosen to suit the models.
+    @Test(
+        "Loads real-world manifests",
+        arguments: zip(
+            ["real-xcreds", "real-macoslaps"],
+            ["com.twocanoes.xcreds", "com.joshua-d-miller.macoslaps"],
+        ),
+    )
+    func loadRealWorld(fileName: String, domain: String) async throws {
+        // Given the URL of xCreds' or macOSLAPS' published manifest
+        let url = try fixtureURL(subject: "Manifest", named: fileName)
+
+        // When the manifest is loaded from the URL
+        let manifest = try Manifest.load(from: url)
+
+        // Then its domain is the project's
+        #expect(manifest.domain == domain)
+
+        // And it has fields
+        #expect(!manifest.subkeys.isEmpty)
+    }
+
+    // xCreds writes whole-number <real> defaults, which PropertyListDecoder reads as .int.
+    // coerced(to:) exists for this case: without it, re-encoding would write them as <integer>.
+    @Test("Coerces a real-world whole-number real default to .double")
+    func coerceRealWorldDefault() async throws {
+        // Given xCreds' published manifest
+        let url = try fixtureURL(subject: "Manifest", named: "real-xcreds")
+        let manifest = try Manifest.load(from: url)
+
+        // And its real field loginWindowBackgroundImageAlpha, whose default is <real>1</real>
+        let field = try #require(
+            manifest.subkeys.first { $0.name == "loginWindowBackgroundImageAlpha" }
+        )
+        let defaultValue = try #require(field.defaultValue)
+
+        // When the default is coerced to the field
+        let coerced = defaultValue.coerced(to: field)
+
+        // Then it's a .double holding the default's value
+        #expect(coerced == .double(1))
+    }
 }

@@ -152,6 +152,8 @@
 				"Fixtures/Manifest/missing-domain.plist",
 				"Fixtures/Manifest/missing-subkeys.plist",
 				"Fixtures/Manifest/not-a-plist.txt",
+				"Fixtures/Manifest/real-macoslaps.plist",
+				"Fixtures/Manifest/real-xcreds.plist",
 				"Fixtures/Manifest/unknown-interaction.plist",
 			);
 		};
