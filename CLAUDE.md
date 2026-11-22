@@ -42,6 +42,6 @@ The project is early: the manifest model layer exists, while the UI is still the
 
 ## Workflow
 
-- Work on feature branches and open PRs into `main`. When a non-draft PR touches Swift, pbxproj, plist, or entitlements files, `.github/workflows/claude-code-review.yml` runs an automated Claude code review on it.
+- Work on feature branches and open PRs into `main`. When a non-draft PR touches Swift, pbxproj, plist, or entitlements files, `.github/workflows/code-review.yml` runs an automated Claude code review on it.
 - When a pre-commit check (security review, diagnostics) finds an issue, report it and wait for the user. Don't fix it yourself.
 - When a decision becomes a convention, write it as a rule (here or in `.claude/rules/`) instead of logging it. Log other decisions that shape the shipped app (scope cuts, deferrals) in `docs/decisions.md` when they're made, and check it before proposing work it rules out. Track unsettled questions in `docs/outstanding-questions.md`; when one is settled, log it (or write the rule) and remove it from that file.

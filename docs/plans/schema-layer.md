@@ -38,7 +38,7 @@ What shipped in #9 (merged):
 - `pfm_platforms` was added to the existing `target-condition-all-keys.plist` fixture, rather than a new fixture, so `project.pbxproj` stayed out of the PR. `targetConditionAllKeys` checks it.
 - The property-order rule's example of a type with only Apple-defined keys is now `ManifestConditionalRule`.
 - `docs/decisions.md` logs the change. `docs/outstanding-questions.md` narrows the environment-conditions question to `pfm_n_platforms` (1 condition) and `pfm_distribution` (3).
-- `claude-code-review.yml` gains a **Summarize review tool use** step. It logs tool names, permission denials, and models from the action's execution file, because the first review of #9 posted "No issues found" without running its agents. It's on `main` now, so it runs on the next PR the review covers.
+- The review workflow (now `code-review.yml`) gains a **Summarize review tool use** step. It logs tool names, permission denials, and models from the action's execution file, because the first review of #9 posted "No issues found" without running its agents. It's on `main` now, so it runs on the next PR the review covers.
 
 Still open: a local review found that no test covers a condition with only `pfm_platforms` and no `pfm_target`, the real Apple shape. It needs its own fixture, which means a Copy Files phase entry in `project.pbxproj`.
 
