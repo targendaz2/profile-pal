@@ -12,7 +12,6 @@
 
 These are outside PR 3's scope. Pick them up separately, or fold them in where noted.
 
-- **Test for a platform-only condition (ProfileManifestKit).** No test decodes a condition that has `pfm_platforms` and no `pfm_target`, which is the shape real Apple manifests use. The `pfm_platforms` test uses `target-condition-all-keys.plist`, which also sets `pfm_target`. It needs a new fixture in `ProfileManifestKitTests/Fixtures/ManifestCondition/`, plus an entry in that folder's Copy Files phase (see `.claude/rules/testing-plist-fixtures.md`).
 - **The automated code review isn't reviewing anything.** The `code-review.yml` workflow reports success, but on #9 and #10 the plugin never got past its first step:
   - #9: 4 turns, 1 permission denial, no Opus usage. It posted "No issues found".
   - #10: one Haiku `Agent` call, no denials and no Haiku usage, 2 turns. It posted nothing.
@@ -51,7 +50,7 @@ What shipped in #9:
 - `docs/decisions.md` logs the change. `docs/outstanding-questions.md` narrows the environment-conditions question to `pfm_n_platforms` (1 condition) and `pfm_distribution` (3).
 - The review workflow (now `code-review.yml`) gains a **Summarize review tool use** step. It logs tool names, permission denials, and models from the action's execution file, because the first review of #9 posted "No issues found" without running its agents.
 
-Still open: a test for a platform-only condition (see Open follow-ups).
+A test for a platform-only condition (`pfm_platforms` and no `pfm_target`, the shape real Apple manifests use) followed separately, on branch `test/platform-only-condition`, with the `target-condition-platforms-only.plist` fixture.
 
 ## PR 2: VersionKit, branch `feat/version-kit` (independent of PR 1)
 

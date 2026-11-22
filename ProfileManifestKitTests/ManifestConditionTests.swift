@@ -56,6 +56,25 @@ struct ManifestConditionTests {
         #expect(condition.present == true)
     }
 
+    // Apple's manifests use this shape for conditions that test the platform instead of a field.
+    @Test("Decodes a target condition with only pfm_platforms")
+    func targetConditionPlatformsOnly() async throws {
+        // Given a target condition whose only key is pfm_platforms
+        let data = try fixtureData(
+            subject: "ManifestCondition",
+            named: "target-condition-platforms-only",
+        )
+
+        // When the condition is decoded as a ManifestTargetCondition
+        let condition = try PropertyListDecoder().decode(ManifestTargetCondition.self, from: data)
+
+        // Then its platforms are the key's value, in order
+        #expect(condition.platforms == ["iOS", "macOS"])
+
+        // And it has no target
+        #expect(condition.target == nil)
+    }
+
     @Test("Decodes a conditional rule with only target conditions")
     func conditionalRuleMinimal() async throws {
         // Given a conditional rule whose only key is pfm_target_conditions
