@@ -32,12 +32,24 @@ jobs:
       - name: Run Code Review
         id: review
         uses: anthropics/claude-code-action@d70510b174a1244958df0b03166a54912811f3e6 # v1
+        env:
+          # Subagents start in the background by default, so in this headless run the main turn
+          # ended right after launching the plugin's first subagent, and the job passed without
+          # reviewing anything (#10, #12: 2 turns, no Haiku usage). This makes Claude wait for
+          # each subagent before continuing.
+          CLAUDE_CODE_DISABLE_BACKGROUND_TASKS: "1"
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           plugin_marketplaces: "https://github.com/anthropics/claude-plugins-official.git"
           plugins: "code-review@claude-plugins-official"
           prompt: "/code-review:code-review --comment ${{ github.repository }}/pull/${{ github.event.pull_request.number }}"
-          claude_args: '--allowedTools "mcp__github_inline_comment__create_inline_comment"'
+          # --allowedTools is the whole list for the run. The plugin's own allowed-tools cover only
+          # its main session, so its subagents also need gh (to read the PR and CLAUDE.md files),
+          # the read tools, and Agent/Task to launch them. `gh pr comment` posts the summary when
+          # no issues are found. Everything is read-only except the two comment tools.
+          claude_args: >-
+            --allowedTools
+            "Agent,Task,TodoWrite,Read,Glob,Grep,Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr list:*),Bash(gh pr comment:*),Bash(gh issue view:*),Bash(gh issue list:*),Bash(gh search:*),mcp__github_inline_comment__create_inline_comment"
 
       # The full output stays hidden because this repository is public. This prints only which
       # tools ran, whether each returned ok or an error, which were denied, and which models were
