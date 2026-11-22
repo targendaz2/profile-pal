@@ -14,16 +14,16 @@ The project is early: the manifest model layer exists, while the UI is still the
   ```sh
   xcodebuild -project ProfilePal.xcodeproj -scheme ProfilePal -configuration Debug build
   ```
-- Tests live in the `ProfileManifestKitTests` target and use **Swift Testing** (`import Testing`, `@Test`, `#expect`), not XCTest.
+- Tests live in the `ProfileManifestKitTests`, `VersionKitTests`, and `ProfilePalTests` targets and use **Swift Testing** (`import Testing`, `@Test`, `#expect`), not XCTest.
 - Format with the toolchain's swift-format (config in `.swift-format`: 4-space indent, 100-column lines, trailing commas on multiline collections, `switch` case labels indented):
   ```sh
-  xcrun swift-format format -i -r ProfilePal ProfileManifestKit ProfileManifestKitTests
-  xcrun swift-format lint -r ProfilePal ProfileManifestKit ProfileManifestKitTests
+  xcrun swift-format format -i -r ProfilePal ProfilePalTests ProfileManifestKit ProfileManifestKitTests VersionKit VersionKitTests
+  xcrun swift-format lint -r ProfilePal ProfilePalTests ProfileManifestKit ProfileManifestKitTests VersionKit VersionKitTests
   ```
 
 ## Project setup
 
-- Targets: the `ProfilePal` app, the `ProfileManifestKit` framework (embedded in the app), and `ProfileManifestKitTests`. Two shared schemes: `ProfilePal` builds and runs the app; `ProfileManifestKit` builds the framework and runs its tests, so make it the active scheme before running tests. Swift 6, set at the project level, with approachable concurrency; the models are all `Sendable`.
+- Targets: the `ProfilePal` app and its `ProfilePalTests`; the `ProfileManifestKit` framework and `ProfileManifestKitTests`; and the `VersionKit` framework and `VersionKitTests`. Both frameworks are embedded in the app and are built only for it, so they don't use library-evolution or module-verifier settings. Three shared schemes: `ProfilePal` builds and runs the app and runs `ProfilePalTests` and `VersionKitTests`; `ProfileManifestKit` and `VersionKit` each build their framework and run its tests, so make the matching one active before running a framework's tests. CI runs the two framework schemes. Swift 6, set at the project level, with approachable concurrency; the models are all `Sendable`.
 - The project uses Xcode file-system-synchronized groups, so files added under each target's folder are picked up without editing `project.pbxproj`. Test fixtures are the exception: each must be added to its Copy Files phase (see `.claude/rules/testing-plist-fixtures.md`).
 - The app is sandboxed with read-only access to user-selected files.
 
@@ -42,6 +42,6 @@ The project is early: the manifest model layer exists, while the UI is still the
 
 ## Workflow
 
-- Work on feature branches and open PRs into `main`. When a non-draft PR touches Swift, pbxproj, plist, or entitlements files, `.github/workflows/claude-code-review.yml` runs an automated Claude code review on it.
+- Work on feature branches and open PRs into `main`. When a non-draft PR touches Swift, pbxproj, plist, or entitlements files, `.github/workflows/code-review.yml` runs an automated Claude code review on it.
 - When a pre-commit check (security review, diagnostics) finds an issue, report it and wait for the user. Don't fix it yourself.
 - When a decision becomes a convention, write it as a rule (here or in `.claude/rules/`) instead of logging it. Log other decisions that shape the shipped app (scope cuts, deferrals) in `docs/decisions.md` when they're made, and check it before proposing work it rules out. Track unsettled questions in `docs/outstanding-questions.md`; when one is settled, log it (or write the rule) and remove it from that file.

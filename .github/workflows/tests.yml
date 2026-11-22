@@ -18,10 +18,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - name: Run unit tests
+      - name: Run ProfileManifestKit tests
         run: >-
           xcodebuild test
           -project ProfilePal.xcodeproj
           -scheme ProfileManifestKit
+          -destination 'platform=macOS'
+          CODE_SIGNING_ALLOWED=NO
+
+      - name: Run VersionKit tests
+        run: >-
+          xcodebuild test
+          -project ProfilePal.xcodeproj
+          -scheme VersionKit
           -destination 'platform=macOS'
           CODE_SIGNING_ALLOWED=NO
