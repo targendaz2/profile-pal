@@ -6,17 +6,15 @@
 | --- | --- |
 | 1: `pfm_platforms` on conditions | Merged as #9 on 2026-11-22. |
 | 2: VersionKit | Merged as #10 on 2026-11-22. |
-| 3: The schema layer | **Next.** Not started. Both PRs it builds on are merged, so branch `feat/payload-schema` from `main`. |
+| 3a: Schema types and field conversion | **Next.** Not started. Branch `feat/payload-schema` from `main`. |
+| 3b: Condition resolution | Not started. Branch `feat/schema-conditions` from `main` once 3a merges. |
 
 ## Open follow-ups
 
-These are outside PR 3's scope. Pick them up separately, or fold them in where noted.
+These are outside PR 3a's and 3b's scope. Pick them up separately, or fold them in where noted.
 
-- **The automated code review isn't reviewing anything.** The `code-review.yml` workflow reports success, but on #9 and #10 the plugin never got past its first step:
-  - #9: 4 turns, 1 permission denial, no Opus usage. It posted "No issues found".
-  - #10: one Haiku `Agent` call, no denials and no Haiku usage, 2 turns. It posted nothing.
-
-  The **Summarize review tool use** step (added in #9; #10 added the error flags) prints each tool call with `ok`, `error`, or `no result`, plus denials and models used, without exposing content. #10 also switched the plugin to the `claude-plugins-official` marketplace and renamed the workflow to **Code Review**. Read that step's output on the next PR that touches Swift or project files (PR 3 will). If the `Agent` call shows `error`, the subagent tool is failing in the action's environment, likely because of permissions or `claude_args`. The action skips any PR whose copy of the workflow differs from `main`, so a workflow fix has to merge before it's reviewed.
+- **Check that the automated code review now reviews.** On #9, #10, and #12 the review workflow reported success without reviewing anything. #13 found the causes: the plugin's first subagent started in the background and the headless run ended before it ran, and `--allowedTools` blocked the subagents' `gh` calls. #14 then rewrote `code-review.yml` from the plugin's standard setup, keeping `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS: "1"` and allowing `gh pr diff`, `gh pr view`, and `gh pr comment`. It also dropped the **Summarize review tool use** step and the draft-PR check. No Swift PR has run under the rewritten workflow yet, so PR 3a is the first real test. Open it and check that the review posts inline comments or a summary, rather than passing silently. With no summary step, the run's log in the Actions tab is the only other evidence. If it fails again, fix the workflow in its own PR: the action skips any PR whose copy of the workflow differs from `main`.
+- **`CLAUDE.md` still says the review runs on "a non-draft PR"** that touches Swift, pbxproj, plist, or entitlements files. Since #14, it also runs on drafts and on `CLAUDE.md`, `README.md`, `docs/**/*.md`, and `Package.resolved`. Fold the fix into PR 3a's `CLAUDE.md` changes.
 
 ## Context
 
@@ -78,9 +76,26 @@ Shipped in #10 as planned below. Two things differ from the plan:
 - `CLAUDE.md`: add VersionKit to the targets and schemes list. Extend the `paths:` of `testing-unit-test-style.md` to `VersionKitTests/**`. Add `VersionKitTests` to the swift-format commands.
 - `docs/decisions.md`: log the version formats accepted, with the audit numbers.
 
-## PR 3: the schema layer (ProfilePal), branch `feat/payload-schema` on top of PRs 1 and 2
+## PR 3: the schema layer (ProfilePal), in two PRs
 
-The `ProfilePalTests` target came in with #10, so this PR replaces its placeholder test. CI doesn't run it yet: `tests.yml` runs only the `ProfileManifestKit` and `VersionKit` schemes, so add a step for the `ProfilePal` scheme. Its tests run inside the app, so check that `CODE_SIGNING_ALLOWED=NO` still works for them.
+The design below covers the whole layer. It ships as two PRs, split at the converter's second pass, since condition resolution is the most involved part and has its own tests and survey numbers.
+
+### PR 3a: schema types and field conversion, branch `feat/payload-schema`
+
+- **Types:** everything below except `Condition.swift`. `SchemaField` has no `exclusions` yet, and `Requirement` has `level` only, without `conditional`. Both are added in 3b, so no condition type exists before it can be filled in.
+- **Converter:** `ManifestSchemaConverter.swift` with pass 1 only (`+Fields`, `+Availability`). `pfm_conditionals` and `pfm_exclude` aren't read yet. Nothing in the app uses the schema before 3b lands, so skipping them isn't a user-visible loss.
+- **Diagnostics:** the `SchemaDiagnostic.Kind` cases pass 1 can produce: `valueTypeMismatch`, `choiceTitleCountMismatch`, `unparsableVersion`, `unknownPlatform`, `requirementConflict`, `constraintNotApplicable`, and `invalidPattern`.
+- **Tests:** the test setup (fixture helper, Copy Files phases, rule `paths:`), and the `FieldKind`, `Requirement` merging, and `Availability` suites. Also the xCreds and macOSLAPS smoke test, which checks only that they convert, with no condition-related diagnostics.
+- **CI:** the `ProfilePal` scheme step in `tests.yml`. The `ProfilePalTests` target came in with #10, so this PR replaces its placeholder test. Its tests run inside the app, so check that `CODE_SIGNING_ALLOWED=NO` still works for them.
+- **Docs:** the `CLAUDE.md` schema-layer section and the ProfileManifestKit-only scope of the spec rules. `docs/decisions.md` rows for the layer living in the app, never throwing, and strictest-wins requirement merging.
+
+### PR 3b: condition resolution, branch `feat/schema-conditions`
+
+- **Types:** `Condition.swift`, `SchemaField.exclusions`, and `Requirement.conditional`.
+- **Converter:** pass 2 (`+Conditions`): target resolution and coercing test values. It also drops a conditional rule that has no `require`, recording a diagnostic.
+- **Diagnostics:** `unresolvedConditionTarget`, `ambiguousConditionTarget`, `unsupportedCondition`, and `missingConditionalRequirement`.
+- **Tests:** the condition-resolution suite with its synthetic fixtures, and the `PROFILEMANIFESTS_DIR` survey test. The survey waits for 3b because most of its expected counts are condition diagnostics.
+- **Docs:** `docs/decisions.md` rows for nearest-scope target resolution and deferring cross-payload conditions.
 
 ### Types (`ProfilePal/Schema/`)
 
@@ -163,9 +178,9 @@ The app target defaults to `MainActor` isolation, so every schema type is a `non
 
 ## Verification
 
-- Build and test with the `xcode` MCP server (`BuildProject`, then `RunAllTests`), using the `ProfileManifestKit` scheme for PR 1, `VersionKit` for PR 2, and `ProfilePal` for PR 3.
+- Build and test with the `xcode` MCP server (`BuildProject`, then `RunAllTests`), using the `ProfileManifestKit` scheme for PR 1, `VersionKit` for PR 2, and `ProfilePal` for PRs 3a and 3b.
 - Run the swift-format lint command from `CLAUDE.md`, which covers all six source folders.
-- Clone ProfileManifests at `0d01e64` into the scratchpad and run the survey test with `PROFILEMANIFESTS_DIR` set. The expected diagnostics from today's numbers:
+- For PR 3b, clone ProfileManifests at `0d01e64` into the scratchpad and run the survey test with `PROFILEMANIFESTS_DIR` set. The expected diagnostics from today's numbers:
   - about 22 unresolved targets
   - 4 unsupported conditions (`pfm_n_platforms` and `pfm_distribution`)
   - 0 ambiguous targets: the one name with two candidates, in `extensiblesso`, has a single match at the top level, which nearest-scope checks first
