@@ -171,6 +171,7 @@
 				"Fixtures/ManifestCondition/exclusion-rule-missing-conditions.plist",
 				"Fixtures/ManifestCondition/target-condition-all-keys.plist",
 				"Fixtures/ManifestCondition/target-condition-missing-target.plist",
+				"Fixtures/ManifestCondition/target-condition-platforms-only.plist",
 			);
 		};
 		EC2DB9F33097DF0000B2A25F /* Exceptions for "ProfileManifestKitTests" folder in "Copy Manifest Fixtures" phase from "ProfileManifestKitTests" target */ = {
