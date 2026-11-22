@@ -4,9 +4,20 @@
 
 | PR | State |
 | --- | --- |
-| 1: `pfm_platforms` on conditions | Merged as #9 on 2026-11-22, together with a review-workflow step; see PR 1 below. |
-| 2: VersionKit | In review on `feat/version-kit`. |
-| 3: The schema layer | Not started. Builds on PRs 1 and 2. |
+| 1: `pfm_platforms` on conditions | Merged as #9 on 2026-11-22. |
+| 2: VersionKit | Merged as #10 on 2026-11-22. |
+| 3: The schema layer | **Next.** Not started. Both PRs it builds on are merged, so branch `feat/payload-schema` from `main`. |
+
+## Open follow-ups
+
+These are outside PR 3's scope. Pick them up separately, or fold them in where noted.
+
+- **Test for a platform-only condition (ProfileManifestKit).** No test decodes a condition that has `pfm_platforms` and no `pfm_target`, which is the shape real Apple manifests use. The `pfm_platforms` test uses `target-condition-all-keys.plist`, which also sets `pfm_target`. It needs a new fixture in `ProfileManifestKitTests/Fixtures/ManifestCondition/`, plus an entry in that folder's Copy Files phase (see `.claude/rules/testing-plist-fixtures.md`).
+- **The automated code review isn't reviewing anything.** The `code-review.yml` workflow reports success, but on #9 and #10 the plugin never got past its first step:
+  - #9: 4 turns, 1 permission denial, no Opus usage. It posted "No issues found".
+  - #10: one Haiku `Agent` call, no denials and no Haiku usage, 2 turns. It posted nothing.
+
+  The **Summarize review tool use** step (added in #9; #10 added the error flags) prints each tool call with `ok`, `error`, or `no result`, plus denials and models used, without exposing content. #10 also switched the plugin to the `claude-plugins-official` marketplace and renamed the workflow to **Code Review**. Read that step's output on the next PR that touches Swift or project files (PR 3 will). If the `Agent` call shows `error`, the subagent tool is failing in the action's environment, likely because of permissions or `claude_args`. The action skips any PR whose copy of the workflow differs from `main`, so a workflow fix has to merge before it's reviewed.
 
 ## Context
 
@@ -33,16 +44,20 @@ Survey basis: all 288 manifests at ProfileManifests `0d01e64`.
 
 ## PR 1: `pfm_platforms` on conditions (ProfileManifestKit), branch `feat/condition-platforms`
 
-What shipped in #9 (merged):
+What shipped in #9:
 - `ManifestTargetCondition` has `platforms: [String]?` (`pfm_platforms`), typed to match `Manifest.platforms`. Because it's an extended key, the type now has both `// MARK:` sections. `target`'s doc comment mentions dotted paths and platform-only conditions.
 - `pfm_platforms` was added to the existing `target-condition-all-keys.plist` fixture, rather than a new fixture, so `project.pbxproj` stayed out of the PR. `targetConditionAllKeys` checks it.
 - The property-order rule's example of a type with only Apple-defined keys is now `ManifestConditionalRule`.
 - `docs/decisions.md` logs the change. `docs/outstanding-questions.md` narrows the environment-conditions question to `pfm_n_platforms` (1 condition) and `pfm_distribution` (3).
-- The review workflow (now `code-review.yml`) gains a **Summarize review tool use** step. It logs tool names, permission denials, and models from the action's execution file, because the first review of #9 posted "No issues found" without running its agents. It's on `main` now, so it runs on the next PR the review covers.
+- The review workflow (now `code-review.yml`) gains a **Summarize review tool use** step. It logs tool names, permission denials, and models from the action's execution file, because the first review of #9 posted "No issues found" without running its agents.
 
-Still open: a local review found that no test covers a condition with only `pfm_platforms` and no `pfm_target`, the real Apple shape. It needs its own fixture, which means a Copy Files phase entry in `project.pbxproj`.
+Still open: a test for a platform-only condition (see Open follow-ups).
 
 ## PR 2: VersionKit, branch `feat/version-kit` (independent of PR 1)
+
+Shipped in #10 as planned below. Two things differ from the plan:
+- `VersionKitTests` doesn't run inside the app: it has no `TEST_HOST` and no dependency on the app, matching `ProfileManifestKitTests`. While it was hosted, Xcode wouldn't add it to the `VersionKit` scheme.
+- #10 also changed the review workflow: it flags errored tool calls, installs the plugin from `claude-plugins-official`, and renames the workflow to `code-review.yml` (see Open follow-ups).
 
 **Prerequisite (created by the project owner in Xcode):**
 - a `VersionKit` framework target, embedded in ProfilePal
@@ -66,7 +81,7 @@ Still open: a local review found that no test covers a condition with only `pfm_
 
 ## PR 3: the schema layer (ProfilePal), branch `feat/payload-schema` on top of PRs 1 and 2
 
-The `ProfilePalTests` target arrives in PR 2, so this PR replaces its placeholder test.
+The `ProfilePalTests` target came in with #10, so this PR replaces its placeholder test. CI doesn't run it yet: `tests.yml` runs only the `ProfileManifestKit` and `VersionKit` schemes, so add a step for the `ProfilePal` scheme. Its tests run inside the app, so check that `CODE_SIGNING_ALLOWED=NO` still works for them.
 
 ### Types (`ProfilePal/Schema/`)
 
@@ -145,13 +160,12 @@ The app target defaults to `MainActor` isolation, so every schema type is a `non
 - `CLAUDE.md`:
   - Add an "Architecture: schema layer (ProfilePal)" section.
   - State the rule that the spec-mirroring and no-fix-up rules apply to `ProfileManifestKit` only, and that normalization belongs in `ProfilePal/Schema/`.
-  - Describe the `ProfilePalTests` target, and note that the `ProfilePal` scheme runs it.
 - `docs/decisions.md`: add rows for the schema layer living in the app, never throwing and recording diagnostics, nearest-scope target resolution, strictest-wins requirement merging, and cross-payload conditions being deferred.
 
 ## Verification
 
 - Build and test with the `xcode` MCP server (`BuildProject`, then `RunAllTests`), using the `ProfileManifestKit` scheme for PR 1, `VersionKit` for PR 2, and `ProfilePal` for PR 3.
-- Run `xcrun swift-format lint -r ProfilePal ProfileManifestKit ProfileManifestKitTests ProfilePalTests`.
+- Run the swift-format lint command from `CLAUDE.md`, which covers all six source folders.
 - Clone ProfileManifests at `0d01e64` into the scratchpad and run the survey test with `PROFILEMANIFESTS_DIR` set. The expected diagnostics from today's numbers:
   - about 22 unresolved targets
   - 4 unsupported conditions (`pfm_n_platforms` and `pfm_distribution`)

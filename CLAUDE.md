@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Profile Pal is a macOS SwiftUI app for building and editing Apple configuration profiles (`.mobileconfig`). Its editing UI will be driven by [ProfileManifests](https://github.com/ProfileManifests/ProfileManifests) manifests (`pfm_*` plist keys), which describe each payload domain and its fields.
 
-The project is early: the manifest model layer exists, while the UI is still the template `ContentView`.
+The project is early: the manifest model layer (`ProfileManifestKit`) and version parsing (`VersionKit`) exist, while the UI is still the template `ContentView`. Work in progress is the app's schema layer, a cleaner format between the manifest models and the UI; its plan, status, and open follow-ups are in [`docs/plans/schema-layer.md`](docs/plans/schema-layer.md).
 
 ## Build, test, format
 
@@ -43,5 +43,6 @@ The project is early: the manifest model layer exists, while the UI is still the
 ## Workflow
 
 - Work on feature branches and open PRs into `main`. When a non-draft PR touches Swift, pbxproj, plist, or entitlements files, `.github/workflows/code-review.yml` runs an automated Claude code review on it.
+- Work that spans several PRs gets a plan in `docs/plans/` with a status table and open follow-ups. Check it at the start of a session, and update its status as PRs open and merge.
 - When a pre-commit check (security review, diagnostics) finds an issue, report it and wait for the user. Don't fix it yourself.
 - When a decision becomes a convention, write it as a rule (here or in `.claude/rules/`) instead of logging it. Log other decisions that shape the shipped app (scope cuts, deferrals) in `docs/decisions.md` when they're made, and check it before proposing work it rules out. Track unsettled questions in `docs/outstanding-questions.md`; when one is settled, log it (or write the rule) and remove it from that file.
