@@ -7,11 +7,13 @@
 
 import Foundation
 
-/// A condition that tests the state of another field.
+/// A condition that tests the state of another field, or the platform the profile targets.
 public struct ManifestTargetCondition: Decodable, Sendable {
-    /// The name of the target field.
+    // MARK: - Apple-defined keys
+
+    /// The name of the target field, or a dot-separated path for a nested field.
     ///
-    /// `nil` when the condition doesn't test a field, such as one that tests only the platform.
+    /// `nil` when the condition doesn't test a field, such as one that tests only `platforms`.
     ///
     /// - Note: The spec requires this key; it's optional so real manifests that leave it out load.
     public let target: String?
@@ -31,6 +33,11 @@ public struct ManifestTargetCondition: Decodable, Sendable {
     /// The values the target field's value must not contain any of.
     public let negatedContainsAny: [PlistValue]?
 
+    // MARK: - Extended keys
+
+    /// The platforms the profile must target for the condition to match, such as `iOS` or `macOS`.
+    public let platforms: [String]?
+
     enum CodingKeys: String, CodingKey {
         case target = "pfm_target"
         case present = "pfm_present"
@@ -38,6 +45,8 @@ public struct ManifestTargetCondition: Decodable, Sendable {
         case negatedRangeList = "pfm_n_range_list"
         case containsAny = "pfm_contains_any"
         case negatedContainsAny = "pfm_n_contains_any"
+
+        case platforms = "pfm_platforms"
     }
 }
 

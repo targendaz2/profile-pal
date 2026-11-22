@@ -30,6 +30,7 @@ jobs:
           fetch-depth: 1
 
       - name: Run Claude Code Review
+        id: review
         uses: anthropics/claude-code-action@d70510b174a1244958df0b03166a54912811f3e6 # v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -37,3 +38,32 @@ jobs:
           plugins: 'code-review@claude-code-plugins'
           prompt: '/code-review:code-review --comment ${{ github.repository }}/pull/${{ github.event.pull_request.number }}'
           claude_args: '--allowedTools "mcp__github_inline_comment__create_inline_comment"'
+
+      # The full output stays hidden because this repository is public. This prints only which
+      # tools ran, which were denied, and which models were used, so a review that skipped its
+      # agents shows up in the log without exposing anything the agents read.
+      - name: Summarize review tool use
+        if: always() && steps.review.outputs.execution_file != ''
+        env:
+          EXECUTION_FILE: ${{ steps.review.outputs.execution_file }}
+        run: |
+          jq -r '
+            def messages: if type == "array" then .[] else . end;
+            def describe:
+              if .name == "Agent" or .name == "Task" then
+                "\(.name) type=\(.input.subagent_type // "-") model=\(.input.model // "-")"
+              elif .name == "Bash" then
+                "Bash \((.input.command // "") | split(" ") | .[0:3] | join(" "))"
+              else .name end;
+
+            "Tool calls:",
+            (messages | select(.type == "assistant")
+              | (if .parent_tool_use_id then "subagent" else "main" end) as $who
+              | .message.content[]? | select(.type == "tool_use")
+              | "  \($who): \(describe)"),
+            "Permission denials:",
+            (messages | select(.type == "result") | (.permission_denials // [])[]
+              | "  " + ({name: .tool_name, input: .tool_input} | describe)),
+            (messages | select(.type == "result")
+              | "Turns: \(.num_turns), models: \(.modelUsage // {} | keys | join(", "))")
+          ' "$EXECUTION_FILE"

@@ -16,9 +16,9 @@ The spec rule forbids undocumented enum cases, but v1 prioritizes loading existi
 
 The spec's table says `pfm_app_min`, `pfm_app_max`, and `pfm_app_deprecated` apply to fields only, but their descriptions say "key or payload", and 10 manifests set `pfm_app_min` on the payload. They're modeled on `ManifestField` only, so payload values are dropped.
 
-## How should conditions that test the environment be modeled?
+## How should `pfm_n_platforms` and `pfm_distribution` in conditions be handled?
 
-4 Apple manifests have conditions with no `pfm_target` that test only `pfm_platforms`, `pfm_n_platforms`, or `pfm_distribution`. They load, but none of those keys is modeled on `ManifestTargetCondition`, so these conditions decode with every property `nil`. The spec's conditions example documents `pfm_platforms` in a condition; `pfm_n_platforms` there is an inference from it, and `pfm_distribution` isn't documented. A condition may need to be either a field test or an environment test, rather than one struct of optionals.
+7 conditions in 4 Apple manifests have no `pfm_target` and test the environment instead of a field. `pfm_platforms` is now modeled on `ManifestTargetCondition` (see [decisions.md](decisions.md)), which covers 3 of them. The other 4 use `pfm_n_platforms` (1 condition in `com.apple.carddav.account`) or `pfm_distribution` (3 in `com.apple.configurationprofile.identification`). `pfm_n_platforms` in a condition is only an inference from the spec's `pfm_platforms` example, and `pfm_distribution` isn't documented, so neither is modeled. Those conditions still decode with every property `nil`.
 
 ## How malformed can a manifest be and still load?
 

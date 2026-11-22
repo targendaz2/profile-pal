@@ -24,5 +24,9 @@
 	<array>
 		<integer>7</integer>
 	</array>
+	<key>pfm_platforms</key>
+	<array>
+		<string>macOS</string>
+	</array>
 </dict>
 </plist>

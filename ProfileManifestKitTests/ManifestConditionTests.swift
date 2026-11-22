@@ -33,6 +33,7 @@ struct ManifestConditionTests {
         #expect(condition.negatedRangeList == [.bool(true), .double(1.5)])
         #expect(condition.containsAny == [.string("wifi")])
         #expect(condition.negatedContainsAny == [.int(7)])
+        #expect(condition.platforms == ["macOS"])
     }
 
     // The spec requires pfm_target, but real manifests leave it out of conditions that test the
