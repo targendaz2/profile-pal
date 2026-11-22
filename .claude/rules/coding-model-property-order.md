@@ -7,7 +7,7 @@ paths:
 
 Applies only to types that encode/decode mobileconfigs or profile manifests. Use `ManifestField` as the reference.
 
-- Split properties into `// MARK: - Apple-defined keys` then `// MARK: - Extended keys` (ProfileManifests `pfm_` extensions). Never mix the two. A type with only Apple-defined keys, such as `ManifestTargetCondition`, skips both MARKs.
+- Split properties into `// MARK: - Apple-defined keys` then `// MARK: - Extended keys` (ProfileManifests `pfm_` extensions). Never mix the two. A type with only Apple-defined keys, such as `ManifestConditionalRule`, skips both MARKs.
 - Within each section, order by purpose, not alphabetically:
   - **Apple-defined:** identity (name, title, description, type) → value and constraints (default, allowed values, min/max, format) → nesting (subkeys, repetition) → requirement rules (require, conditionals, exclusions) → scope (targets).
   - **Extended:** payload-wide settings, in manifest types only (subdomain, interaction, unique, icon) → display help (placeholder, titles, unit, value inversion, note, documentation URL, app URL) → device requirements (sensitive, supervised, user approved) → supported platforms, then unsupported → platform versions → app versions → last modified.
