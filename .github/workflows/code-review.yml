@@ -15,7 +15,7 @@ on:
 
 jobs:
   code-review:
-    if: |
+    if: >-
       github.event.pull_request.user.login == 'targendaz2'
     runs-on: ubuntu-latest
     timeout-minutes: 20
