@@ -14,16 +14,16 @@ The project is early: the manifest model layer exists, while the UI is still the
   ```sh
   xcodebuild -project ProfilePal.xcodeproj -scheme ProfilePal -configuration Debug build
   ```
-- Tests live in the `ProfileManifestKitTests` target and use **Swift Testing** (`import Testing`, `@Test`, `#expect`), not XCTest.
+- Tests live in the `ProfileManifestKitTests`, `VersionKitTests`, and `ProfilePalTests` targets and use **Swift Testing** (`import Testing`, `@Test`, `#expect`), not XCTest.
 - Format with the toolchain's swift-format (config in `.swift-format`: 4-space indent, 100-column lines, trailing commas on multiline collections, `switch` case labels indented):
   ```sh
-  xcrun swift-format format -i -r ProfilePal ProfileManifestKit ProfileManifestKitTests
-  xcrun swift-format lint -r ProfilePal ProfileManifestKit ProfileManifestKitTests
+  xcrun swift-format format -i -r ProfilePal ProfilePalTests ProfileManifestKit ProfileManifestKitTests VersionKit VersionKitTests
+  xcrun swift-format lint -r ProfilePal ProfilePalTests ProfileManifestKit ProfileManifestKitTests VersionKit VersionKitTests
   ```
 
 ## Project setup
 
-- Targets: the `ProfilePal` app, the `ProfileManifestKit` framework (embedded in the app), and `ProfileManifestKitTests`. Two shared schemes: `ProfilePal` builds and runs the app; `ProfileManifestKit` builds the framework and runs its tests, so make it the active scheme before running tests. Swift 6, set at the project level, with approachable concurrency; the models are all `Sendable`.
+- Targets: the `ProfilePal` app and its `ProfilePalTests`; the `ProfileManifestKit` framework and `ProfileManifestKitTests`; and the `VersionKit` framework and `VersionKitTests`. Both frameworks are embedded in the app and are built only for it, so they don't use library-evolution or module-verifier settings. Three shared schemes: `ProfilePal` builds and runs the app and runs `ProfilePalTests` and `VersionKitTests`; `ProfileManifestKit` and `VersionKit` each build their framework and run its tests, so make the matching one active before running a framework's tests. CI runs the two framework schemes. Swift 6, set at the project level, with approachable concurrency; the models are all `Sendable`.
 - The project uses Xcode file-system-synchronized groups, so files added under each target's folder are picked up without editing `project.pbxproj`. Test fixtures are the exception: each must be added to its Copy Files phase (see `.claude/rules/testing-plist-fixtures.md`).
 - The app is sandboxed with read-only access to user-selected files.
 

@@ -1,6 +1,7 @@
 ---
 paths:
   - "ProfileManifestKitTests/**/*.swift"
+  - "VersionKitTests/**/*.swift"
 ---
 
 # Unit test style

@@ -16,6 +16,9 @@
 		EC2DB96E3097D82E00B2A25F /* ProfileManifestKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EC2DB9653097D82E00B2A25F /* ProfileManifestKit.framework */; };
 		EC2DB9783097D82E00B2A25F /* ProfileManifestKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EC2DB9653097D82E00B2A25F /* ProfileManifestKit.framework */; };
 		EC2DB9793097D82E00B2A25F /* ProfileManifestKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = EC2DB9653097D82E00B2A25F /* ProfileManifestKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		ECE22B6430B28AAF00A410A8 /* VersionKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ECE22B5B30B28AAF00A410A8 /* VersionKit.framework */; };
+		ECE22B6E30B28AAF00A410A8 /* VersionKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ECE22B5B30B28AAF00A410A8 /* VersionKit.framework */; };
+		ECE22B6F30B28AAF00A410A8 /* VersionKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = ECE22B5B30B28AAF00A410A8 /* VersionKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -33,6 +36,27 @@
 			remoteGlobalIDString = EC2DB9643097D82E00B2A25F;
 			remoteInfo = ProfileManifestKit;
 		};
+		ECE22B4E30B27E6000A410A8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EC2DB78130904DA000B2A25F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EC2DB78830904DA100B2A25F;
+			remoteInfo = ProfilePal;
+		};
+		ECE22B6530B28AAF00A410A8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EC2DB78130904DA000B2A25F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = ECE22B5A30B28AAF00A410A8;
+			remoteInfo = VersionKit;
+		};
+		ECE22B6C30B28AAF00A410A8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EC2DB78130904DA000B2A25F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = ECE22B5A30B28AAF00A410A8;
+			remoteInfo = VersionKit;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -41,6 +65,7 @@
 			dstPath = "";
 			dstSubfolder = Frameworks;
 			files = (
+				ECE22B6F30B28AAF00A410A8 /* VersionKit.framework in Embed Frameworks */,
 				EC2DB9793097D82E00B2A25F /* ProfileManifestKit.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -90,6 +115,9 @@
 		EC2DB8B03090775C00B2A25F /* CLAUDE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CLAUDE.md; sourceTree = "<group>"; };
 		EC2DB9653097D82E00B2A25F /* ProfileManifestKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ProfileManifestKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		EC2DB96D3097D82E00B2A25F /* ProfileManifestKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ProfileManifestKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		ECE22B4A30B27E6000A410A8 /* ProfilePalTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ProfilePalTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		ECE22B5B30B28AAF00A410A8 /* VersionKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = VersionKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		ECE22B6330B28AAF00A410A8 /* VersionKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VersionKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
@@ -199,12 +227,28 @@
 			path = ProfileManifestKitTests;
 			sourceTree = "<group>";
 		};
+		ECE22B4B30B27E6000A410A8 /* ProfilePalTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ProfilePalTests;
+			sourceTree = "<group>";
+		};
+		ECE22B5C30B28AAF00A410A8 /* VersionKit */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = VersionKit;
+			sourceTree = "<group>";
+		};
+		ECE22B6930B28AAF00A410A8 /* VersionKitTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = VersionKitTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		EC2DB78630904DA100B2A25F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
+				ECE22B6E30B28AAF00A410A8 /* VersionKit.framework in Frameworks */,
 				EC2DB9783097D82E00B2A25F /* ProfileManifestKit.framework in Frameworks */,
 			);
 		};
@@ -219,6 +263,22 @@
 				EC2DB96E3097D82E00B2A25F /* ProfileManifestKit.framework in Frameworks */,
 			);
 		};
+		ECE22B4730B27E6000A410A8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+		ECE22B5830B28AAF00A410A8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+		ECE22B6030B28AAF00A410A8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+				ECE22B6430B28AAF00A410A8 /* VersionKit.framework in Frameworks */,
+			);
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -229,8 +289,11 @@
 				EC2DB7A030904EA900B2A25F /* .github */,
 				EC2DB7A130904EB400B2A25F /* docs */,
 				EC2DB78B30904DA100B2A25F /* ProfilePal */,
+				ECE22B4B30B27E6000A410A8 /* ProfilePalTests */,
 				EC2DB9663097D82E00B2A25F /* ProfileManifestKit */,
 				EC2DB9733097D82E00B2A25F /* ProfileManifestKitTests */,
+				ECE22B5C30B28AAF00A410A8 /* VersionKit */,
+				ECE22B6930B28AAF00A410A8 /* VersionKitTests */,
 				EC2DB79D30904E9700B2A25F /* .editorconfig */,
 				EC2DB7A630904F0000B2A25F /* .gitignore */,
 				EC2DB79930904E6300B2A25F /* .mcp.json */,
@@ -248,6 +311,9 @@
 				EC2DB78930904DA100B2A25F /* ProfilePal.app */,
 				EC2DB9653097D82E00B2A25F /* ProfileManifestKit.framework */,
 				EC2DB96D3097D82E00B2A25F /* ProfileManifestKitTests.xctest */,
+				ECE22B4A30B27E6000A410A8 /* ProfilePalTests.xctest */,
+				ECE22B5B30B28AAF00A410A8 /* VersionKit.framework */,
+				ECE22B6330B28AAF00A410A8 /* VersionKitTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -256,6 +322,11 @@
 
 /* Begin PBXHeadersBuildPhase section */
 		EC2DB9603097D82E00B2A25F /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			files = (
+			);
+		};
+		ECE22B5630B28AAF00A410A8 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			files = (
 			);
@@ -276,6 +347,7 @@
 			);
 			dependencies = (
 				EC2DB9773097D82E00B2A25F /* PBXTargetDependency */,
+				ECE22B6D30B28AAF00A410A8 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				EC2DB78B30904DA100B2A25F /* ProfilePal */,
@@ -331,6 +403,67 @@
 			productReference = EC2DB96D3097D82E00B2A25F /* ProfileManifestKitTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		ECE22B4930B27E6000A410A8 /* ProfilePalTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = ECE22B5230B27E6000A410A8 /* Build configuration list for PBXNativeTarget "ProfilePalTests" */;
+			buildPhases = (
+				ECE22B4630B27E6000A410A8 /* Sources */,
+				ECE22B4730B27E6000A410A8 /* Frameworks */,
+				ECE22B4830B27E6000A410A8 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				ECE22B4F30B27E6000A410A8 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				ECE22B4B30B27E6000A410A8 /* ProfilePalTests */,
+			);
+			name = ProfilePalTests;
+			productName = ProfilePalTests;
+			productReference = ECE22B4A30B27E6000A410A8 /* ProfilePalTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		ECE22B5A30B28AAF00A410A8 /* VersionKit */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = ECE22B7030B28AAF00A410A8 /* Build configuration list for PBXNativeTarget "VersionKit" */;
+			buildPhases = (
+				ECE22B5630B28AAF00A410A8 /* Headers */,
+				ECE22B5730B28AAF00A410A8 /* Sources */,
+				ECE22B5830B28AAF00A410A8 /* Frameworks */,
+				ECE22B5930B28AAF00A410A8 /* Resources */,
+			);
+			buildRules = (
+			);
+			fileSystemSynchronizedGroups = (
+				ECE22B5C30B28AAF00A410A8 /* VersionKit */,
+			);
+			name = VersionKit;
+			productName = VersionKit;
+			productReference = ECE22B5B30B28AAF00A410A8 /* VersionKit.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		ECE22B6230B28AAF00A410A8 /* VersionKitTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = ECE22B7330B28AAF00A410A8 /* Build configuration list for PBXNativeTarget "VersionKitTests" */;
+			buildPhases = (
+				ECE22B5F30B28AAF00A410A8 /* Sources */,
+				ECE22B6030B28AAF00A410A8 /* Frameworks */,
+				ECE22B6130B28AAF00A410A8 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				ECE22B6630B28AAF00A410A8 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				ECE22B6930B28AAF00A410A8 /* VersionKitTests */,
+			);
+			name = VersionKitTests;
+			productName = VersionKitTests;
+			productReference = ECE22B6330B28AAF00A410A8 /* VersionKitTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -348,6 +481,16 @@
 						CreatedOnToolsVersion = 27.1;
 					};
 					EC2DB96C3097D82E00B2A25F = {
+						CreatedOnToolsVersion = 27.1;
+					};
+					ECE22B4930B27E6000A410A8 = {
+						CreatedOnToolsVersion = 27.1;
+						TestTargetID = EC2DB78830904DA100B2A25F;
+					};
+					ECE22B5A30B28AAF00A410A8 = {
+						CreatedOnToolsVersion = 27.1;
+					};
+					ECE22B6230B28AAF00A410A8 = {
 						CreatedOnToolsVersion = 27.1;
 					};
 				};
@@ -369,8 +512,11 @@
 			projectRoot = "";
 			targets = (
 				EC2DB78830904DA100B2A25F /* ProfilePal */,
+				ECE22B4930B27E6000A410A8 /* ProfilePalTests */,
 				EC2DB9643097D82E00B2A25F /* ProfileManifestKit */,
 				EC2DB96C3097D82E00B2A25F /* ProfileManifestKitTests */,
+				ECE22B5A30B28AAF00A410A8 /* VersionKit */,
+				ECE22B6230B28AAF00A410A8 /* VersionKitTests */,
 			);
 		};
 /* End PBXProject section */
@@ -388,6 +534,21 @@
 			);
 		};
 		EC2DB9633097D82E00B2A25F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		ECE22B4830B27E6000A410A8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		ECE22B5930B28AAF00A410A8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		ECE22B6130B28AAF00A410A8 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			files = (
 			);
@@ -410,6 +571,21 @@
 			files = (
 			);
 		};
+		ECE22B4630B27E6000A410A8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
+		ECE22B5730B28AAF00A410A8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
+		ECE22B5F30B28AAF00A410A8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -422,6 +598,21 @@
 			isa = PBXTargetDependency;
 			target = EC2DB9643097D82E00B2A25F /* ProfileManifestKit */;
 			targetProxy = EC2DB9763097D82E00B2A25F /* PBXContainerItemProxy */;
+		};
+		ECE22B4F30B27E6000A410A8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EC2DB78830904DA100B2A25F /* ProfilePal */;
+			targetProxy = ECE22B4E30B27E6000A410A8 /* PBXContainerItemProxy */;
+		};
+		ECE22B6630B28AAF00A410A8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = ECE22B5A30B28AAF00A410A8 /* VersionKit */;
+			targetProxy = ECE22B6530B28AAF00A410A8 /* PBXContainerItemProxy */;
+		};
+		ECE22B6D30B28AAF00A410A8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = ECE22B5A30B28AAF00A410A8 /* VersionKit */;
+			targetProxy = ECE22B6C30B28AAF00A410A8 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -714,6 +905,150 @@
 			};
 			name = Release;
 		};
+		ECE22B5030B27E6000A410A8 /* Debug configuration for PBXNativeTarget "ProfilePalTests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2E9K39V4CT;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.dgrdev.profile-pal.tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ProfilePal.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ProfilePal";
+			};
+			name = Debug;
+		};
+		ECE22B5130B27E6000A410A8 /* Release configuration for PBXNativeTarget "ProfilePalTests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2E9K39V4CT;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.dgrdev.profile-pal.tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ProfilePal.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ProfilePal";
+			};
+			name = Release;
+		};
+		ECE22B7130B28AAF00A410A8 /* Debug configuration for PBXNativeTarget "VersionKit" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2E9K39V4CT;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.dgrdev.version-kit";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_MODULE = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		ECE22B7230B28AAF00A410A8 /* Release configuration for PBXNativeTarget "VersionKit" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2E9K39V4CT;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.dgrdev.version-kit";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_MODULE = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		ECE22B7430B28AAF00A410A8 /* Debug configuration for PBXNativeTarget "VersionKitTests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2E9K39V4CT;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.dgrdev.version-kit.tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+			};
+			name = Debug;
+		};
+		ECE22B7530B28AAF00A410A8 /* Release configuration for PBXNativeTarget "VersionKitTests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2E9K39V4CT;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.dgrdev.version-kit.tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -746,6 +1081,30 @@
 			buildConfigurations = (
 				EC2DB97D3097D82E00B2A25F /* Debug configuration for PBXNativeTarget "ProfileManifestKitTests" */,
 				EC2DB97E3097D82E00B2A25F /* Release configuration for PBXNativeTarget "ProfileManifestKitTests" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		ECE22B5230B27E6000A410A8 /* Build configuration list for PBXNativeTarget "ProfilePalTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ECE22B5030B27E6000A410A8 /* Debug configuration for PBXNativeTarget "ProfilePalTests" */,
+				ECE22B5130B27E6000A410A8 /* Release configuration for PBXNativeTarget "ProfilePalTests" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		ECE22B7030B28AAF00A410A8 /* Build configuration list for PBXNativeTarget "VersionKit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ECE22B7130B28AAF00A410A8 /* Debug configuration for PBXNativeTarget "VersionKit" */,
+				ECE22B7230B28AAF00A410A8 /* Release configuration for PBXNativeTarget "VersionKit" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		ECE22B7330B28AAF00A410A8 /* Build configuration list for PBXNativeTarget "VersionKitTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ECE22B7430B28AAF00A410A8 /* Debug configuration for PBXNativeTarget "VersionKitTests" */,
+				ECE22B7530B28AAF00A410A8 /* Release configuration for PBXNativeTarget "VersionKitTests" */,
 			);
 			defaultConfigurationName = Release;
 		};
