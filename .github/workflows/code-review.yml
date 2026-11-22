@@ -2,97 +2,51 @@ name: Code Review
 
 on:
   pull_request:
-    types: [opened, ready_for_review, reopened]
+    types: [opened, synchronize, ready_for_review, reopened]
     paths:
       - "**/*.swift"
       - "**/*.pbxproj"
       - "**/*.entitlements"
       - "**/*.plist"
       - "**/Package.resolved"
+      - "CLAUDE.md"
+      - "README.md"
+      - "docs/**/*.md"
 
 jobs:
-  review:
-    if: >-
-      github.event.pull_request.draft == false &&
+  code-review:
+    if: |
       github.event.pull_request.user.login == 'targendaz2'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
       contents: read
-      pull-requests: read
-      issues: read
+      pull-requests: write
       id-token: write
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        uses: actions/checkout@v7
         with:
           fetch-depth: 1
 
       - name: Run Code Review
         id: review
-        uses: anthropics/claude-code-action@d70510b174a1244958df0b03166a54912811f3e6 # v1
+        uses: anthropics/claude-code-action@v1
         env:
-          # Subagents start in the background by default, so in this headless run the main turn
-          # ended right after launching the plugin's first subagent, and the job passed without
-          # reviewing anything (#10, #12: 2 turns, no Haiku usage). This makes Claude wait for
-          # each subagent before continuing.
           CLAUDE_CODE_DISABLE_BACKGROUND_TASKS: "1"
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          plugin_marketplaces: "https://github.com/anthropics/claude-plugins-official.git"
-          plugins: "code-review@claude-plugins-official"
-          prompt: "/code-review:code-review --comment ${{ github.repository }}/pull/${{ github.event.pull_request.number }}"
-          # --allowedTools is the whole list for the run. The plugin's own allowed-tools cover only
-          # its main session, so its subagents also need gh (to read the PR), the read tools, and
-          # Agent/Task to launch them. The inline-comment tool, scoped to this PR, is the only
-          # write.
-          # Left out on purpose, because issue text in a public repository can carry a prompt
-          # injection:
-          # - `gh pr comment`, whose --body-file could publish any file the run can read. A clean
-          #   review posts no summary comment; the summary step below still shows it ran.
-          # - `gh search` and `gh issue list`, which pull in text anyone can write.
-          # --disallowedTools keeps Read, Glob, and Grep away from secrets: the process
-          # environment under /proc (which holds the OAuth token), dotfiles in the home folder
-          # (gh and Claude credentials), and the runner's temp folder (git credentials, prompt).
-          claude_args: >-
-            --allowedTools
-            "Agent,Task,TodoWrite,Read,Glob,Grep,Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr list:*),Bash(gh issue view:*),mcp__github_inline_comment__create_inline_comment"
-            --disallowedTools
-            "Read(//proc/**),Read(~/.*),Read(/${{ runner.temp }}/**)"
+          track_progress: true
+          
+          plugin_marketplaces: |
+            https://github.com/anthropics/claude-plugins-official.git
+            
+          plugins: |
+            code-review@claude-plugins-official
+          
+          prompt: |
+            /code-review:code-review --comment ${{ github.repository }}/pull/${{ github.event.pull_request.number }}
 
-      # The full output stays hidden because this repository is public. This prints only which
-      # tools ran, whether each returned ok or an error, which were denied, and which models were
-      # used, so a review that skipped its agents shows up in the log without exposing anything
-      # the agents read.
-      - name: Summarize review tool use
-        if: always() && steps.review.outputs.execution_file != ''
-        env:
-          EXECUTION_FILE: ${{ steps.review.outputs.execution_file }}
-        run: |
-          jq -r '
-            def messages: if type == "array" then .[] else . end;
-            def describe:
-              if .name == "Agent" or .name == "Task" then
-                "\(.name) type=\(.input.subagent_type // "-") model=\(.input.model // "-")"
-              elif .name == "Bash" then
-                "Bash \((.input.command // "") | split(" ") | .[0:3] | join(" "))"
-              else .name end;
-
-            # Each tool result says only whether it was an error; its content is never printed.
-            ([messages | select(.type == "user") | .message.content[]?
-              | select(type == "object" and .type == "tool_result" and .tool_use_id != null)
-              | {key: .tool_use_id, value: (if .is_error then "error" else "ok" end)}]
-              | from_entries) as $results
-
-            | "Tool calls:",
-            (messages | select(.type == "assistant")
-              | (if .parent_tool_use_id then "subagent" else "main" end) as $who
-              | .message.content[]? | select(.type == "tool_use")
-              | "  \($who): \(describe) -> \($results[.id // ""] // "no result")"),
-            "Permission denials:",
-            (messages | select(.type == "result") | (.permission_denials // [])[]
-              | "  " + ({name: .tool_name, input: .tool_input} | describe)),
-            (messages | select(.type == "result")
-              | "Turns: \(.num_turns), models: \(.modelUsage // {} | keys | join(", "))")
-          ' "$EXECUTION_FILE"
+          claude_args: |
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
