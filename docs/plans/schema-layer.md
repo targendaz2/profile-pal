@@ -87,7 +87,7 @@ The design below covers the whole layer. It ships as two PRs, split at the conve
 - **Diagnostics:** the `SchemaDiagnostic.Kind` cases pass 1 can produce: `valueTypeMismatch`, `choiceTitleCountMismatch`, `unparsableVersion`, `unknownPlatform`, `requirementConflict`, `constraintNotApplicable`, and `invalidPattern`.
 - **Tests:** the test setup (fixture helper, Copy Files phases, rule `paths:`), and the `FieldKind`, `Requirement` merging, and `Availability` suites. Also the xCreds and macOSLAPS smoke test, which checks only that they convert, with no condition-related diagnostics.
 - **CI:** the `ProfilePal` scheme step in `tests.yml`. The `ProfilePalTests` target came in with #10, so this PR replaces its placeholder test. Its tests run inside the app, so check that `CODE_SIGNING_ALLOWED=NO` still works for them.
-- **Docs:** the `CLAUDE.md` schema-layer section and the ProfileManifestKit-only scope of the spec rules. `docs/decisions.md` rows for the layer living in the app, never throwing, and strictest-wins requirement merging.
+- **Docs:** the `CLAUDE.md` schema-layer section and the ProfileManifestKit-only scope of the spec rules. `docs/decisions.md` rows for never throwing and strictest-wins requirement merging.
 
 ### PR 3b: condition resolution, branch `feat/schema-conditions`
 
@@ -174,7 +174,7 @@ The app target defaults to `MainActor` isolation, so every schema type is a `non
 - `CLAUDE.md`:
   - Add an "Architecture: schema layer (ProfilePal)" section.
   - State the rule that the spec-mirroring and no-fix-up rules apply to `ProfileManifestKit` only, and that normalization belongs in `ProfilePal/Schema/`.
-- `docs/decisions.md`: add rows for the schema layer living in the app, never throwing and recording diagnostics, nearest-scope target resolution, strictest-wins requirement merging, and cross-payload conditions being deferred.
+- `docs/decisions.md`: add rows for never throwing and recording diagnostics, nearest-scope target resolution, strictest-wins requirement merging, and cross-payload conditions being deferred.
 
 ## Verification
 
