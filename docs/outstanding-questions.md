@@ -8,6 +8,16 @@ The survey numbers below come from decoding all 288 of [ProfileManifests](https:
 
 ProfileManifests has no license, so the app likely can't bundle its manifests. The app is sandboxed with read-only access to user-selected files, so downloading them at runtime would need a network entitlement. Options include asking the maintainers to add a license, having the user point the app at a local checkout, or downloading at runtime. The answer also decides whether `ProfileManifestKit` needs more than `Manifest.load(from:)` for a single file, such as a loader for a folder or for ProfileManifests' `index`.
 
+## How should the kit type `PlistValue` against `pfm_type`?
+
+`pfm_type` is authoritative. A value that doesn't match it should be converted to that type and reported, and a value that can't be converted should be reported and left out of the field. Three questions are still open:
+
+- **Which conversions count?** Candidates include integer to real, a whole-number real to integer, `"5"` to integer, integer 0 or 1 to boolean, and an ISO 8601 string to date.
+- **When one array item can't be converted,** is that item dropped, or the whole value?
+- **How does the kit see the type the file wrote?** `PropertyListDecoder` reads `<real>2.0</real>` as an `Int` and `<integer>2</integer>` as a `Double`, so it can't tell them apart. A validator built on it misses integers in `real` fields and whole-number reals in `integer` fields. A custom `Decoder` over `PropertyListSerialization` can tell them apart (`CFNumberIsFloatType`), at the cost of owning a `Decoder` implementation.
+
+The mechanism is open as well. A typing pass inside `Manifest.load` keeps `ManifestField`'s synthesized decoding and can also type condition values once their targets are resolved. `DecodableWithConfiguration` needs a hand-written `ManifestField.init(from:)` and can't type conditions, whose targets aren't decoded yet.
+
 ## Should v1 accept undocumented values that real manifests use?
 
 The spec rule forbids undocumented enum cases, but v1 prioritizes loading existing manifests (see [decisions.md](decisions.md)). The 2 manifests that still fail, ProfileCreator's `com.profilecreator.developer.slider` and `com.profilecreator.developer.textfieldfloat`, use the undocumented `pfm_type` value `float`. They're ProfileCreator's own test manifests, not real payloads. Leaving them failing until v2's graceful handling is the current behavior.
