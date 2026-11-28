@@ -5,7 +5,7 @@
 | Step | State |
 | --- | --- |
 | 0: Survey mismatched values | Done on 2026-11-28. The results trimmed the conversion table (see [decisions.md](../decisions.md)). |
-| A: Conversion and field-value typing | **Next.** Not started. Branch `feat/best-effort-loading`. |
+| A: Conversion and field-value typing | **In progress** on branch `feat/best-effort-loading`. |
 | B: Condition targets and condition-value typing | Not started. Branch from `main` once A merges. |
 
 ## Open follow-ups
@@ -43,9 +43,9 @@ No manifest puts `pfm_range_list` on an array field.
 
 ## PR A: conversion and field-value typing
 
-- **Issues:** a public `ManifestIssue` (`fieldPath: [String]`, the raw `pfm_` `key`, and `kind`), with kinds `.valueConverted(from:to:)` and `.valueDropped(_:expected:)`. A small `PlistValue.Kind` enum keeps issues from holding whole values. An unnamed array item appears in `fieldPath` as `[]`.
+- **Issues:** a public `ManifestIssue` (`fieldPath: [String]`, the raw `pfm_` `key`, and `kind`), with kinds `.valueConverted(from:to:)` and `.valueDropped(_:expected:)`. Each kind holds the value as written, so the GUI can show it, which makes `PlistValue` `Hashable`. An unnamed array item appears in `fieldPath` as `[]`.
 - **Delivery:** `Manifest.issues`, a `public internal(set) var` outside `CodingKeys`. `load(from:)` keeps its signature.
-- **Mutability:** the value properties (`defaultValue`, `rangeList`) and the properties the pass recurses through (`subkeys`, `conditionals`, `exclude`, and the condition value arrays) become `public internal(set) var`. Their doc comments say values are typed only through `Manifest.load(from:)`.
+- **Mutability:** the value properties (`defaultValue`, `rangeList`, and `rangeListTitles`, which loses the title of each dropped range-list value) and `subkeys` become `public internal(set) var`. The condition properties wait for PR B, which first needs them. Their doc comments say values are typed only through `Manifest.load(from:)`.
 - **Conversion function** (`PlistValue+Conversion.swift`, internal): it replaces `coerced(to:)` and keeps its recursion. Arrays use their first subkey; dictionaries use the subkey with the same name and keep entries with no subkey. A bad item or entry is dropped and reported alone. Scalar conversions are only the ones in decisions.md:
   - an `<integer>` 0 or 1 to a boolean;
   - a `<string>` to an integer or real when it parses as one, finite only, or to a boolean when it's `true`/`false`, `YES`/`NO`, or `1`/`0`, ignoring case;

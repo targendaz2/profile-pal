@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>pfm_name</key>
+	<string>Filters</string>
+	<key>pfm_type</key>
+	<string>array</string>
+	<key>pfm_subkeys</key>
+	<array>
+		<dict>
+			<key>pfm_type</key>
+			<string>string</string>
+		</dict>
+	</array>
+</dict>
+</plist>

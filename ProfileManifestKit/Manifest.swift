@@ -21,7 +21,7 @@ public struct Manifest: Decodable, Sendable {
     public let description: String?
 
     /// The payload's fields.
-    public let subkeys: [ManifestField]
+    public internal(set) var subkeys: [ManifestField]
 
     /// The scopes where the payload is valid. Defaults to `.user`.
     public let targets: [ManifestTarget]?
@@ -99,6 +99,13 @@ public struct Manifest: Decodable, Sendable {
     /// The date the manifest was last modified.
     public let lastModified: Date?
 
+    // MARK: - Loading
+
+    /// The problems found while loading the manifest, each handled without failing the load.
+    ///
+    /// - Note: Filled in only by `load(from:)`.
+    public internal(set) var issues: [ManifestIssue] = []
+
     enum CodingKeys: String, CodingKey {
         case domain = "pfm_domain"
         case title = "pfm_title"
@@ -129,12 +136,17 @@ public struct Manifest: Decodable, Sendable {
         case lastModified = "pfm_last_modified"
     }
 
-    /// Decodes a manifest from the property list file at `url`.
+    /// Decodes a manifest from the property list file at `url`, with its values typed.
+    ///
+    /// Each default and range-list value is loaded as its field's type. A value that can't be is
+    /// left out, and each conversion and each value left out is recorded in `issues`.
     ///
     /// - Throws: An error if the file can't be read or isn't a valid manifest.
     public static func load(from url: URL) throws -> Self {
         let data = try Data(contentsOf: url)
-        return try PropertyListDecoder().decode(Self.self, from: data)
+        var manifest = try PropertyListDecoder().decode(Self.self, from: data)
+        manifest.typeValues()
+        return manifest
     }
 }
 
