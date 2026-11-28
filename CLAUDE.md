@@ -36,7 +36,7 @@ The project is early: the manifest model layer (`ProfileManifestKit`) and versio
 
 ### Rules for model code
 
-- **The spec is the source of truth.** Models mirror the documented ProfileManifests format. Don't add undocumented keys or enum cases, even ones real-world manifests use, and don't add derived logic that "fixes" spec quirks (for example, merging `require` and `required`). Flag spec ambiguity as deferred work instead.
+- **The spec is the source of truth.** Models mirror the documented ProfileManifests format. Don't add undocumented keys or enum cases, even ones real-world manifests use (the one deviation is `pfm_type` `float`, read as `real`, logged in `docs/decisions.md`), and don't add derived logic that "fixes" spec quirks (for example, merging `require` and `required`). Flag spec ambiguity as deferred work instead. Loading a mistyped value is a separate matter: the kit loads it whenever it can still be read as a correct value of the field's type (such as a date written as a string), and drops it otherwise. It never changes the field's type to fit the value.
 - Path-scoped rules in `.claude/rules/` govern every type in `ProfileManifestKit/`. Types the app uses must be `public`. `coding-model-property-order.md` sets the property and `CodingKeys` order (Apple-defined keys, then extended keys, each ordered by purpose). `coding-model-doc-comments.md` sets the `///` comment style. `ManifestField` is the reference implementation for both.
 - Skip doc comments on enum cases whose names already say everything (such as `ManifestFieldType`).
 

@@ -152,6 +152,7 @@
 			buildPhase = EC2DB9E03097DD0000B2A25F /* Copy ManifestField Fixtures */;
 			membershipExceptions = (
 				"Fixtures/ManifestField/all-keys.plist",
+				"Fixtures/ManifestField/float-type.plist",
 				"Fixtures/ManifestField/integer-range.plist",
 				Fixtures/ManifestField/minimal.plist,
 				"Fixtures/ManifestField/missing-type.plist",

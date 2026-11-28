@@ -210,6 +210,30 @@ public enum ManifestFieldType: String, Codable, Sendable {
     case dictionary
     case data
     case date
+
+    /// Decodes a type from its `pfm_type` string, reading `float` as `real`.
+    ///
+    /// - Note: `float` isn't in the spec. It's accepted because ProfileCreator, the spec's first
+    ///   implementation, treats it as `real`. See `docs/decisions.md`.
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let rawValue = try container.decode(String.self)
+
+        // ProfileCreator's alias for real, the one undocumented type the kit accepts.
+        if rawValue == "float" {
+            self = .real
+            return
+        }
+
+        guard let type = Self(rawValue: rawValue) else {
+            throw DecodingError.dataCorruptedError(
+                in: container,
+                debugDescription: "Unknown pfm_type value: \(rawValue)",
+            )
+        }
+
+        self = type
+    }
 }
 
 /// When a field must be present in the payload.
