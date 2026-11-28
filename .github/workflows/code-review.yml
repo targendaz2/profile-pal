@@ -56,3 +56,24 @@ jobs:
             "Agent,Task,TodoWrite,Read,Glob,Grep,Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr list:*),Bash(gh pr comment:*),Bash(gh issue view:*),mcp__github_inline_comment__create_inline_comment"
             --disallowedTools
             "Read(//proc/**),Read(~/.*),Read(/${{ runner.temp }}/**)"
+
+      # The full output stays hidden because this repository is public. This prints only which
+      # tool calls were denied, so a gap in --allowedTools shows up in the log: each denial's tool
+      # name, plus the first words of a Bash command or the path a read tool asked for. Nothing the
+      # tools returned is printed.
+      - name: Log permission denials
+        if: always() && steps.review.outputs.execution_file != ''
+        env:
+          EXECUTION_FILE: ${{ steps.review.outputs.execution_file }}
+        run: |
+          jq -r '
+            (if type == "array" then .[] else . end) | select(.type == "result")
+            | (.permission_denials // []) as $denials
+            | "Permission denials: \($denials | length)",
+              ($denials[] | .tool_input as $in | "  \(.tool_name)" + (
+                if .tool_name == "Bash" then
+                  " \(($in.command // "") | split(" ") | .[0:3] | join(" "))"
+                elif ($in.file_path // $in.path) != null then
+                  " \($in.file_path // $in.path)"
+                else "" end))
+          ' "$EXECUTION_FILE"
