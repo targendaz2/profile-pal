@@ -29,7 +29,7 @@ The project is early: the manifest model layer (`ProfileManifestKit`) and versio
 
 ## Architecture: manifest models (`ProfileManifestKit`)
 
-- `Manifest` is one payload domain (`pfm_domain`). Its `subkeys` is a tree of `ManifestField`s, nested through `subkeys` for arrays and dictionaries. Load one with `Manifest.load(from:)`, which uses `PropertyListDecoder`.
+- `Manifest` is one payload domain (`pfm_domain`). Its `subkeys` is a tree of `ManifestField`s, nested through `subkeys` for arrays and dictionaries. Load one with `Manifest.load(from:)`, which uses `PropertyListDecoder`. Always load manifests through it, never by decoding `Manifest` directly: it's where the kit's planned typing pass runs (see `docs/decisions.md`), so it's the only path that will guarantee typed values.
 - `ManifestField.require`/`conditionals`/`exclude` hold requirement logic. `ManifestConditionalRule` and `ManifestExclusionRule` each contain `ManifestTargetCondition`s that test *another* field by name (`pfm_target`, which is optional because some real conditions test the platform instead).
 - `PlistValue` is a type-erased plist value used wherever a key can hold any type (defaults, range lists, placeholders). `PropertyListDecoder` decodes a whole-number `<real>` as `.int`, so call `coerced(to:)` with the value's `ManifestField` before encoding. It also reaches values nested in arrays and dictionaries.
 - Every model property maps to a `pfm_*` key through an explicit `CodingKeys` enum. In v1, loading existing manifests comes first: a property is non-optional only when the spec requires its key and real manifests reliably include it. A spec-required key that real manifests leave out stays optional, with a row in `docs/decisions.md` saying why.
