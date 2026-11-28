@@ -131,6 +131,20 @@ struct ManifestFieldTests {
         #expect(context.codingPath.last?.stringValue == "pfm_type")
     }
 
+    // float isn't in the spec, but ProfileCreator reads it as real, and two of ProfileManifests'
+    // manifests use it. See docs/decisions.md.
+    @Test("Decodes a float pfm_type as real")
+    func floatType() async throws {
+        // Given a field whose pfm_type is float
+        let data = try fixtureData(subject: "ManifestField", named: "float-type")
+
+        // When the field is decoded as a ManifestField
+        let field = try PropertyListDecoder().decode(ManifestField.self, from: data)
+
+        // Then its type is real
+        #expect(field.type == .real)
+    }
+
     // Real manifests nearly always write range bounds as <integer>, while the models store them
     // as Double, so decoding must accept the integer form.
     @Test("Decodes integer range bounds as Double")

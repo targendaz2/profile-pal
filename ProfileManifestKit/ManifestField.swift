@@ -31,12 +31,16 @@ public struct ManifestField: Decodable, Sendable {
     /// `placeholder` for example values. Don't combine with `require`.
     ///
     /// - Important: Must match the field's `type`.
-    public let defaultValue: PlistValue?
+    ///
+    /// - Note: Loaded as the field's `type` only through `Manifest.load(from:)`.
+    public internal(set) var defaultValue: PlistValue?
 
     /// The allowed values for the field.
     ///
     /// - Important: Each value must match the field's `type`.
-    public let rangeList: [PlistValue]?
+    ///
+    /// - Note: Loaded as the field's `type` only through `Manifest.load(from:)`.
+    public internal(set) var rangeList: [PlistValue]?
 
     /// The minimum value for the field.
     public let rangeMin: Double?
@@ -48,7 +52,7 @@ public struct ManifestField: Decodable, Sendable {
     public let format: String?
 
     /// The field's nested fields.
-    public let subkeys: [ManifestField]?
+    public internal(set) var subkeys: [ManifestField]?
 
     /// The minimum number of items allowed in an array.
     public let repetitionMin: Int?
@@ -79,12 +83,14 @@ public struct ManifestField: Decodable, Sendable {
     ///
     /// Use instead of `defaultValue` when the app doesn't define a real default.
     /// Ignored when `defaultValue` is set.
+    ///
+    /// - Note: Loaded as written, whatever its type, since it's only displayed.
     public let placeholder: PlistValue?
 
     /// The human-readable titles for the values in `rangeList`.
     ///
     /// - Important: Must contain the same number of items as `rangeList`.
-    public let rangeListTitles: [String]?
+    public internal(set) var rangeListTitles: [String]?
 
     /// The unit the field's value represents, such as milliseconds, hours, or characters.
     public let valueUnit: String?
@@ -210,6 +216,30 @@ public enum ManifestFieldType: String, Codable, Sendable {
     case dictionary
     case data
     case date
+
+    /// Decodes a type from its `pfm_type` string, reading `float` as `real`.
+    ///
+    /// - Note: `float` isn't in the spec. It's accepted because ProfileCreator, the spec's first
+    ///   implementation, treats it as `real`. See `docs/decisions.md`.
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let rawValue = try container.decode(String.self)
+
+        // ProfileCreator's alias for real, the one undocumented type the kit accepts.
+        if rawValue == "float" {
+            self = .real
+            return
+        }
+
+        guard let type = Self(rawValue: rawValue) else {
+            throw DecodingError.dataCorruptedError(
+                in: container,
+                debugDescription: "Unknown pfm_type value: \(rawValue)",
+            )
+        }
+
+        self = type
+    }
 }
 
 /// When a field must be present in the payload.

@@ -14,6 +14,7 @@
 These are outside PR 3a's and 3b's scope. Pick them up separately, or fold them in where noted.
 
 - **Check that the automated code review now reviews.** On #9, #10, and #12 the review workflow reported success without reviewing anything. #13 found the causes: the plugin's first subagent started in the background and the headless run ended before it ran, and `--allowedTools` blocked the subagents' `gh` calls. #14 then rewrote `code-review.yml` from the plugin's standard setup, keeping `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS: "1"` and allowing `gh pr diff`, `gh pr view`, and `gh pr comment`. It also dropped the **Summarize review tool use** step and the draft-PR check. No Swift PR has run under the rewritten workflow yet, so PR 3a is the first real test. Open it and check that the review posts inline comments or a summary, rather than passing silently. With no summary step, the run's log in the Actions tab is the only other evidence. If it fails again, fix the workflow in its own PR: the action skips any PR whose copy of the workflow differs from `main`.
+- **Revise PR 3a's scope before starting it.** The kit now owns validating manifests against the spec (see [decisions.md](../decisions.md)), so PR 3a's plan needs three changes before work begins. Move the spec-rule `SchemaDiagnostic` cases to a kit-side issue type: `valueTypeMismatch`, `choiceTitleCountMismatch`, `constraintNotApplicable`, `invalidPattern`, the default-with-`require` part of `requirementConflict`, and extra array subkeys. Condition-target resolution now lives in the kit too, so move `unresolvedConditionTarget` and `ambiguousConditionTarget` to the kit and have the converter map the kit's resolved targets. Revise the **Values** decision below, which has the converter call `coerced(to:)`: the kit now types values itself in `Manifest.load(from:)` (see [decisions.md](../decisions.md)), so the converter receives values already typed.
 - **`CLAUDE.md` still says the review runs on "a non-draft PR"** that touches Swift, pbxproj, plist, or entitlements files. Since #14, it also runs on drafts and on `CLAUDE.md`, `README.md`, `docs/**/*.md`, and `Package.resolved`. Fold the fix into PR 3a's `CLAUDE.md` changes.
 
 ## Context
@@ -30,9 +31,9 @@ Survey basis: all 288 manifests at ProfileManifests `0d01e64`.
 | --- | --- |
 | Placement | `ProfilePal/Schema/`, tested in the new `ProfilePalTests` target |
 | Names | `PayloadSchema`, `SchemaField`, … |
-| Values | Typed per kind (a `String` default for string fields, and so on). `coerced(to:)` runs once, inside the converter. |
+| Values | Typed per kind (a `String` default for string fields, and so on). The kit types values in `Manifest.load(from:)`, so the converter only unwraps them. |
 | Bad input | Conversion never throws. Bad pieces are dropped and recorded as `SchemaDiagnostic`s. |
-| Condition targets | Nearest scope outward for both bare names and dotted paths (the spec documents `.` paths). Stored as a relative reference, so each array item is evaluated against its own values. A target that's missing, or matches more than one field at the same level, gets a diagnostic. |
+| Condition targets | Resolved by `ProfileManifestKit`: nearest scope outward for both bare names and dotted paths (the spec documents `.` paths). The converter stores each resolution as a relative reference, so each array item is evaluated against its own values. A target that's missing, or matches more than one field at the same level, gets a kit issue. |
 | Environment conditions | Model the documented `pfm_platforms` in the kit first, in a separate PR. `pfm_n_platforms` (inferred) and `pfm_distribution` (undocumented) stay unmodeled, so those conditions become diagnostics. |
 | Cross-payload conditions (`pfm_domain`) | Deferred. They show up as unresolved-target diagnostics. |
 | Platforms | A closed enum: iOS, iPadOS, macOS, Mac Catalyst, tvOS, visionOS, watchOS. An unknown string gets a diagnostic. ProfileManifestKit keeps platforms as strings and adds no keys for the new platforms, since the spec has no version keys for them and no manifest uses them. |
@@ -87,15 +88,15 @@ The design below covers the whole layer. It ships as two PRs, split at the conve
 - **Diagnostics:** the `SchemaDiagnostic.Kind` cases pass 1 can produce: `valueTypeMismatch`, `choiceTitleCountMismatch`, `unparsableVersion`, `unknownPlatform`, `requirementConflict`, `constraintNotApplicable`, and `invalidPattern`.
 - **Tests:** the test setup (fixture helper, Copy Files phases, rule `paths:`), and the `FieldKind`, `Requirement` merging, and `Availability` suites. Also the xCreds and macOSLAPS smoke test, which checks only that they convert, with no condition-related diagnostics.
 - **CI:** the `ProfilePal` scheme step in `tests.yml`. The `ProfilePalTests` target came in with #10, so this PR replaces its placeholder test. Its tests run inside the app, so check that `CODE_SIGNING_ALLOWED=NO` still works for them.
-- **Docs:** the `CLAUDE.md` schema-layer section and the ProfileManifestKit-only scope of the spec rules. `docs/decisions.md` rows for the layer living in the app, never throwing, and strictest-wins requirement merging.
+- **Docs:** the `CLAUDE.md` schema-layer section and the ProfileManifestKit-only scope of the spec rules. `docs/decisions.md` rows for never throwing and strictest-wins requirement merging.
 
 ### PR 3b: condition resolution, branch `feat/schema-conditions`
 
 - **Types:** `Condition.swift`, `SchemaField.exclusions`, and `Requirement.conditional`.
-- **Converter:** pass 2 (`+Conditions`): target resolution and coercing test values. It also drops a conditional rule that has no `require`, recording a diagnostic.
-- **Diagnostics:** `unresolvedConditionTarget`, `ambiguousConditionTarget`, `unsupportedCondition`, and `missingConditionalRequirement`.
+- **Converter:** pass 2 (`+Conditions`): mapping each condition's target, which the kit has resolved, into a relative reference. It also drops a conditional rule that has no `require`, recording a diagnostic.
+- **Diagnostics:** `unsupportedCondition` and `missingConditionalRequirement`. The kit reports unresolved and ambiguous targets.
 - **Tests:** the condition-resolution suite with its synthetic fixtures, and the `PROFILEMANIFESTS_DIR` survey test. The survey waits for 3b because most of its expected counts are condition diagnostics.
-- **Docs:** `docs/decisions.md` rows for nearest-scope target resolution and deferring cross-payload conditions.
+- **Docs:** a `docs/decisions.md` row for deferring cross-payload conditions.
 
 ### Types (`ProfilePal/Schema/`)
 
@@ -129,8 +130,6 @@ The app target defaults to `MainActor` isolation, so every schema type is a `non
   - `choiceTitleCountMismatch`
   - `unparsableVersion`
   - `unknownPlatform`
-  - `unresolvedConditionTarget`
-  - `ambiguousConditionTarget`
   - `unsupportedCondition`, covering empty or environment-only keys we don't model
   - `requirementConflict`
   - `missingConditionalRequirement`
@@ -142,12 +141,8 @@ The app target defaults to `MainActor` isolation, so every schema type is a `non
 ### Converter (`ProfilePal/Schema/ProfileManifests/`)
 
 - **`ManifestSchemaConverter.swift`**: the entry point `static func convert(_ manifest: Manifest) -> SchemaConversion`, where `SchemaConversion` holds `schema` and `diagnostics`. Conversion runs in two passes:
-  1. Build the field tree: kinds, typed values, presentation, availability, and requirement levels. Values go through `PlistValue.coerced(to:)` (`ProfileManifestKit/PlistValue.swift`) and then a typed extraction step.
-  2. Resolve every condition's `pfm_target` against the finished tree:
-     - Split the target on `.`.
-     - Starting at the conditioned field's own scope, look for that path at each enclosing level up to the root. Path segments match field names, including array-item names such as `StaticItem`.
-     - The first level with exactly one match wins. More than one match at the same level is ambiguous; no match at any level is unresolved.
-     - Coerce the test values to the target's kind.
+  1. Build the field tree: kinds, typed values, presentation, availability, and requirement levels. Values arrive typed from the kit, so the typed extraction step only unwraps them.
+  2. Map every condition's target, which the kit has resolved, into a relative reference against the finished tree.
 - Split the converter across extension files by concern (`+Fields`, `+Conditions`, `+Availability`) to keep each one readable (`coding-readable-functions.md`).
 - Conversion rules:
   - `required: true` merges with `require`, and the strictest wins.
@@ -164,7 +159,7 @@ The app target defaults to `MainActor` isolation, so every schema type is a `non
 - Suites:
   - `FieldKind` conversion, including typed defaults, choices, and the whole-number `<real>` case
   - `Requirement` merging
-  - Condition resolution, with synthetic fixtures for: a bare unique name, an array-item sibling (the `wdav` pattern), a dotted root path, a relative dotted path (the `dnsSettings` pattern), an ambiguous name, a missing target, and a platform condition
+  - Condition mapping into relative references. The resolution cases themselves (a bare unique name, an array-item sibling such as the `wdav` pattern, a dotted root path, a relative dotted path such as the `dnsSettings` pattern, an ambiguous name, a missing target, and a platform condition) are tested in `ProfileManifestKitTests`
   - `Availability`, including converting version strings and recording a diagnostic for unparsable ones
   - A real-world smoke test that converts the existing xCreds and macOSLAPS fixtures, copied together with their `THIRD-PARTY-NOTICES.md`
 - A survey test over a local ProfileManifests checkout, enabled only when the `PROFILEMANIFESTS_DIR` environment variable is set. It converts every manifest and prints a count of each diagnostic kind. No ProfileManifests files are committed, matching the licensing decision.
@@ -174,13 +169,13 @@ The app target defaults to `MainActor` isolation, so every schema type is a `non
 - `CLAUDE.md`:
   - Add an "Architecture: schema layer (ProfilePal)" section.
   - State the rule that the spec-mirroring and no-fix-up rules apply to `ProfileManifestKit` only, and that normalization belongs in `ProfilePal/Schema/`.
-- `docs/decisions.md`: add rows for the schema layer living in the app, never throwing and recording diagnostics, nearest-scope target resolution, strictest-wins requirement merging, and cross-payload conditions being deferred.
+- `docs/decisions.md`: add rows for never throwing and recording diagnostics, strictest-wins requirement merging, and cross-payload conditions being deferred.
 
 ## Verification
 
 - Build and test with the `xcode` MCP server (`BuildProject`, then `RunAllTests`), using the `ProfileManifestKit` scheme for PR 1, `VersionKit` for PR 2, and `ProfilePal` for PRs 3a and 3b.
 - Run the swift-format lint command from `CLAUDE.md`, which covers all six source folders.
-- For PR 3b, clone ProfileManifests at `0d01e64` into the scratchpad and run the survey test with `PROFILEMANIFESTS_DIR` set. The expected diagnostics from today's numbers:
+- For PR 3b, clone ProfileManifests at `0d01e64` into the scratchpad and run the survey test with `PROFILEMANIFESTS_DIR` set. The expected diagnostics from today's numbers, with target counts now coming from the kit's issues:
   - about 22 unresolved targets
   - 4 unsupported conditions (`pfm_n_platforms` and `pfm_distribution`)
   - 0 ambiguous targets: the one name with two candidates, in `extensiblesso`, has a single match at the top level, which nearest-scope checks first

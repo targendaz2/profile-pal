@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>pfm_domain</key>
+	<string>com.example.mistyped</string>
+	<key>pfm_subkeys</key>
+	<array>
+		<dict>
+			<key>pfm_name</key>
+			<string>FontSize</string>
+			<key>pfm_type</key>
+			<string>integer</string>
+			<key>pfm_default</key>
+			<string>12</string>
+		</dict>
+		<dict>
+			<key>pfm_name</key>
+			<string>Mode</string>
+			<key>pfm_type</key>
+			<string>string</string>
+			<key>pfm_range_list</key>
+			<array>
+				<string>rw</string>
+				<true/>
+				<string>ro</string>
+			</array>
+			<key>pfm_range_list_titles</key>
+			<array>
+				<string>Read-write</string>
+				<string>Mistyped</string>
+				<string>Read-only</string>
+			</array>
+		</dict>
+		<dict>
+			<key>pfm_name</key>
+			<string>DaysUntilReset</string>
+			<key>pfm_type</key>
+			<string>string</string>
+			<key>pfm_value_placeholder</key>
+			<integer>7</integer>
+		</dict>
+		<dict>
+			<key>pfm_name</key>
+			<string>Settings</string>
+			<key>pfm_type</key>
+			<string>dictionary</string>
+			<key>pfm_subkeys</key>
+			<array>
+				<dict>
+					<key>pfm_name</key>
+					<string>Enabled</string>
+					<key>pfm_type</key>
+					<string>boolean</string>
+					<key>pfm_default</key>
+					<integer>1</integer>
+				</dict>
+			</array>
+		</dict>
+	</array>
+	<key>pfm_platforms</key>
+	<array>
+		<string>macOS</string>
+	</array>
+</dict>
+</plist>

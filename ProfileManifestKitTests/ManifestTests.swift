@@ -184,23 +184,70 @@ struct ManifestTests {
     }
 
     // xCreds writes whole-number <real> defaults, which PropertyListDecoder reads as .int.
-    // coerced(to:) exists for this case: without it, re-encoding would write them as <integer>.
-    @Test("Coerces a real-world whole-number real default to .double")
-    func coerceRealWorldDefault() async throws {
+    // Without the typing pass, re-encoding would write them as <integer>.
+    @Test("Loads a real-world whole-number real default as .double")
+    func loadRealWorldWholeReal() async throws {
         // Given xCreds' published manifest
         let url = try fixtureURL(subject: "Manifest", named: "real-xcreds")
+
+        // When it's loaded from its URL
         let manifest = try Manifest.load(from: url)
 
-        // And its real field loginWindowBackgroundImageAlpha, whose default is <real>1</real>
+        // Then its real field loginWindowBackgroundImageAlpha has a .double default of 1
         let field = try #require(
             manifest.subkeys.first { $0.name == "loginWindowBackgroundImageAlpha" }
         )
-        let defaultValue = try #require(field.defaultValue)
+        #expect(field.defaultValue == .double(1))
 
-        // When the default is coerced to the field
-        let coerced = defaultValue.coerced(to: field)
+        // And no issue is recorded for it, since the decoder can't tell it from an <integer>
+        #expect(!manifest.issues.contains { $0.fieldPath == ["loginWindowBackgroundImageAlpha"] })
+    }
 
-        // Then it's a .double holding the default's value
-        #expect(coerced == .double(1))
+    @Test("Loads mistyped values as their field's type when they can be read as it")
+    func loadMistypedValues() async throws {
+        // Given a manifest with a <string> default on an integer field
+        // And a <true/> in a string field's range list
+        // And an <integer> placeholder on a string field
+        // And an <integer> 1 default on a boolean field inside a dictionary
+        let url = try fixtureURL(subject: "Manifest", named: "mistyped-values")
+
+        // When it's loaded from its URL
+        let manifest = try Manifest.load(from: url)
+
+        // Then the integer field's default is the parsed integer
+        let fields = Dictionary(uniqueKeysWithValues: manifest.subkeys.map { ($0.name, $0) })
+        #expect(fields["FontSize"]?.defaultValue == .int(12))
+
+        // And the range list and its titles both lose the <true/>
+        #expect(fields["Mode"]?.rangeList == [.string("rw"), .string("ro")])
+        #expect(fields["Mode"]?.rangeListTitles == ["Read-write", "Read-only"])
+
+        // And the placeholder is left as written
+        #expect(fields["DaysUntilReset"]?.placeholder == .int(7))
+
+        // And the nested boolean's default is true
+        let nested = try #require(fields["Settings"]?.subkeys?.first)
+        #expect(nested.defaultValue == .bool(true))
+
+        // And each conversion and drop is recorded where it happened
+        #expect(
+            Set(manifest.issues) == [
+                ManifestIssue(
+                    fieldPath: ["FontSize"],
+                    key: "pfm_default",
+                    kind: .valueConverted(from: .string("12"), to: .integer),
+                ),
+                ManifestIssue(
+                    fieldPath: ["Mode"],
+                    key: "pfm_range_list",
+                    kind: .valueDropped(.bool(true), expected: .string),
+                ),
+                ManifestIssue(
+                    fieldPath: ["Settings", "Enabled"],
+                    key: "pfm_default",
+                    kind: .valueConverted(from: .int(1), to: .boolean),
+                ),
+            ]
+        )
     }
 }
